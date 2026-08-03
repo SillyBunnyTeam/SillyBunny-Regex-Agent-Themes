@@ -37,8 +37,11 @@ export function decl(map) {
 }
 
 /** Root element attributes: the theme marker, the archetype, and the tracker key. */
-export function rootAttrs(spec, tokens) {
-    const classes = ['rat', `rat-${spec.archetype}`, `rat-k-${spec.key}`, `rat-tm-${tokens.slug}`];
+export function rootAttrs(spec, tokens, extraClasses = []) {
+    const classes = [
+        'rat', `rat-${spec.archetype}`, `rat-k-${spec.key}`, `rat-tm-${tokens.slug}`,
+        ...extraClasses,
+    ];
     return ` data-rat="${tokens.slug}@${ENGINE_VERSION}" data-rat-arch="${spec.archetype}"`
         + ` data-rat-key="${spec.key}" class="${classes.join(' ')}"`;
 }
@@ -48,6 +51,7 @@ export function part(name) {
 }
 
 function ornament(tokens, anchor) {
+    if (tokens.glyphMode === 'none') return '';
     return tokens.ornament?.[anchor] ?? '';
 }
 
@@ -67,14 +71,41 @@ function withExtra(styleAttr, tokens, name) {
     return styleAttr.replace(/"$/, `;${appendix}"`);
 }
 
+function asBackgroundLayer(value) {
+    return /gradient\(/i.test(value) ? value : `linear-gradient(${value},${value})`;
+}
+
+/** Adds the bounded canvas and, only when needed, an adaptive-colour safety scrim. */
+export function layeredBackground(tokens, layers, { canvas = false, forceSafety = false } = {}) {
+    const stack = [];
+    const scrim = forceSafety ? tokens.a11y?.safetyScrim : tokens.a11y?.scrim;
+    if (scrim) {
+        stack.push(asBackgroundLayer(scrim));
+    }
+    stack.push(...layers.filter(Boolean).map(asBackgroundLayer));
+    if (canvas) stack.push(tokens.a11y?.canvas ?? '#17181d');
+    if (!canvas && !tokens.a11y?.scrim && stack.length === 1 && !/gradient\(/i.test(layers[0])) {
+        return layers[0];
+    }
+    return stack.join(',');
+}
+
 /** The background stack for a surface, with the theme's optional scan layer on top. */
 function surfaceBackground(tokens, from, to, angle = '180deg') {
     const base = from === to ? from : `linear-gradient(${angle},${from},${to})`;
-    if (!tokens.scan) {
-        return base;
-    }
-    const { color, size } = tokens.scan;
-    return `repeating-linear-gradient(0deg,${color} 0,${color} 1px,transparent 1px,transparent ${size}),${base}`;
+    const scan = tokens.scan
+        ? `repeating-linear-gradient(0deg,${tokens.scan.color} 0,${tokens.scan.color} 1px,transparent 1px,transparent ${tokens.scan.size})`
+        : null;
+    return layeredBackground(tokens, [scan, base], { canvas: true });
+}
+
+export function surfaceFill(tokens, value) {
+    return layeredBackground(tokens, [value]);
+}
+
+/** Bounds content whose authored colour depends on a capture or unknown host backdrop. */
+export function dynamicBackground(tokens, layers) {
+    return layeredBackground(tokens, layers, { canvas: true, forceSafety: true });
 }
 
 function borderValue(tokens, color) {
@@ -83,6 +114,7 @@ function borderValue(tokens, color) {
 
 /** Corner brackets, rivets, ticks and friends. Returns HTML for the root's before-anchor. */
 export function frameDecoration(tokens, accent) {
+    if (tokens.glyphMode === 'none') return '';
     switch (tokens.frame) {
         case 'brackets': {
             const style = (corners) => decl({
@@ -119,13 +151,52 @@ export function frameDecoration(tokens, accent) {
                 'background-size': '5px 5px',
             })}></span>`;
         }
+        case 'diecut': {
+            return `<span aria-hidden="true"${decl({
+                position: 'absolute', inset: '-3px', 'pointer-events': 'none',
+                border: `2px dashed ${alpha(accent, 0.58)}`,
+                'border-radius': tokens.radius.body,
+            })}></span>`;
+        }
+        case 'bevel': {
+            return `<span aria-hidden="true"${decl({
+                position: 'absolute', inset: '1px', 'pointer-events': 'none',
+                'border-top': `2px solid ${alpha('#ffffff', 0.72)}`,
+                'border-left': `2px solid ${alpha('#ffffff', 0.72)}`,
+                'border-right': `2px solid ${alpha('#000000', 0.55)}`,
+                'border-bottom': `2px solid ${alpha('#000000', 0.55)}`,
+                'border-radius': tokens.radius.body,
+            })}></span>`;
+        }
         default:
             return '';
     }
 }
 
 function needsPositioning(tokens) {
-    return ['brackets', 'rivets', 'ticks', 'halftone'].includes(tokens.frame);
+    return ['brackets', 'rivets', 'ticks', 'halftone', 'diecut', 'bevel'].includes(tokens.frame);
+}
+
+export function decorative(text, tokens, style = {}) {
+    if (!text || tokens.glyphMode === 'none') return '';
+    return `<span aria-hidden="true"${decl(style)}>${text}</span>`;
+}
+
+export function radiusCorners(value) {
+    const parts = String(value).trim().split(/\s+/);
+    switch (parts.length) {
+        case 1: return [parts[0], parts[0], parts[0], parts[0]];
+        case 2: return [parts[0], parts[1], parts[0], parts[1]];
+        case 3: return [parts[0], parts[1], parts[2], parts[1]];
+        default: return parts.slice(0, 4);
+    }
+}
+
+export function weldedRadius(value, edge) {
+    const [topLeft, topRight, bottomRight, bottomLeft] = radiusCorners(value);
+    return edge === 'top'
+        ? `${topLeft} ${topRight} 0 0`
+        : `0 0 ${bottomRight} ${bottomLeft}`;
 }
 
 /**
@@ -135,15 +206,18 @@ function needsPositioning(tokens) {
 function headField(field, tokens) {
     const pieces = [];
     if (field.icon) {
-        pieces.push(`<span aria-hidden="true">${field.icon}</span> `);
+        const icon = decorative(field.icon, tokens);
+        if (icon) pieces.push(`${icon} `);
     }
     if (field.label) {
-        pieces.push(`<span${decl({ opacity: '0.72' })}>${field.label}:</span> `);
+        pieces.push(`<span>${field.label}:</span> `);
     }
     if (field.text) {
         pieces.push(field.text);
     } else if (field.arrow) {
-        pieces.push(`<span aria-hidden="true"${decl({ opacity: '0.72' })}>${tokens.glyph.arrow}</span> $${field.g}`);
+        pieces.push(tokens.glyph.arrow
+            ? `<span aria-label="to">${tokens.glyph.arrow}</span> $${field.g}`
+            : `<span>to</span> $${field.g}`);
     } else {
         pieces.push(`$${field.g}`);
     }
@@ -153,8 +227,8 @@ function headField(field, tokens) {
 /** Joins header fields with the theme separator, honouring per-field `glue`. */
 export function headContent(spec, tokens) {
     const separator = tokens.glyph.sep
-        ? `<span aria-hidden="true"${decl({ opacity: '0.55' })}> ${tokens.glyph.sep} </span>`
-        : ' ';
+        ? `<span aria-label=","> ${tokens.glyph.sep} </span>`
+        : ', ';
     const out = [];
     spec.head.forEach((field, index) => {
         if (index > 0) {
@@ -178,9 +252,7 @@ export function chevron(tokens) {
 /** The `<summary>` of a collapsible panel: a header chip welded to the body below it. */
 export function headerChip(spec, tokens, { welded = true, showChevron = true } = {}) {
     const accent = accentAt(tokens, spec.accent);
-    const radius = welded
-        ? `${tokens.radius.head} ${tokens.radius.head} 0 0`
-        : tokens.radius.head;
+    const radius = welded ? weldedRadius(tokens.radius.head, 'top') : tokens.radius.head;
 
     const style = withExtra(decl({
         display: 'block',
@@ -189,7 +261,7 @@ export function headerChip(spec, tokens, { welded = true, showChevron = true } =
         'border-radius': radius,
         border: borderValue(tokens, tokens.line.head),
         'box-shadow': tokens.shadow.head,
-        color: tokens.ink.head,
+        color: tokens.on.head,
         'font-family': tokens.type.family,
         'font-size': tokens.type.headSize,
         'font-weight': tokens.type.headWeight,
@@ -200,7 +272,8 @@ export function headerChip(spec, tokens, { welded = true, showChevron = true } =
         'list-style': 'none',
     }), tokens, 'header');
 
-    const icon = spec.icon ? `<span aria-hidden="true">${spec.icon}</span> ` : '';
+    const iconMarkup = decorative(spec.icon, tokens);
+    const icon = iconMarkup ? `${iconMarkup} ` : '';
     const inner = ornament(tokens, 'headerBefore')
         + icon + headContent(spec, tokens)
         + (showChevron ? chevron(tokens) : '')
@@ -214,11 +287,11 @@ export function bodyPanel(tokens, children, { welded = true } = {}) {
     const style = withExtra(decl({
         padding: tokens.space.bodyPad,
         background: surfaceBackground(tokens, tokens.surface.bodyFrom, tokens.surface.bodyTo),
-        'border-radius': welded ? `0 0 ${tokens.radius.body} ${tokens.radius.body}` : tokens.radius.body,
+        'border-radius': welded ? weldedRadius(tokens.radius.body, 'bottom') : tokens.radius.body,
         border: borderValue(tokens, tokens.line.body),
         'border-top': welded ? 'none' : '',
         'box-shadow': tokens.shadow.body === 'none' ? '' : tokens.shadow.body,
-        color: tokens.ink.body,
+        color: tokens.on.body,
         'font-family': tokens.type.bodyFamily,
         'font-size': tokens.type.bodySize,
         'line-height': tokens.type.lineHeight,
@@ -245,11 +318,11 @@ function edgeDeclarations(tokens, accent) {
  */
 export function row(rowSpec, tokens, accentIndex, index = 0) {
     const accent = accentAt(tokens, accentIndex);
-    const background = rowSpec.tint ? alpha(accent, 0.12) : tokens.surface.row;
+    const background = rowSpec.tint ? tokens.surface.rowAlt : tokens.surface.row;
 
     const style = withExtra(decl({
         padding: `${tokens.space.rowPadY} ${tokens.space.rowPadX}`,
-        background,
+        background: surfaceFill(tokens, background),
         ...edgeDeclarations(tokens, accent),
         border: tokens.line.row === 'transparent' ? '' : borderValue(tokens, tokens.line.row),
         'border-radius': tokens.radius.row,
@@ -260,11 +333,11 @@ export function row(rowSpec, tokens, accentIndex, index = 0) {
 
     const label = rowSpec.label
         ? `<span${part('row-label')}${decl({
-            color: tokens.ink.label,
+            color: tokens.on.label,
             'font-size': tokens.type.labelSize,
             'font-weight': tokens.type.labelWeight,
             'text-transform': tokens.type.labelCase === 'none' ? '' : tokens.type.labelCase,
-        })}>${tokens.glyph.section ? `${tokens.glyph.section} ` : ''}${rowSpec.label}:</span> `
+        })}>${decorative(tokens.glyph.section, tokens)}${tokens.glyph.section ? ' ' : ''}${rowSpec.label}:</span> `
         : '';
 
     return `<div${part('row')}${style}>`
@@ -283,7 +356,7 @@ export function section(sectionSpec, tokens, { tier, index }) {
 
     const style = withExtra(decl({
         padding: `${tokens.space.rowPadY} ${tokens.space.rowPadX}`,
-        background: alpha(accent, wash),
+        background: surfaceFill(tokens, alpha(accent, wash)),
         ...edgeDeclarations(tokens, accent),
         'border-radius': tokens.radius.row,
         'margin-top': index > 0 ? tokens.space.gap : '',
@@ -292,11 +365,11 @@ export function section(sectionSpec, tokens, { tier, index }) {
 
     const label = sectionSpec.label
         ? `<b${part('section-label')}${decl({
-            color: accent,
+            color: tokens.on.accents[sectionSpec.accent],
             'font-size': tokens.type.labelSize,
             'font-weight': tokens.type.labelWeight,
             'text-transform': tokens.type.labelCase === 'none' ? '' : tokens.type.labelCase,
-        })}>${glyph ? `${glyph} ` : ''}${sectionSpec.label}</b><br>`
+        })}>${decorative(glyph, tokens)}${glyph ? ' ' : ''}${sectionSpec.label}</b><br>`
         : '';
 
     return `<div${part('section')}${style}>${label}`
@@ -312,25 +385,25 @@ export function slot(slotSpec, tokens, accentIndex, index) {
     const accent = accentAt(tokens, accentIndex);
     const style = withExtra(decl({
         padding: `${tokens.space.slotPadY} ${tokens.space.slotPadX}`,
-        background: tokens.surface.row,
+        background: surfaceFill(tokens, tokens.surface.row),
         ...edgeDeclarations(tokens, accent),
         'border-radius': tokens.radius.slot,
         margin: `${tokens.space.rowGap} 0`,
         'overflow-wrap': 'anywhere',
     }), tokens, 'row');
 
-    return `<div${part('slot')}${style}>$${slotSpec.g}</div>`;
+    return `<li${part('slot')}${style}>$${slotSpec.g}</li>`;
 }
 
 /**
- * A label/value slot. The colon lives in ::after (style.css) rather than in the markup,
- * so an unmatched label cannot leave the bare `<b>:</b>` the stock parallel tracker shows.
+ * A label/value slot. The generated cleanup script removes the whole row when both
+ * captures are empty, so its semantic separator can remain in the durable markup.
  */
 export function pairSlot(slotSpec, tokens, accentIndex, index) {
     const accent = accentAt(tokens, accentIndex);
     const style = withExtra(decl({
         padding: `${tokens.space.slotPadY} ${tokens.space.slotPadX}`,
-        background: tokens.surface.row,
+        background: surfaceFill(tokens, tokens.surface.row),
         ...edgeDeclarations(tokens, accent),
         'border-radius': tokens.radius.slot,
         margin: `${tokens.space.rowGap} 0`,
@@ -338,8 +411,9 @@ export function pairSlot(slotSpec, tokens, accentIndex, index) {
     }), tokens, 'row');
 
     return `<div${part('pair')}${style}>`
-        + `<b${part('pair-label')}${decl({ color: tokens.ink.label, 'font-weight': tokens.type.labelWeight })}>$${slotSpec.k}</b>`
-        + `<span${part('pair-value')}> $${slotSpec.v}</span></div>`;
+        + `<dt${part('pair-label')}${decl({ color: tokens.on.label, 'font-weight': tokens.type.labelWeight })}>$${slotSpec.k}</dt>`
+        + `<dd${part('pair-value')}${decl({ margin: '0' })}>`
+        + `<span aria-label=":"${part('pair-separator')}>${tokens.glyph.pairSep || ':'}</span> $${slotSpec.v}</dd></div>`;
 }
 
 /** A rounded pill, used for the relationship condition and inline chips. */
@@ -350,8 +424,8 @@ export function pill(text, tokens, accent) {
         'margin-top': '4px',
         'border-radius': tokens.radius.pill,
         border: borderValue(tokens, alpha(accent, 0.26)),
-        background: alpha(accent, 0.18),
-        color: tokens.ink.strong,
+        background: surfaceFill(tokens, alpha(accent, 0.18)),
+        color: tokens.on.strong,
     })}>${text}</span>`;
 }
 
@@ -361,29 +435,31 @@ export function pill(text, tokens, accent) {
  */
 export function statTile(statSpec, tokens, { meters }) {
     const accent = accentAt(tokens, statSpec.accent);
+    const glyph = decorative(statSpec.glyph, tokens);
     const value = meters && statSpec.meter
         ? `<span${part('meter')} data-v="$${statSpec.g}"${decl({ 'font-weight': tokens.type.valueWeight })}>$${statSpec.g}</span>`
         : `$${statSpec.g}`;
 
     return `<div${part('stat')}${decl({
         padding: `${tokens.space.rowPadY} ${tokens.space.rowPadX}`,
-        background: alpha(accent, 0.12),
+        background: surfaceFill(tokens, alpha(accent, 0.12)),
         border: borderValue(tokens, alpha(accent, 0.22)),
         'border-radius': tokens.radius.row,
         'min-width': '0',
     })}>`
-        + `<div${part('stat-label')}${decl({
-            color: accent,
+        + `<dt${part('stat-label')}${decl({
+            color: tokens.on.accents[statSpec.accent],
             'font-size': tokens.type.labelSize,
             'margin-bottom': '4px',
             'text-transform': tokens.type.labelCase === 'none' ? '' : tokens.type.labelCase,
-        })}>${statSpec.glyph ? `${statSpec.glyph} ` : ''}${statSpec.label}</div>`
-        + `<div${part('stat-value')}${decl({
-            color: tokens.ink.strong,
+        })}>${glyph}${glyph ? ' ' : ''}${statSpec.label}</dt>`
+        + `<dd${part('stat-value')}${decl({
+            margin: '0',
+            color: tokens.on.strong,
             'font-weight': tokens.type.valueWeight,
             'font-size': tokens.type.valueSize,
             'overflow-wrap': 'anywhere',
-        })}>${value}</div>`
+        })}>${value}</dd>`
         + '</div>';
 }
 
@@ -391,8 +467,8 @@ export function statTile(statSpec, tokens, { meters }) {
 export function chip(spec, tokens, { tag = 'span' } = {}) {
     const accent = accentAt(tokens, spec.accent);
     const separator = tokens.glyph.chipSep
-        ? `<span aria-hidden="true"${decl({ color: tokens.ink.muted })}> ${tokens.glyph.chipSep} </span>`
-        : ' ';
+        ? `<span aria-label=","${decl({ color: tokens.on.chip.muted })}> ${tokens.glyph.chipSep} </span>`
+        : ', ';
 
     const fields = spec.fields.map((field, index) => {
         const color = toneColor(tokens, field.tone, spec.accent);
@@ -405,17 +481,20 @@ export function chip(spec, tokens, { tag = 'span' } = {}) {
         display: 'inline-block',
         padding: '4px 9px',
         margin: '2px 4px 2px 0',
-        background: `linear-gradient(90deg,${tokens.surface.chip},${alpha(accent, 0.1)})`,
+        background: layeredBackground(tokens, [
+            `linear-gradient(90deg,${tokens.surface.chip},${alpha(accent, 0.1)})`,
+        ], { canvas: true }),
         'border-radius': tokens.radius.chip,
         border: borderValue(tokens, alpha(accent, 0.28)),
         'box-shadow': tokens.shadow.chip === 'none' ? '' : tokens.shadow.chip,
-        color: tokens.ink.body,
+        color: tokens.on.chip.body,
         'font-family': tokens.type.family,
         'font-size': tokens.type.chipSize,
         'overflow-wrap': 'anywhere',
     }), tokens, 'chip');
 
-    const icon = spec.icon ? `<span aria-hidden="true"${decl({ color: accent })}>${spec.icon}</span> ` : '';
+    const iconMarkup = decorative(spec.icon, tokens, { color: tokens.on.chip.accents[spec.accent] });
+    const icon = iconMarkup ? `${iconMarkup} ` : '';
     return `<${tag}${rootAttrs(spec, tokens)}${part('root')}${style}>${icon}${fields}</${tag}>`;
 }
 

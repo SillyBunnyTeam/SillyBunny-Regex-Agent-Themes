@@ -34,12 +34,13 @@
     transform: rotate(180deg);
 }
 
-.mes_text [data-rat] > summary:hover,
-.mes_text [data-rat] [data-rat-part='header']:hover {
-    filter: brightness(1.07);
+.mes_text [data-rat] summary[data-rat-part='header']:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
 }
 
-.mes_text [data-rat] > summary:focus-visible {
+.mes_text [data-rat] summary[data-rat-part='header']:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 2px;
 }
@@ -59,21 +60,12 @@
     display: none;
 }
 
-.mes_text [data-rat] [data-rat-part='row']:not(:has([data-rat-part='row-value']:not(:empty))) {
+.mes_text [data-rat] [data-rat-part='row']:has(> [data-rat-part='row-value']):not(:has(> [data-rat-part='row-value']:not(:empty))) {
     display: none;
 }
 
-.mes_text [data-rat] [data-rat-part='section']:not(:has([data-rat-part='section-value']:not(:empty))) {
+.mes_text [data-rat] [data-rat-part='section']:has(> [data-rat-part='section-value']):not(:has(> [data-rat-part='section-value']:not(:empty))) {
     display: none;
-}
-
-/*
- * The colon after a key/value label lives here rather than in the markup, so an unmatched
- * label cannot leave the bare `<b>:</b>` the stock parallel tracker shows.
- */
-.mes_text [data-rat] [data-rat-part='pair-label']:not(:empty)::after {
-    content: ':';
-    opacity: 0.7;
 }
 
 .mes_text [data-rat] [data-rat-part='meterbar'] {
@@ -97,14 +89,13 @@
         grid-template-columns: 1fr;
     }
 
-    .mes_text [data-rat] [data-rat-part='header'] {
+    .mes_text [data-rat] summary[data-rat-part='header'] {
         line-height: 1.5;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .mes_text [data-rat] [data-rat-part='chevron'],
-    .mes_text [data-rat] [data-rat-part='header'] {
+    .mes_text [data-rat] [data-rat-part='chevron'] {
         transition: none;
     }
 }
@@ -147,139 +138,267 @@
 
 /* ------------------------------------------------------------------ settings panel */
 
-/*
- * Nested collapsible sections. SillyBunny's global .inline-drawer-toggle handler animates
- * these, so they need no JS of their own. The deduping MutationObserver only inspects the
- * host's direct children, so nesting drawers here is safe.
- */
+#rat_drawer {
+    container-name: rat-settings;
+    container-type: inline-size;
+}
+
+#rat_drawer .rat-drawer-toggle {
+    width: 100%;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+#rat_drawer .rat-drawer-toggle:focus-visible,
+#rat_drawer .menu_button:focus-visible,
+#rat_drawer select:focus-visible,
+#rat_drawer input:focus-visible,
+#rat_drawer summary:focus-visible {
+    outline: 2px solid var(--SmartThemeQuoteColor, #9f7aea);
+    outline-offset: 2px;
+}
+
+#rat_drawer > .inline-drawer > .rat-root-content,
+#rat_drawer .rat-section > .rat-section-content {
+    padding-inline: 14px;
+}
+
+#rat_drawer .rat-root-content {
+    padding-bottom: 12px;
+}
+
 #rat_drawer .rat-section {
-    border-top: 1px solid rgba(127, 127, 127, 0.22);
-    margin-top: 6px;
+    border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+    margin-top: 4px;
 }
 
 #rat_drawer .rat-section > .inline-drawer-header {
     font-size: 0.95em;
 }
 
-/*
- * Line body content up with the header text above it. The host gives
- * .inline-drawer-header a 14px left padding, so anything less leaves the content sitting
- * further left than its own heading.
- */
-#rat_drawer > .inline-drawer > .inline-drawer-content,
-#rat_drawer .rat-section > .inline-drawer-content {
-    padding-left: 14px;
-    padding-right: 14px;
+#rat_drawer .rat-section-content {
+    padding-block: 6px 14px;
 }
 
-#rat_drawer .rat-section > .inline-drawer-content {
-    padding-top: 4px;
-    padding-bottom: 12px;
+#rat_drawer h4,
+#rat_drawer p {
+    margin-block: 0;
 }
 
-#rat_drawer .rat-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+#rat_drawer h4 {
+    font-size: 1em;
+    line-height: 1.35;
+}
+
+#rat_drawer .rat-intro {
+    max-width: 68ch;
     margin-bottom: 10px;
+    line-height: 1.45;
 }
 
 #rat_drawer .rat-field {
     display: flex;
+    min-width: 0;
     flex-direction: column;
-    gap: 3px;
-    font-size: 0.9em;
-    min-width: 150px;
-    flex: 1 1 150px;
+    gap: 4px;
+    font-size: 0.92em;
 }
 
 #rat_drawer .rat-field > span {
-    opacity: 0.8;
+    font-weight: 600;
 }
 
-#rat_drawer .rat-check {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9em;
-    flex: 1 1 auto;
-}
-
-/* Keep short button labels from breaking mid-word in a narrow panel. */
-#rat_drawer .menu_button {
-    white-space: nowrap;
-}
-
-#rat_drawer .rat-applied {
-    opacity: 0.6;
-    pointer-events: none;
+#rat_drawer .rat-help,
+#rat_drawer .rat-note,
+#rat_drawer .rat-card-meta,
+#rat_drawer .rat-preview-stage-head p,
+#rat_drawer .rat-scope-head p,
+#rat_drawer .rat-maintenance-group p,
+#rat_drawer .rat-danger-zone p {
+    color: color-mix(in srgb, currentColor 72%, transparent);
+    font-size: 0.86em;
+    font-weight: 400;
+    line-height: 1.4;
 }
 
 #rat_drawer .rat-note {
-    opacity: 0.75;
-    font-size: 0.88em;
-    margin: 6px 0 10px;
+    margin-block: 4px 10px;
 }
 
-#rat_drawer .rat-warning {
-    border-left: 3px solid var(--warning, #d9a13a);
-    padding: 7px 10px;
-    margin: 8px 0;
-    background: rgba(217, 161, 58, 0.1);
-    border-radius: 5px;
+#rat_drawer select,
+#rat_drawer input[type='search'] {
+    width: 100%;
+}
+
+#rat_drawer .rat-check-list {
+    display: grid;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+#rat_drawer .rat-check {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    padding-block: 4px;
+    font-size: 0.92em;
+}
+
+#rat_drawer .rat-check > input {
+    margin-top: 2px;
+}
+
+#rat_drawer .rat-check > span {
+    display: grid;
+    gap: 2px;
+}
+
+#rat_drawer .menu_button {
+    min-height: 32px;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+#rat_drawer .menu_button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+#rat_drawer .rat-dependency,
+#rat_drawer .rat-result,
+#rat_drawer .rat-callout {
+    display: grid;
+    gap: 3px;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    border-radius: 7px;
+    padding: 8px 10px;
+    margin-block: 8px 10px;
+    background: color-mix(in srgb, var(--SmartThemeBlurTintColor, transparent) 88%, currentColor 4%);
     font-size: 0.9em;
+    line-height: 1.4;
+}
+
+#rat_drawer .rat-dependency[data-tone='success'],
+#rat_drawer .rat-result[data-tone='success'] {
+    border-color: color-mix(in srgb, var(--SmartThemeQuoteColor, #68a67d) 42%, transparent);
+}
+
+#rat_drawer .rat-callout[data-tone='warning'],
+#rat_drawer .rat-result[data-tone='warning'] {
+    border-color: color-mix(in srgb, var(--warning, #d9a13a) 58%, transparent);
+    background: color-mix(in srgb, var(--warning, #d9a13a) 10%, transparent);
+}
+
+#rat_drawer .rat-result[data-tone='error'] {
+    border-color: color-mix(in srgb, var(--fullred, #c0504d) 62%, transparent);
+    background: color-mix(in srgb, var(--fullred, #c0504d) 10%, transparent);
+}
+
+#rat_drawer .rat-result[data-tone='progress'] {
+    border-color: color-mix(in srgb, var(--SmartThemeQuoteColor, #9f7aea) 58%, transparent);
+}
+
+#rat_drawer .rat-filter-grid,
+#rat_drawer .rat-option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+#rat_drawer .rat-preview-stage {
+    display: grid;
+    gap: 8px;
+    margin-block: 12px;
+    border-block: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    padding-block: 12px;
+}
+
+#rat_drawer .rat-preview-stage-head,
+#rat_drawer .rat-scope-head,
+#rat_drawer .rat-maintenance-group,
+#rat_drawer .rat-danger-zone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#rat_drawer .rat-preview-stage-head > div,
+#rat_drawer .rat-scope-head > div,
+#rat_drawer .rat-maintenance-group > div,
+#rat_drawer .rat-danger-zone > div {
+    min-width: 0;
+}
+
+#rat_drawer .rat-gallery-count {
+    margin-top: 8px;
+    font-size: 0.86em;
+    font-weight: 600;
 }
 
 #rat_drawer .rat-gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
     gap: 10px;
-    margin: 10px 0 0;
+    margin-top: 8px;
 }
 
 #rat_drawer .rat-card {
-    border: 1px solid rgba(127, 127, 127, 0.3);
+    display: grid;
+    grid-template-rows: auto minmax(100px, auto) auto auto;
+    min-width: 0;
+    gap: 7px;
+    border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
     border-radius: 8px;
     padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
+    background: color-mix(in srgb, var(--SmartThemeBlurTintColor, transparent) 94%, currentColor 2%);
 }
 
-#rat_drawer .rat-card[data-active='true'] {
-    outline: 2px solid var(--SmartThemeQuoteColor, #bd93f9);
+#rat_drawer .rat-card[data-selected='true'] {
+    border-color: var(--SmartThemeQuoteColor, #9f7aea);
+    box-shadow: inset 0 0 0 1px var(--SmartThemeQuoteColor, #9f7aea);
+}
+
+#rat_drawer .rat-card[data-current='true'] .rat-card-name::after {
+    content: ' (current)';
+    color: color-mix(in srgb, currentColor 68%, transparent);
+    font-size: 0.78em;
+    font-weight: 400;
 }
 
 #rat_drawer .rat-card-head {
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 #rat_drawer .rat-card-name {
-    font-weight: 600;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.94em;
 }
 
 #rat_drawer .rat-card-mode {
-    font-size: 0.75em;
-    opacity: 0.7;
-    text-transform: uppercase;
+    flex: 0 0 auto;
+    color: color-mix(in srgb, currentColor 68%, transparent);
+    font-size: 0.7em;
     letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
 /*
- * The preview host carries `mes_text` so message-content rules and the `.mes_text ` prefix
- * that decodeStyleTags bakes into decoded <style> blocks both apply. Without it a preview
- * would not match what chat renders.
+ * Preview hosts carry `mes_text`, matching chat formatting. Thumbnails are inert and hidden
+ * from accessibility APIs; only the selected preview remains interactive.
  */
 #rat_drawer .rat-preview {
+    min-width: 0;
     border-radius: 6px;
     padding: 6px;
-    overflow: hidden;
-    background: rgba(127, 127, 127, 0.08);
+    background: color-mix(in srgb, currentColor 7%, transparent);
     container-type: inline-size;
 }
 
@@ -287,40 +406,181 @@
     max-width: 100%;
 }
 
-#rat_drawer .rat-scope-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88em;
+#rat_drawer .rat-thumbnail {
+    max-height: 180px;
+    overflow: clip;
+    pointer-events: none;
+    user-select: none;
 }
 
-#rat_drawer .rat-scope-table th,
-#rat_drawer .rat-scope-table td {
-    text-align: left;
-    padding: 4px 6px;
-    border-bottom: 1px solid rgba(127, 127, 127, 0.22);
-    vertical-align: middle;
+#rat_drawer .rat-selected-preview {
+    overflow-x: auto;
+}
+
+#rat_drawer .rat-preview-unavailable {
+    padding: 14px 8px;
+    color: color-mix(in srgb, currentColor 68%, transparent);
+    font-size: 0.86em;
+    text-align: center;
+}
+
+#rat_drawer .rat-card-actions,
+#rat_drawer .rat-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+#rat_drawer .rat-card-actions > * {
+    flex: 1 1 80px;
+}
+
+#rat_drawer .rat-option-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#rat_drawer .rat-scope-list {
+    display: grid;
+    gap: 9px;
+}
+
+#rat_drawer .rat-scope-card {
+    display: grid;
+    gap: 9px;
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    border-radius: 8px;
+    padding: 10px;
 }
 
 #rat_drawer .rat-status {
-    font-size: 0.8em;
-    padding: 1px 6px;
-    border-radius: 999px;
+    display: inline-block;
+    max-width: 100%;
     border: 1px solid currentColor;
-    white-space: nowrap;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 0.76em;
+    line-height: 1.3;
+    text-align: center;
 }
 
-#rat_drawer .rat-status[data-status='pristine'] { opacity: 0.7; }
-#rat_drawer .rat-status[data-status='stock'] { opacity: 0.7; }
-#rat_drawer .rat-status[data-status='outdated'] { color: var(--warning, #d9a13a); }
-#rat_drawer .rat-status[data-status='foreign'] { color: var(--warning, #d9a13a); }
-#rat_drawer .rat-status[data-status='upstream-changed'] { color: var(--fullred, #c0504d); }
-
-#rat_drawer select {
-    width: 100%;
+#rat_drawer .rat-status[data-status='pristine'],
+#rat_drawer .rat-status[data-status='stock'] {
+    color: color-mix(in srgb, currentColor 72%, transparent);
 }
 
-@media (max-width: 600px) {
+#rat_drawer .rat-status[data-status='outdated'],
+#rat_drawer .rat-status[data-status='foreign'],
+#rat_drawer .rat-status[data-status='missing'] {
+    color: var(--warning, #d9a13a);
+}
+
+#rat_drawer .rat-status[data-status='upstream-changed'] {
+    color: var(--fullred, #c0504d);
+}
+
+#rat_drawer .rat-agent-details summary {
+    cursor: pointer;
+    font-size: 0.88em;
+}
+
+#rat_drawer .rat-agent-list {
+    display: grid;
+    gap: 5px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+#rat_drawer .rat-agent-list li,
+#rat_drawer .rat-custom-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#rat_drawer .rat-agent-list li > span:first-child,
+#rat_drawer .rat-custom-row > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#rat_drawer .rat-maintenance-group {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+    padding-block: 8px 12px;
+}
+
+#rat_drawer .rat-custom-list {
+    display: grid;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+#rat_drawer .rat-custom-row {
+    border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+    padding-top: 6px;
+}
+
+#rat_drawer .rat-danger-zone {
+    border: 1px solid color-mix(in srgb, var(--fullred, #c0504d) 58%, transparent);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 12px;
+    background: color-mix(in srgb, var(--fullred, #c0504d) 8%, transparent);
+}
+
+#rat_drawer .rat-danger-button {
+    border-color: color-mix(in srgb, var(--fullred, #c0504d) 72%, transparent);
+    color: var(--fullred, #c0504d);
+}
+
+#rat_drawer .rat-empty {
+    display: grid;
+    gap: 4px;
+    padding-block: 12px;
+    color: color-mix(in srgb, currentColor 76%, transparent);
+    text-align: center;
+}
+
+#rat_drawer .rat-confirm-copy {
+    display: grid;
+    gap: 8px;
+    line-height: 1.45;
+}
+
+@container rat-settings (max-width: 520px) {
+    #rat_drawer .rat-filter-grid,
+    #rat_drawer .rat-option-grid,
     #rat_drawer .rat-gallery {
         grid-template-columns: 1fr;
+    }
+
+    #rat_drawer .rat-preview-stage-head,
+    #rat_drawer .rat-scope-head,
+    #rat_drawer .rat-maintenance-group,
+    #rat_drawer .rat-danger-zone,
+    #rat_drawer .rat-option-action {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #rat_drawer .rat-preview-stage-head .menu_button,
+    #rat_drawer .rat-maintenance-group > .menu_button,
+    #rat_drawer .rat-danger-zone > .menu_button {
+        width: 100%;
+    }
+}
+
+@media (pointer: coarse) {
+    #rat_drawer .menu_button,
+    #rat_drawer select,
+    #rat_drawer input[type='search'],
+    #rat_drawer .rat-drawer-toggle {
+        min-height: 44px;
     }
 }

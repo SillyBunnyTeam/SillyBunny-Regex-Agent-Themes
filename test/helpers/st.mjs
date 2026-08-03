@@ -23,6 +23,9 @@ export function findSillyBunnyRoot() {
             return candidate;
         }
     }
+    if (process.env.RAT_REQUIRE_HOST === '1') {
+        throw new Error('RAT_REQUIRE_HOST=1 but no SillyBunny checkout was found. Set RAT_ST_ROOT.');
+    }
     return null;
 }
 

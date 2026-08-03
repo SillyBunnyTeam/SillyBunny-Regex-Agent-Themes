@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pure-tests:
+    name: Pure tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run test:pure
+
+  host-contract:
+    name: SillyBunny host contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RAT_ST_ROOT: ${{ runner.temp }}/SillyBunny
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check out SillyBunny
+        run: git clone --depth 1 https://github.com/SillyBunnyTeam/SillyBunny.git "$RAT_ST_ROOT"
+      - run: npm run test:host
+      - name: Verify generated stock baseline
+        run: npm run generate:stock -- "$RAT_ST_ROOT" && git diff --exit-code -- src/stock.js

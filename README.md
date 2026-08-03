@@ -1,54 +1,66 @@
 # SillyBunny Regex Agent Themes
 
-Changes how SillyBunny's bundled trackers look. 45 themes to pick from.
+Changes the presentation of SillyBunny's bundled tracker and companion panels without changing
+their prompts or model output. Choose from 45 themes, use the original SillyBunny style, or import
+a validated custom theme.
 
-Scene, time, items, events, status, secrets, reputation, achievements, the relationship meter,
-NPC profiles, CYOA choices, the direction menu, the chatroom, the phone inbox and the terminal
-panels all render as the same dark purple card. This lets you swap that, globally or per tracker.
-
-Changing a theme also updates trackers already in your chat. Your chat files are not touched.
+Theme changes repaint compatible tracker cards already visible in the current chat. Agent scripts
+are updated, but chat messages and chat metadata are not rewritten.
 
 ## Requirements
 
-SillyBunny with the In-Chat Agents extension enabled, and at least one tracker agent installed.
+- SillyBunny 1.7.0 or newer.
+- The bundled In-Chat Agents extension enabled.
+- At least one compatible tracker or companion agent installed.
 
-No server plugin, so nothing to add to `config.yaml`.
+No server plugin or `config.yaml` change is required.
 
 ## Install
 
-Paste this into the extension installer:
+Paste this URL into the SillyBunny extension installer:
 
-```
+```text
 https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes
 ```
 
-Then open Extensions, and expand "Regex Agent Themes".
+Then open Extensions and expand **Regex Agent Themes**.
 
-To work on it instead, symlink the checkout:
+For development, symlink the checkout into the user extension directory:
 
 ```bash
 ln -s "$PWD" /path/to/SillyBunny/data/default-user/extensions/SillyBunny-Regex-Agent-Themes
 ```
 
-If that symlink ever breaks, every third party extension stops loading, not just this one. Worth
-checking first if your extensions disappear after moving things around.
+## Using It
 
-## Using it
+The settings panel follows SillyBunny's native controls and has five sections:
 
-Pick a theme from the dropdown at the top, grouped by family. It applies everywhere immediately.
+- **Overview** shows dependency status, installed compatible agents, overrides, drift, and the
+  default theme. Changing the default applies it to compatible agents unless an override exists.
+- **Browse themes** filters by name, family, and color mode. It includes Original SillyBunny style,
+  one interactive preview, and lightweight comparison thumbnails.
+- **Options** controls density, initial panel state, adaptive colors, meters, bold styling, glyphs,
+  and automatic repair. Visual option changes show an explicit action before installed cards change.
+- **Tracker overrides** assigns a theme to one template and shows every installed duplicate agent
+  with its own state.
+- **Maintenance** re-applies themes, imports or exports custom themes, and contains the separate
+  restore area.
 
-Everything else sits in three collapsed sections so the panel stays short:
+Disabling the extension stops its UI, commands, and background work. It does not silently rewrite
+agents back to stock.
 
-- **Themes** is the gallery. Every theme, each showing a real card with sample data in it, and an
-  Apply button. The Preview shape dropdown at the top switches which card they all show, so you can
-  compare how they handle NPC profiles or the chatroom.
-- **Options** is the settings below.
-- **Per-tracker** sets a theme for one tracker at a time. Leave a row blank to use the global theme.
+## Preservation Policy
 
-The gallery only builds itself when you open it, so the panel costs nothing while collapsed.
+Automatic apply and restore operations only change scripts the extension owns or recognizes as
+stock. If a script was edited after a theme was applied, the operation is blocked and names the
+affected agent.
 
-"Revert all" puts everything back to stock. Disabling the extension does not revert, because the
-themes get saved into your agent files.
+Using **Force** requires confirmation. The current replacement and pattern are saved before the
+write, so **Restore original styles** can recover that exact edit. A restore without an ownership
+record performs no write unless the user confirms a named baseline reset.
+
+Save failures are isolated per agent. The extension restores the local agent cache, reports the
+failure, and continues a batch without claiming success for the failed agent.
 
 ## Themes
 
@@ -64,65 +76,88 @@ themes get saved into your agent files.
 | Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth |
 | Adaptive | Adaptive Native, Adaptive Accent, Adaptive Ink |
 
-Most themes bring their own colours. The three Adaptive ones use your active SillyBunny theme's
-colours instead, so trackers match the rest of your UI. Those are also the ones to use on a light
-theme, which the stock trackers handle badly.
+Adaptive themes use allowlisted SillyBunny theme variables. Generated text colors and local safety
+surfaces are derived to preserve readable contrast. Compact density reduces spacing without
+shrinking text below the extension's readability floor.
 
-## Settings
+## Options
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Density | normal | Scales padding and text size in every theme. |
-| Panels | theme | Whether cards start open or closed. |
-| Use SillyBunny theme colours | off | Keeps a theme's shapes and accents but takes surfaces and text from your active theme. |
-| Relationship meter bars | off | Turns the relationship tracker's `7/10` values into progress bars. Values that are not numbers stay as text. |
-| Restyle bold text | off | Also themes bold text. Off by default because it affects all your prose, not just trackers. |
-| Plain glyphs | off | Drops decorative characters. |
-| Re-apply after template updates | on | See below. |
+| Density | Normal | Adjusts spacing and typography while retaining readable minimum sizes. |
+| Panels | Theme default | Uses the theme's open state, opens all panels, or closes all panels. |
+| Use SillyBunny theme colors | Off | Adapts surfaces to the active host theme while preserving the selected structure. |
+| Relationship meter bars | Off | Adds an accessible progress bar while keeping the visible `n/m` value. |
+| Restyle bold text | Off | Adds a themed underline to bold prose without changing its semantic element or text color. |
+| Plain glyphs | Off | Removes decorative icons, ornaments, separators, and terminal chrome. |
+| Re-apply after template updates | On | Repairs extension-owned or stock output when SillyBunny starts. |
+
+## Custom Themes
+
+Maintenance can import and export the versioned JSON custom-theme format. Import is limited to
+256 KiB, 64 themes, and 8 KiB per canonical theme. A preflight lists accepted themes, replacements,
+and rejected entries before settings change.
+
+Custom themes support validated palette, surface, line, shadow, radius, spacing, typography, glyph,
+frame, scan, and terminal tokens. Raw HTML, raw CSS, URLs, macros, replacement placeholders,
+prototype keys, unknown fields, and reserved or bundled slugs are rejected.
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `/rat-theme [slug]` | Show or set the global theme. |
-| `/rat-theme-tracker tracker=… theme=…` | Set or clear one tracker's theme. |
-| `/rat-apply` | Re-apply the current theme. |
-| `/rat-revert` | Put every tracker back to stock. |
-| `/rat-status` | List each tracker's theme and state. |
+| `/rat-theme [slug]` | Shows or sets the default theme, including validated custom themes. |
+| `/rat-theme-tracker tracker=... theme=...` | Sets or clears one tracker template override. |
+| `/rat-apply` | Re-applies the current effective themes and reports partial failures. |
+| `/rat-revert` | Restores extension-owned agents to their recorded originals. |
+| `/rat-status` | Lists each compatible agent's theme and friendly drift state. |
 
-## Template updates
+Commands are removed when the extension is disabled. A command parsed before teardown is also
+gated and cannot write after deactivation.
 
-The In-Chat Agents update buttons rebuild an agent from its template, which wipes the theme.
-Themed agents are marked so those buttons skip them. If it happens anyway, the theme comes back
-the next time SillyBunny starts.
+## Template Updates
 
-That only works when the tracker's HTML still matches stock. If you have edited a tracker's HTML
-yourself, the extension leaves it alone and marks the row "edited by hand". Use Force if you do
-want it overwritten.
+In-Chat Agents template update buttons rebuild agent scripts and can remove a theme. With automatic
+repair enabled, the extension restores recognized stock or older extension output on the next
+startup. It does not overwrite a hand edit, a changed upstream pattern, or a missing bundled script.
+Those states remain visible under Tracker overrides and require review.
 
-## Problems
+## Troubleshooting
 
-**Nothing changed.** Check that In-Chat Agents is enabled and tracker agents are installed. If
-the panel says it cannot load In-Chat Agents, previews still work but applying will not.
+**Nothing changed.** Check Overview for the In-Chat Agents connection and compatible agent count.
+Previews remain available when the dependency cannot be loaded, but apply actions are disabled.
 
-**Trackers show raw HTML as text.** Turn off "Show tags in chat as plain text" in User Settings.
-It breaks the stock trackers too.
+**Trackers show HTML as text.** Turn off **Show tags in chat as plain text** in User Settings. The
+Overview section warns when this setting is detected.
 
-**One tracker will not update.** Look at its row in the table. "edited by hand" means the
-extension found HTML it did not write. "pattern changed upstream" means SillyBunny changed that
-tracker and this extension needs an update.
+**One tracker will not update.** Open Tracker overrides. Edited output, changed upstream patterns,
+missing bundled scripts, and save failures are reported by agent name rather than silently reset.
+
+**A newly added meter or cleanup is absent from an old message.** Existing message references can
+repaint scripts that kept their IDs. A script ID that did not exist when the message was generated
+cannot be added without rewriting chat metadata, which this extension intentionally avoids.
 
 ## Development
 
+Node 22.3.0 or newer is required. Install the declared dependency from the lockfile:
+
 ```bash
-npm test
-npm run test:pure
-npm run generate:stock [path-to-SillyBunny]
+npm ci
 ```
 
-`npm test` renders every theme through SillyBunny's own regex engine, so it needs a checkout. Set
-`RAT_ST_ROOT` if yours is not at `/home/platinum/SillyBunny`. Those tests skip if it is missing.
-`npm run test:pure` is the subset that needs neither.
+Run tests with:
+
+```bash
+npm run test:pure
+RAT_ST_ROOT=/path/to/SillyBunny npm run test:host
+npm test
+npm run generate:stock -- /path/to/SillyBunny
+```
+
+`npm run test:pure` needs no SillyBunny checkout. `npm run test:host` and `npm test` require one and
+fail if it is unavailable, so host coverage cannot be skipped in release checks. CI runs pure tests
+on Node 22 and 24, checks out current SillyBunny for host contracts, and verifies the generated stock
+baseline remains synchronized.
 
 ## License
 

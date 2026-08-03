@@ -186,7 +186,6 @@ export const RETRO_PRINT = [
             labelCase: 'uppercase', labelSize: '9px',
         },
         glyph: { section: '', sectionAlt: '', bullet: '·', sep: '|', chevron: '▾' },
-        css: '[data-rat-part="row-label"],[data-rat-part="section-label"]{border-bottom:1px solid #141414;padding-bottom:2px}',
     },
     {
         slug: 'ink-vellum',

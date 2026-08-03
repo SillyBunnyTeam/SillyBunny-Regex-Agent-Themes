@@ -59,20 +59,17 @@ export function renderPreviewHtml(archetype, theme, options = {}) {
         return '';
     }
 
-    const { scripts } = buildAgentScripts(
-        spec.templateId,
-        stockScriptsFor(spec.templateId),
-        theme,
-        options,
-        'preview',
-    );
+    const stockScripts = stockScriptsFor(spec.templateId);
+    const scripts = theme
+        ? buildAgentScripts(spec.templateId, stockScripts, theme, options, 'preview').scripts
+        : stockScripts;
 
     const context = getContext();
     const substitute = value => String(value).replaceAll('{{user}}', context?.name1 ?? 'You');
     const raw = applyList(sampleFor(spec), scripts, substitute);
 
     if (typeof context?.messageFormatting !== 'function') {
-        return raw;
+        return '';
     }
     return context.messageFormatting(raw, 'Preview', false, false, null);
 }
@@ -84,7 +81,14 @@ export function mountPreview(hostElement, archetype, theme, options = {}) {
 
     const surface = document.createElement('div');
     surface.className = 'mes_text';
-    surface.innerHTML = html;
+    if (html) {
+        surface.innerHTML = html;
+    } else {
+        const unavailable = document.createElement('p');
+        unavailable.className = 'rat-preview-unavailable';
+        unavailable.textContent = 'Preview unavailable until SillyBunny formatting is ready.';
+        surface.append(unavailable);
+    }
     hostElement.append(surface);
     return surface;
 }

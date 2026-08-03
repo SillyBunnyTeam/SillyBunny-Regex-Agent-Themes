@@ -198,7 +198,6 @@ export const CUTE_FLOWERY = [
             headTracking: '0.12em', labelCase: 'uppercase',
         },
         glyph: { section: '✿', sectionAlt: '❀', bullet: '-', sep: '|', chevron: '▾' },
-        css: '[data-rat-part="row"],[data-rat-part="section"]{border-bottom:1px solid #d3d9c9}',
     },
     {
         slug: 'rose-gold-bloom',

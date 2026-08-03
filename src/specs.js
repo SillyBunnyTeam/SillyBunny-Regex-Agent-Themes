@@ -128,7 +128,7 @@ const SPEC_LIST = [
         scriptId: '4cdb1a49-f071-4768-911d-063a35b5bbc5',
         scriptName: 'Replace Major NPC',
         key: 'npc-major', archetype: ARCHETYPES.PROFILE, groups: 6, accent: 4,
-        tier: 'major', icon: '🔍', headCase: 'upper',
+        tier: 'major', icon: '🔍',
         head: [{ g: 1 }],
         sections: [
             { g: 2, label: 'BASICS', accent: 0 },
@@ -143,7 +143,7 @@ const SPEC_LIST = [
         scriptId: '3e450d46-14f2-4318-8803-ca3a96d7cb28',
         scriptName: 'Replace Support NPC',
         key: 'npc-support', archetype: ARCHETYPES.PROFILE, groups: 6, accent: 5,
-        tier: 'support', icon: '📋',
+        tier: 'support', icon: '📋', optionalSections: [1, 2, 3, 4],
         head: [{ g: 1 }],
         sections: [
             { g: 2, label: 'Basics', accent: 0 },
@@ -204,7 +204,7 @@ const SPEC_LIST = [
         scriptId: 'eed918c3-7cb6-478d-8c9d-8272868046a9',
         scriptName: 'Replace Choices',
         key: 'choices', archetype: ARCHETYPES.SLOTS, groups: 7, accent: 1, open: true,
-        icon: '📌', rainbow: true, cleanupClass: true,
+        icon: '📌', rainbow: true,
         head: [{ text: 'Choose your next action' }],
         slots: [{ g: 1 }, { g: 2 }, { g: 3 }, { g: 4 }, { g: 5 }, { g: 6 }, { g: 7 }],
     },

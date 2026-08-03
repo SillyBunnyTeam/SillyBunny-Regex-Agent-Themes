@@ -6,7 +6,7 @@
 import { ARCHETYPES } from '../specs.js';
 import { OWNED_SCRIPT_PREFIX } from '../constants.js';
 import { accentAt, alpha, resolveTheme } from '../tokens.js';
-import { pairSlot, slot } from './parts.js';
+import { pairSlot, section, slot } from './parts.js';
 import { renderChip, renderPanel, renderProfile, renderSlots, renderStatcard } from './trackers.js';
 import { renderBold, renderStream, renderTerminal, renderTranscript } from './companions.js';
 
@@ -74,16 +74,32 @@ function emptyMarkupPattern(markup) {
  * empty. Returns null when the target spec has no collapsible slots.
  */
 export function buildCleanupFindRegex(targetSpec, theme, options = {}) {
-    if (targetSpec.archetype !== ARCHETYPES.SLOTS || !targetSpec.slots.length) {
-        return null;
-    }
     const merged = { ...DEFAULT_OPTIONS, ...options };
     const tokens = resolveTheme(theme, merged);
-    const first = targetSpec.slots[0];
-    const markup = targetSpec.kv
-        ? pairSlot(first, tokens, targetSpec.accent, 0)
-        : slot(first, tokens, targetSpec.accent, 0);
-    return `/${emptyMarkupPattern(markup)}/g`;
+    const patterns = [];
+
+    if (targetSpec.archetype === ARCHETYPES.SLOTS && targetSpec.slots.length) {
+        const first = targetSpec.slots[0];
+        const markup = targetSpec.kv
+            ? pairSlot(first, tokens, targetSpec.accent, 0)
+            : slot(first, tokens, targetSpec.accent, 0);
+        patterns.push(emptyMarkupPattern(markup));
+    }
+
+    if (targetSpec.archetype === ARCHETYPES.PROFILE) {
+        for (const index of targetSpec.optionalSections ?? []) {
+            const sectionSpec = targetSpec.sections[index];
+            if (sectionSpec) {
+                patterns.push(emptyMarkupPattern(section(sectionSpec, tokens, {
+                    tier: targetSpec.tier,
+                    index,
+                })));
+            }
+        }
+    }
+
+    if (!patterns.length) return null;
+    return patterns.length === 1 ? `/${patterns[0]}/g` : `/(?:${patterns.join('|')})/g`;
 }
 
 /** Stable id for a script this extension owns on a given agent. */
@@ -99,14 +115,14 @@ export function ownedScriptId(kind, agentId) {
 export function buildMeterScript(agentId, theme, options = {}) {
     const merged = { ...DEFAULT_OPTIONS, ...options };
     const tokens = resolveTheme(theme, merged);
-    const fill = accentAt(tokens, 6);
+    const fill = tokens.on.meterFill;
     const track = alpha(accentAt(tokens, 6), 0.18);
 
-    const bar = `<span data-rat-part="meterbar" style="display:block;height:6px;margin:4px 0 3px;`
+    const bar = `<span role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuenow="$1" aria-valuemax="$2" aria-valuetext="$1/$2" data-rat-part="meterbar" style="display:block;height:6px;margin:4px 0 3px;`
         + `border-radius:${tokens.radius.pill};background:${track};overflow:hidden">`
         + `<span style="display:block;height:100%;width:min(100%,calc(100% * $1 / $2));`
-        + `background:linear-gradient(90deg,${alpha(fill, 0.75)},${fill})"></span></span>`
-        + `<span data-rat-part="metertext" style="font-weight:${tokens.type.valueWeight}">$1/$2</span>`;
+        + `background:${fill}"></span></span>`
+        + `<span data-rat-part="metertext" style="color:${tokens.on.strong};font-weight:${tokens.type.valueWeight}">$1/$2</span>`;
 
     return {
         id: ownedScriptId('meter', agentId),
@@ -137,7 +153,7 @@ export function buildExtraCleanupScript(agentId, targetSpec, theme, options = {}
     }
     return {
         id: ownedScriptId(`cleanup-${targetSpec.key}`, agentId),
-        scriptName: `Regex Agent Themes: remove empty ${targetSpec.key} rows`,
+        scriptName: `Regex Agent Themes: remove empty ${targetSpec.key} content`,
         findRegex,
         replaceString: '',
         trimStrings: [],

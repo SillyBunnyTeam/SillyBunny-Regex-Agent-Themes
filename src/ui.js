@@ -1,20 +1,22 @@
 /**
- * The settings drawer: a theme gallery with live previews, per-tracker overrides, options,
- * and the apply/revert actions.
- *
- * Mount notes: SillyBunny watches both settings columns with a MutationObserver and removes
- * any drawer whose dedupe key collides with an existing one
- * (public/scripts/extensions.js:936). The container therefore carries both a unique id and
- * `data-extension-name`, the header text is distinctive, and every inner id is `rat_`-prefixed.
+ * Host-native settings UI for choosing, previewing, applying, and safely restoring themes.
+ * The outer shell and section toggles stay mounted; refreshes replace only section bodies
+ * and restore focus by stable control key.
  */
 
 import { DRAWER_ID, MODULE_NAME, STOCK_THEME } from './constants.js';
 import { ARCHETYPES, THEMABLE_TEMPLATE_IDS } from './specs.js';
+import { summarizeStatuses } from './drift.js';
 import { FAMILIES, THEMES, getTheme } from './themes/index.js';
 import { DENSITIES, OPEN_DEFAULTS, getSettings, resolveThemeSlug, updateSettings } from './settings.js';
 import { PREVIEW_KEYS, detectEncodedTags, mountPreview } from './preview.js';
 import { applyAll, applyToAgent, inspectAgent, revertAgent, themableAgents } from './apply.js';
 import { getContext, loadHost } from './host.js';
+import {
+    CUSTOM_THEME_LIMITS,
+    createCustomThemeExport,
+    parseCustomThemeImport,
+} from './custom-themes.js';
 
 const ARCHETYPE_LABELS = Object.freeze({
     [ARCHETYPES.PANEL]: 'Tracker panel',
@@ -33,7 +35,7 @@ const TEMPLATE_LABELS = Object.freeze({
     'tpl-item-tracker': 'Items',
     'tpl-event-tracker': 'Pending events',
     'tpl-world-detail': 'World detail',
-    'tpl-status-tracker': 'Status & conditions',
+    'tpl-status-tracker': 'Status and conditions',
     'tpl-secrets-tracker': 'Secrets',
     'tpl-reputation-tracker': 'Reputation',
     'tpl-achievements-tracker': 'Achievements',
@@ -51,16 +53,48 @@ const TEMPLATE_LABELS = Object.freeze({
 });
 
 const STATUS_LABELS = Object.freeze({
-    pristine: 'themed',
-    stock: 'not themed',
-    outdated: 'needs re-apply',
-    foreign: 'edited by hand',
-    missing: 'script missing',
-    'upstream-changed': 'changed upstream',
+    pristine: 'Themed',
+    stock: 'Original',
+    outdated: 'Needs re-apply',
+    foreign: 'Edited outside this extension',
+    missing: 'Script missing',
+    'upstream-changed': 'Changed upstream',
 });
 
-let previewArchetype = ARCHETYPES.PANEL;
-const sectionOpen = { preview: false, options: false, scope: false };
+const STATUS_HELP = Object.freeze({
+    pristine: 'This extension owns the current theme output.',
+    stock: 'The original SillyBunny style is installed.',
+    outdated: 'A theme or option changed and can be applied safely.',
+    foreign: 'The tracker contains edits this extension will not overwrite automatically.',
+    missing: 'A required tracker script is not installed.',
+    'upstream-changed': 'The tracker pattern differs from the supported SillyBunny template.',
+});
+
+const sectionOpen = {
+    overview: true,
+    browse: false,
+    options: false,
+    scope: false,
+    maintenance: false,
+};
+
+const uiState = {
+    busy: false,
+    previewArchetype: ARCHETYPES.PANEL,
+    previewThemeSlug: null,
+    family: 'all',
+    mode: 'all',
+    query: '',
+    optionsDirty: false,
+    result: null,
+};
+
+let view = null;
+let refreshHandle = null;
+let renderGeneration = 0;
+let thumbnailObserver = null;
+const thumbnailJobs = new Map();
+const drawerStateObservers = new Set();
 
 function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
@@ -69,12 +103,14 @@ function el(tag, attrs = {}, children = []) {
             node.className = value;
         } else if (key === 'text') {
             node.textContent = value;
+        } else if (key === 'disabled') {
+            node.disabled = Boolean(value);
         } else if (value !== null && value !== undefined) {
             node.setAttribute(key, String(value));
         }
     }
     for (const child of [].concat(children)) {
-        if (child) {
+        if (child !== null && child !== undefined && child !== false) {
             node.append(child);
         }
     }
@@ -85,29 +121,73 @@ function toast(type, message) {
     globalThis.toastr?.[type]?.(message);
 }
 
-/** Checkbox first, then its label, which is the conventional order for a toggle. */
-function optionRow(label, control) {
-    return el('label', { class: 'rat-check' }, [control, el('span', { text: label })]);
+function optionRow(label, control, help = '') {
+    const text = el('span', {}, [el('span', { text: label })]);
+    if (help) {
+        text.append(el('small', { class: 'rat-help', text: help }));
+    }
+    return el('label', { class: 'rat-check' }, [control, text]);
 }
 
-/** Label above its control, so a narrow panel does not squeeze the two side by side. */
-function fieldRow(label, control) {
-    return el('label', { class: 'rat-field' }, [el('span', { text: label }), control]);
+function fieldRow(label, control, help = '') {
+    const children = [el('span', { text: label }), control];
+    if (help) {
+        children.push(el('small', { class: 'rat-help', text: help }));
+    }
+    return el('label', { class: 'rat-field' }, children);
 }
 
-function select(id, options, value, onChange) {
-    const node = el('select', { id, class: 'text_pole' });
+function button(label, onClick, {
+    className = 'menu_button',
+    id,
+    disabled = false,
+    focusKey,
+    description,
+    ariaLabel,
+} = {}) {
+    const node = el('button', {
+        id,
+        type: 'button',
+        class: className,
+        disabled,
+        'data-focus-key': focusKey,
+        'aria-describedby': description,
+        'aria-label': ariaLabel,
+        text: label,
+    });
+    node.dataset.ratOperation = 'true';
+    node.addEventListener('click', () => {
+        Promise.resolve(onClick()).catch((error) => {
+            setResult({ tone: 'error', text: error?.message ?? String(error) });
+        });
+    });
+    return node;
+}
+
+function select(id, options, value, onChange, { focusKey } = {}) {
+    const node = el('select', {
+        id,
+        class: 'text_pole',
+        'data-focus-key': focusKey ?? id,
+    });
     for (const option of options) {
         node.append(el('option', { value: option.value, text: option.label }));
     }
     node.value = value;
-    node.addEventListener('change', () => onChange(node.value));
+    node.addEventListener('change', () => {
+        Promise.resolve(onChange(node.value)).catch((error) => {
+            setResult({ tone: 'error', text: error?.message ?? String(error) });
+        });
+    });
     return node;
 }
 
-/** Same as select(), but with <optgroup> headings so 45 themes stay scannable. */
-function groupedSelect(id, groups, value, onChange) {
-    const node = el('select', { id, class: 'text_pole' });
+function groupedSelect(id, groups, value, onChange, { focusKey } = {}) {
+    const node = el('select', {
+        id,
+        class: 'text_pole',
+        'data-focus-key': focusKey ?? id,
+    });
     for (const group of groups) {
         if (!group.options.length) {
             continue;
@@ -125,66 +205,147 @@ function groupedSelect(id, groups, value, onChange) {
         node.append(optgroup);
     }
     node.value = value;
-    node.addEventListener('change', () => onChange(node.value));
+    node.addEventListener('change', () => {
+        Promise.resolve(onChange(node.value)).catch((error) => {
+            setResult({ tone: 'error', text: error?.message ?? String(error) });
+        });
+    });
     return node;
 }
 
-function section(key, title, build) {
-    const content = el('div', { class: 'inline-drawer-content' });
-    let built = false;
-
-    const ensureBuilt = () => {
-        if (built) {
-            return;
-        }
-        built = true;
-        build(content);
-    };
-
-    const open = sectionOpen[key];
-    if (open) {
-        ensureBuilt();
-    } else {
-        content.style.display = 'none';
-    }
-
-    const icon = el('div', {
-        class: open
-            ? 'inline-drawer-icon fa-solid fa-circle-chevron-up up'
-            : 'inline-drawer-icon fa-solid fa-circle-chevron-down down',
+function checkbox(id, checked, onChange, { focusKey } = {}) {
+    const node = el('input', {
+        id,
+        type: 'checkbox',
+        'data-focus-key': focusKey ?? id,
     });
-
-    const drawer = el('div', { class: 'inline-drawer rat-section' }, [
-        el('div', { class: 'inline-drawer-toggle inline-drawer-header' }, [
-            el('b', { text: title }),
-            icon,
-        ]),
-        content,
-    ]);
-
-    // Fires before the host's slideToggle, so a lazily built section opens already filled.
-    drawer.addEventListener('inline-drawer-toggle', () => {
-        sectionOpen[key] = !sectionOpen[key];
-        if (sectionOpen[key]) {
-            ensureBuilt();
-        }
-    });
-
-    return drawer;
-}
-
-function checkbox(id, checked, onChange) {
-    const node = el('input', { id, type: 'checkbox' });
     node.checked = checked;
-    node.addEventListener('change', () => onChange(node.checked));
+    node.addEventListener('change', () => {
+        Promise.resolve(onChange(node.checked)).catch((error) => {
+            setResult({ tone: 'error', text: error?.message ?? String(error) });
+        });
+    });
     return node;
+}
+
+function captureFocus() {
+    const active = document.activeElement;
+    if (!view?.container?.contains(active)) {
+        return null;
+    }
+    return {
+        id: active.id || '',
+        key: active.dataset?.focusKey || '',
+        start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+        end: typeof active.selectionEnd === 'number' ? active.selectionEnd : null,
+    };
+}
+
+function restoreFocus(snapshot) {
+    if (!snapshot || !view) {
+        return;
+    }
+    let target = snapshot.id ? document.getElementById(snapshot.id) : null;
+    if (!target && snapshot.key) {
+        target = [...view.container.querySelectorAll('[data-focus-key]')]
+            .find(node => node.dataset.focusKey === snapshot.key);
+    }
+    if (!(target instanceof HTMLElement)) {
+        return;
+    }
+    target.focus({ preventScroll: true });
+    if (snapshot.start !== null && typeof target.setSelectionRange === 'function') {
+        target.setSelectionRange(snapshot.start, snapshot.end ?? snapshot.start);
+    }
+}
+
+export function drawerIconClass(open) {
+    const direction = open
+        ? 'fa-circle-chevron-up up'
+        : 'fa-circle-chevron-down down';
+    return `inline-drawer-icon not_focusable fa-solid ${direction}`;
+}
+
+function observeDrawerState(drawer, toggle, content, onChange = () => {}) {
+    const icon = toggle.querySelector('.inline-drawer-icon');
+    let previousOpen = null;
+    const sync = () => {
+        const open = icon?.classList.contains('up') ?? false;
+        toggle.setAttribute('aria-expanded', String(open));
+        content.setAttribute('aria-hidden', String(!open));
+        if (open !== previousOpen) {
+            previousOpen = open;
+            onChange(open);
+        }
+    };
+    const observer = new MutationObserver(sync);
+    if (icon) {
+        observer.observe(icon, { attributes: true, attributeFilter: ['class'] });
+    }
+    observer.observe(content, { attributes: true, attributeFilter: ['style'] });
+    drawerStateObservers.add(observer);
+    drawer.addEventListener('inline-drawer-toggle', (event) => {
+        if (event.target === drawer) {
+            sync();
+        }
+    });
+    sync();
+}
+
+function disconnectDrawerStateObservers() {
+    for (const observer of drawerStateObservers) {
+        observer.disconnect();
+    }
+    drawerStateObservers.clear();
+}
+
+function makeDrawerToggle(id, contentId, title, level, open) {
+    const icon = el('span', {
+        class: drawerIconClass(open),
+        'aria-hidden': 'true',
+    });
+    return el('button', {
+        id,
+        type: 'button',
+        class: 'inline-drawer-toggle inline-drawer-header rat-drawer-toggle',
+        'aria-expanded': String(open),
+        'aria-controls': contentId,
+    }, [
+        el('span', { role: 'heading', 'aria-level': String(level), text: title }),
+        icon,
+    ]);
+}
+
+function makeSection(key, title) {
+    const contentId = `rat_section_${key}`;
+    const open = sectionOpen[key];
+    const content = el('div', {
+        id: contentId,
+        class: 'inline-drawer-content rat-section-content',
+        'aria-hidden': String(!open),
+    });
+    content.style.display = open ? 'block' : 'none';
+    const toggle = makeDrawerToggle(`rat_toggle_${key}`, contentId, title, 3, open);
+    const drawer = el('section', {
+        class: 'inline-drawer rat-section',
+        'data-rat-section': key,
+    }, [toggle, content]);
+    observeDrawerState(drawer, toggle, content, (isOpen) => {
+        sectionOpen[key] = isOpen;
+        if (key === 'browse' && isOpen) {
+            queueMicrotask(mountVisibleThumbnailFallbacks);
+        }
+    });
+    return { drawer, toggle, content };
 }
 
 function themeGroups(settings, { includeInherit = false } = {}) {
     const first = includeInherit
-        ? [{ value: '', label: 'Use global theme' }, { value: STOCK_THEME, label: 'Stock' }]
-        : [{ value: STOCK_THEME, label: 'Stock (leave unthemed)' }];
-
+        ? [
+            { value: '', label: 'Use default theme' },
+            { value: STOCK_THEME, label: 'Original SillyBunny style' },
+        ]
+        : [{ value: STOCK_THEME, label: 'Original SillyBunny style' }];
     const groups = [{ label: '', options: first }];
     for (const family of FAMILIES) {
         groups.push({
@@ -202,78 +363,671 @@ function themeGroups(settings, { includeInherit = false } = {}) {
     return groups;
 }
 
-function buildGallery(settings, refresh) {
-    const gallery = el('div', { class: 'rat-gallery', id: 'rat_gallery' });
-    const custom = Object.values(settings.customThemes);
-
-    for (const theme of [...THEMES, ...custom]) {
-        const active = settings.theme === theme.slug;
-        const card = el('div', { class: 'rat-card', 'data-active': String(active) });
-
-        card.append(el('div', { class: 'rat-card-head' }, [
-            el('span', { class: 'rat-card-name', text: theme.name ?? theme.slug }),
-            el('span', { class: 'rat-card-mode', text: theme.mode ?? '' }),
-        ]));
-
-        const preview = el('div', { class: 'rat-preview' });
-        card.append(preview);
-        mountPreview(preview, previewArchetype, theme, settings.options);
-
-        const button = el('div', {
-            class: active ? 'menu_button rat-applied' : 'menu_button',
-            text: active ? 'Applied' : 'Apply',
-        });
-        button.addEventListener('click', async () => {
-            if (active) {
-                return;
-            }
-            updateSettings({ theme: theme.slug });
-            reportApply(await applyAll());
-            refresh();
-        });
-        card.append(button);
-
-        gallery.append(card);
-    }
-
-    return gallery;
+function themeEntries(settings) {
+    return [
+        {
+            slug: STOCK_THEME,
+            name: 'Original SillyBunny style',
+            family: 'original',
+            familyLabel: 'Original',
+            mode: 'host',
+            theme: null,
+        },
+        ...THEMES.map(theme => ({
+            ...theme,
+            familyLabel: FAMILIES.find(family => family.id === theme.family)?.label ?? theme.family,
+            theme,
+        })),
+        ...Object.values(settings.customThemes).map(theme => ({
+            ...theme,
+            name: theme.name ?? theme.slug,
+            family: 'custom',
+            familyLabel: 'Custom',
+            mode: theme.mode ?? 'custom',
+            theme,
+        })),
+    ];
 }
 
-function reportApply(result) {
-    if (!result.ok) {
-        toast('error', result.reason ?? 'Could not apply the theme.');
-        return;
+function formatNames(items) {
+    return items
+        .map(item => item?.agentName ?? item?.name ?? item?.agentId ?? item?.id)
+        .filter(Boolean)
+        .join(', ');
+}
+
+/** Converts apply-engine results into persistent, human-readable UI feedback. */
+export function summarizeApplyResult(result) {
+    if (!result?.ok) {
+        return { tone: 'error', text: result?.reason ?? 'Could not update tracker themes.' };
     }
     const parts = [];
     if (result.applied) {
         parts.push(`${result.applied} themed`);
     }
     if (result.reverted) {
-        parts.push(`${result.reverted} reverted`);
+        parts.push(`${result.reverted} restored`);
+    }
+    if (result.unchanged) {
+        parts.push(`${result.unchanged} already current`);
     }
     if (result.blocked?.length) {
-        parts.push(`${result.blocked.length} skipped, edited by hand`);
+        parts.push(`skipped edited trackers: ${formatNames(result.blocked)}`);
     }
     if (result.failed?.length) {
-        parts.push(`${result.failed.length} failed`);
+        parts.push(`failed: ${formatNames(result.failed)}`);
     }
-    toast(result.blocked?.length || result.failed?.length ? 'warning' : 'success',
-        parts.length ? parts.join(', ') : 'Nothing to change.');
+    return {
+        tone: result.failed?.length ? 'error' : result.blocked?.length ? 'warning' : 'success',
+        text: parts.length ? `${parts.join('. ')}.` : 'No installed trackers needed changes.',
+    };
 }
 
-async function buildScopeTable(settings, refresh) {
-    const host = await loadHost();
-    const wrapper = el('div');
+/** Worst-first aggregation shared by duplicate-agent rows and tests. */
+export function summarizeTemplateReports(reports) {
+    return summarizeStatuses((reports ?? []).map(report => report.status));
+}
 
-    if (!host.ok) {
-        wrapper.append(el('div', {
-            class: 'rat-warning',
-            text: `${host.reason}. You can still preview themes, but not apply them.`,
+function renderResult() {
+    if (!view?.resultHost) {
+        return;
+    }
+    view.resultHost.textContent = '';
+    const result = uiState.result ?? {
+        tone: 'neutral',
+        text: 'Choose a default theme or preview the library below.',
+    };
+    view.resultHost.dataset.tone = result.tone;
+    view.resultHost.append(el('span', { text: result.text }));
+}
+
+function setResult(result, { notify = false } = {}) {
+    uiState.result = result;
+    renderResult();
+    if (notify && result?.tone !== 'progress' && result?.tone !== 'neutral') {
+        const type = result.tone === 'error' ? 'error' : result.tone === 'warning' ? 'warning' : 'success';
+        toast(type, result.text);
+    }
+}
+
+function updateBusyState() {
+    if (!view) {
+        return;
+    }
+    view.container.setAttribute('aria-busy', String(uiState.busy));
+    for (const control of view.container.querySelectorAll('[data-rat-operation], select, input')) {
+        control.disabled = uiState.busy || control.dataset.ratStaticDisabled === 'true';
+    }
+}
+
+async function runOperation(label, operation) {
+    if (uiState.busy) {
+        return null;
+    }
+    const focus = captureFocus();
+    uiState.busy = true;
+    setResult({ tone: 'progress', text: `${label}...` });
+    updateBusyState();
+    try {
+        return await operation();
+    } catch (error) {
+        setResult({ tone: 'error', text: error?.message ?? String(error) }, { notify: true });
+        return null;
+    } finally {
+        uiState.busy = false;
+        await renderView({ focus });
+    }
+}
+
+async function confirmAction(title, message, okButton) {
+    const context = getContext();
+    if (typeof context?.callGenericPopup === 'function') {
+        const content = el('div', { class: 'rat-confirm-copy' }, [
+            el('strong', { text: title }),
+            el('p', { text: message }),
+        ]);
+        return Boolean(await context.callGenericPopup(content, 2, '', {
+            okButton,
+            cancelButton: 'Cancel',
+            leftAlign: true,
         }));
-        return wrapper;
+    }
+    return Boolean(globalThis.confirm?.(`${title}\n\n${message}`));
+}
+
+function disconnectThumbnailObserver() {
+    thumbnailObserver?.disconnect();
+    thumbnailObserver = null;
+    thumbnailJobs.clear();
+}
+
+function runThumbnailJob(host) {
+    const job = thumbnailJobs.get(host);
+    if (!job || !host.isConnected) {
+        thumbnailJobs.delete(host);
+        return;
+    }
+    thumbnailJobs.delete(host);
+    job();
+}
+
+function mountVisibleThumbnailFallbacks() {
+    if (typeof globalThis.IntersectionObserver === 'function') {
+        return;
+    }
+    for (const host of [...thumbnailJobs.keys()]) {
+        runThumbnailJob(host);
+    }
+}
+
+function scheduleThumbnail(host, archetype, theme, options) {
+    thumbnailJobs.set(host, () => mountPreview(host, archetype, theme, options));
+    if (typeof globalThis.IntersectionObserver !== 'function') {
+        queueMicrotask(mountVisibleThumbnailFallbacks);
+        return;
+    }
+    if (!thumbnailObserver) {
+        thumbnailObserver = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                if (!entry.isIntersecting) {
+                    continue;
+                }
+                thumbnailObserver?.unobserve(entry.target);
+                runThumbnailJob(entry.target);
+            }
+        }, { rootMargin: '180px 0px' });
+    }
+    thumbnailObserver.observe(host);
+}
+
+function applyTheme(slug) {
+    return runOperation('Applying theme', async () => {
+        updateSettings({ theme: slug });
+        uiState.previewThemeSlug = slug;
+        const result = await applyAll();
+        if (result.ok) {
+            uiState.optionsDirty = false;
+        }
+        setResult(summarizeApplyResult(result), { notify: true });
+        return result;
+    });
+}
+
+function renderOverview(settings, host, agents, reports) {
+    const content = view.sections.overview.content;
+    content.textContent = '';
+
+    content.append(el('p', {
+        class: 'rat-intro',
+        text: 'Theme bundled trackers and companion panels without changing prompts or model output.',
+    }));
+
+    if (detectEncodedTags()) {
+        content.append(el('div', {
+            class: 'rat-callout',
+            role: 'alert',
+            'data-tone': 'warning',
+            text: 'Show tags in chat as plain text is enabled. Turn it off in User Settings so tracker HTML can render.',
+        }));
     }
 
-    const agents = themableAgents(host.store.getAgents() ?? []);
+    const dependencyText = host.ok
+        ? `${agents.length} compatible installed ${agents.length === 1 ? 'agent' : 'agents'} found.`
+        : `${host.reason}. Previews remain available, but themes cannot be applied.`;
+    const attention = reports.filter(report => !['pristine', 'stock'].includes(report.status));
+    const summaryText = host.ok
+        ? `${dependencyText} ${Object.keys(settings.overrides).length} tracker override(s). ${attention.length} need attention.`
+        : dependencyText;
+
+    content.append(el('div', {
+        class: 'rat-dependency',
+        'data-tone': host.ok ? 'success' : 'warning',
+    }, [
+        el('strong', { text: host.ok ? 'In-Chat Agents connected' : 'In-Chat Agents unavailable' }),
+        el('span', { text: summaryText }),
+    ]));
+
+    const themeSelect = groupedSelect(
+        'rat_theme',
+        themeGroups(settings),
+        settings.theme,
+        applyTheme,
+    );
+    content.append(fieldRow(
+        'Default theme',
+        themeSelect,
+        'Applied to compatible trackers unless a tracker override says otherwise.',
+    ));
+
+    view.resultHost = el('div', {
+        class: 'rat-result',
+        role: 'status',
+        'aria-live': 'polite',
+        'aria-atomic': 'true',
+    });
+    content.append(view.resultHost);
+    renderResult();
+}
+
+function rerenderBrowse() {
+    if (!view) {
+        return;
+    }
+    const focus = captureFocus();
+    renderBrowse(getSettings());
+    updateBusyState();
+    queueMicrotask(() => restoreFocus(focus));
+}
+
+function renderBrowse(settings) {
+    const content = view.sections.browse.content;
+    disconnectThumbnailObserver();
+    content.textContent = '';
+
+    const entries = themeEntries(settings);
+    if (!entries.some(entry => entry.slug === uiState.previewThemeSlug)) {
+        uiState.previewThemeSlug = settings.theme;
+    }
+
+    const familyOptions = [
+        { value: 'all', label: 'All families' },
+        { value: 'original', label: 'Original' },
+        ...FAMILIES.map(family => ({ value: family.id, label: family.label })),
+    ];
+    if (Object.keys(settings.customThemes).length) {
+        familyOptions.push({ value: 'custom', label: 'Custom' });
+    }
+
+    const search = el('input', {
+        id: 'rat_theme_search',
+        class: 'text_pole',
+        type: 'search',
+        value: uiState.query,
+        placeholder: 'Search themes',
+        'data-focus-key': 'rat_theme_search',
+    });
+    search.value = uiState.query;
+    search.addEventListener('input', () => {
+        uiState.query = search.value;
+        rerenderBrowse();
+    });
+
+    const family = select('rat_family_filter', familyOptions, uiState.family, (value) => {
+        uiState.family = value;
+        rerenderBrowse();
+    });
+    const mode = select('rat_mode_filter', [
+        { value: 'all', label: 'All colour modes' },
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+        { value: 'adaptive', label: 'Adaptive' },
+        { value: 'host', label: 'Original host style' },
+        { value: 'custom', label: 'Custom' },
+    ], uiState.mode, (value) => {
+        uiState.mode = value;
+        rerenderBrowse();
+    });
+    const shape = select(
+        'rat_preview_archetype',
+        Object.keys(PREVIEW_KEYS).map(value => ({ value, label: ARCHETYPE_LABELS[value] ?? value })),
+        uiState.previewArchetype,
+        (value) => {
+            uiState.previewArchetype = value;
+            rerenderBrowse();
+        },
+    );
+
+    content.append(el('div', { class: 'rat-filter-grid' }, [
+        fieldRow('Search', search),
+        fieldRow('Family', family),
+        fieldRow('Colour mode', mode),
+        fieldRow('Preview shape', shape),
+    ]));
+
+    const selected = entries.find(entry => entry.slug === uiState.previewThemeSlug) ?? entries[0];
+    const selectedPreview = el('div', { class: 'rat-preview rat-selected-preview' });
+    mountPreview(selectedPreview, uiState.previewArchetype, selected.theme, settings.options);
+    const selectedCurrent = selected.slug === settings.theme;
+    const selectedApply = button(
+        selectedCurrent ? 'Current default' : `Apply ${selected.name}`,
+        () => applyTheme(selected.slug),
+        {
+            disabled: selectedCurrent,
+            focusKey: `selected-apply-${selected.slug}`,
+        },
+    );
+    if (selectedCurrent) {
+        selectedApply.dataset.ratStaticDisabled = 'true';
+    }
+    content.append(el('section', {
+        class: 'rat-preview-stage',
+        'aria-labelledby': 'rat_selected_theme_name',
+    }, [
+        el('div', { class: 'rat-preview-stage-head' }, [
+            el('div', {}, [
+                el('h4', { id: 'rat_selected_theme_name', text: selected.name }),
+                el('p', {
+                    text: `${selected.familyLabel}. ${String(selected.mode).replace(/^./, value => value.toUpperCase())} palette.`,
+                }),
+            ]),
+            selectedApply,
+        ]),
+        selectedPreview,
+    ]));
+
+    const query = uiState.query.trim().toLowerCase();
+    const filtered = entries.filter((entry) => {
+        const familyMatch = uiState.family === 'all' || entry.family === uiState.family;
+        const modeMatch = uiState.mode === 'all' || entry.mode === uiState.mode;
+        const queryMatch = !query || `${entry.name} ${entry.familyLabel} ${entry.mode}`.toLowerCase().includes(query);
+        return familyMatch && modeMatch && queryMatch;
+    });
+
+    content.append(el('p', {
+        class: 'rat-gallery-count',
+        'aria-live': 'polite',
+        text: `${filtered.length} ${filtered.length === 1 ? 'theme' : 'themes'}`,
+    }));
+
+    if (!filtered.length) {
+        content.append(el('p', {
+            class: 'rat-empty',
+            text: 'No themes match these filters. Clear the search or choose another family.',
+        }));
+        return;
+    }
+
+    const gallery = el('div', { class: 'rat-gallery', id: 'rat_gallery' });
+    for (const entry of filtered) {
+        const selectedCard = uiState.previewThemeSlug === entry.slug;
+        const current = settings.theme === entry.slug;
+        const headingId = `rat_theme_name_${entry.slug}`;
+        const card = el('article', {
+            class: 'rat-card',
+            'data-selected': String(selectedCard),
+            'data-current': String(current),
+            'aria-labelledby': headingId,
+        });
+        card.append(el('div', { class: 'rat-card-head' }, [
+            el('h4', { id: headingId, class: 'rat-card-name', text: entry.name }),
+            el('span', { class: 'rat-card-mode', text: entry.mode }),
+        ]));
+
+        const thumbnail = el('div', {
+            class: 'rat-preview rat-thumbnail',
+            inert: '',
+            'aria-hidden': 'true',
+        });
+        try {
+            thumbnail.inert = true;
+        } catch {
+            // The attribute above remains the fallback for browsers without the property.
+        }
+        card.append(thumbnail);
+        scheduleThumbnail(thumbnail, uiState.previewArchetype, entry.theme, settings.options);
+
+        card.append(el('p', {
+            class: 'rat-card-meta',
+            text: `${entry.familyLabel}. ${String(entry.mode).replace(/^./, value => value.toUpperCase())}.`,
+        }));
+        const previewButton = button('Preview', () => {
+            uiState.previewThemeSlug = entry.slug;
+            rerenderBrowse();
+        }, {
+            focusKey: `preview-${entry.slug}`,
+            ariaLabel: `Preview ${entry.name}`,
+        });
+        const applyButton = button(current ? 'Current' : 'Apply', () => applyTheme(entry.slug), {
+            disabled: current,
+            focusKey: `apply-${entry.slug}`,
+            ariaLabel: current
+                ? `${entry.name} is the current default theme`
+                : `Apply ${entry.name}`,
+        });
+        if (current) {
+            applyButton.dataset.ratStaticDisabled = 'true';
+        }
+        card.append(el('div', { class: 'rat-card-actions' }, [previewButton, applyButton]));
+        gallery.append(card);
+    }
+    content.append(gallery);
+}
+
+function updateOption(patch, { dirty = true } = {}) {
+    updateSettings({ options: patch });
+    if (dirty) {
+        uiState.optionsDirty = true;
+        setResult({
+            tone: 'warning',
+            text: 'Options changed. Apply option changes to update installed cards.',
+        });
+    }
+    refresh();
+}
+
+function applyOptionChanges() {
+    return runOperation('Applying option changes', async () => {
+        const result = await applyAll();
+        if (result.ok) {
+            uiState.optionsDirty = false;
+        }
+        setResult(summarizeApplyResult(result), { notify: true });
+        return result;
+    });
+}
+
+function renderOptions(settings) {
+    const content = view.sections.options.content;
+    content.textContent = '';
+    const options = settings.options;
+
+    content.append(el('div', { class: 'rat-option-grid' }, [
+        fieldRow('Density', select('rat_density', [
+            { value: 'compact', label: 'Compact spacing' },
+            { value: 'normal', label: 'Theme default' },
+            { value: 'roomy', label: 'Roomy spacing' },
+        ], options.density, value => updateOption({ density: value }))),
+        fieldRow('Panel defaults', select('rat_open_defaults', [
+            { value: 'theme', label: 'Use theme default' },
+            { value: 'all-open', label: 'Always expanded' },
+            { value: 'all-closed', label: 'Always collapsed' },
+        ], options.openDefaults, value => updateOption({ openDefaults: value }))),
+    ]));
+
+    content.append(el('div', { class: 'rat-check-list' }, [
+        optionRow('Use SillyBunny theme colours', checkbox(
+            'rat_adaptive',
+            options.adaptiveNeutrals,
+            value => updateOption({ adaptiveNeutrals: value }),
+        ), 'Adapts neutral surfaces to the active host theme.'),
+        optionRow('Relationship meter bars', checkbox(
+            'rat_meters',
+            options.meters,
+            value => updateOption({ meters: value }),
+        ), 'Adds a visual bar while keeping the numeric value.'),
+        optionRow('Restyle bold text', checkbox(
+            'rat_bold',
+            options.restyleBold,
+            value => updateOption({ restyleBold: value }),
+        ), 'Lets the selected theme style bold prose.'),
+        optionRow('Plain glyphs', checkbox(
+            'rat_glyphs',
+            options.glyphs === 'none',
+            value => updateOption({ glyphs: value ? 'none' : 'theme' }),
+        ), 'Removes decorative theme symbols.'),
+        optionRow('Re-apply after template updates', checkbox(
+            'rat_auto',
+            settings.autoReapply,
+            (value) => {
+                updateSettings({ autoReapply: value });
+                refresh();
+            },
+        ), 'Repairs extension-owned theme output after supported template updates.'),
+    ]));
+
+    if (uiState.optionsDirty) {
+        content.append(el('div', {
+            class: 'rat-callout rat-option-action',
+            'data-tone': 'warning',
+        }, [
+            el('span', { text: 'Previews use the new options. Installed cards still use the previous values.' }),
+            button('Apply option changes', applyOptionChanges, { focusKey: 'apply-options' }),
+        ]));
+    } else {
+        content.append(el('p', {
+            class: 'rat-note',
+            text: 'Option changes are previewed here before you apply them to installed cards.',
+        }));
+    }
+}
+
+function emptyBatchResult() {
+    return { ok: true, applied: 0, reverted: 0, unchanged: 0, blocked: [], failed: [] };
+}
+
+async function runAgentBatch(agents, operation, { restoring = false } = {}) {
+    const summary = emptyBatchResult();
+    for (const agent of agents) {
+        const result = await operation(agent);
+        if (result.ok) {
+            if (restoring) {
+                if (result.unchanged) {
+                    summary.unchanged++;
+                } else {
+                    summary.reverted++;
+                }
+            } else {
+                summary.applied++;
+            }
+        } else if (result.blocked) {
+            summary.blocked.push({ agentId: agent.id, agentName: agent.name, blocked: result.blocked });
+        } else {
+            summary.failed.push({ agentId: agent.id, agentName: agent.name, reason: result.reason });
+        }
+    }
+    return summary;
+}
+
+function setOverride(templateId, value) {
+    const settings = getSettings();
+    const overrides = { ...settings.overrides };
+    if (value) {
+        overrides[templateId] = value;
+    } else {
+        delete overrides[templateId];
+    }
+    updateSettings({ overrides });
+}
+
+function applyTemplateOverride(templateId, value, agents) {
+    const current = getSettings();
+    const effective = value || current.theme;
+    if (effective === STOCK_THEME) {
+        return restoreAgents(agents, {
+            label: TEMPLATE_LABELS[templateId] ?? templateId,
+            settingsPatch: () => setOverride(templateId, value),
+        });
+    }
+    return runOperation(`Applying ${TEMPLATE_LABELS[templateId] ?? 'tracker'} theme`, async () => {
+        setOverride(templateId, value);
+        const result = await runAgentBatch(agents, agent => applyToAgent(agent));
+        setResult(summarizeApplyResult(result), { notify: true });
+        return result;
+    });
+}
+
+function forceApplyTemplate(templateId, agents) {
+    const settings = getSettings();
+    const themeSlug = resolveThemeSlug(templateId, settings);
+    const theme = getTheme(themeSlug, settings.customThemes);
+    const names = formatNames(agents);
+    return runOperation('Waiting for confirmation', async () => {
+        const confirmed = await confirmAction(
+            'Apply over tracker edits?',
+            `This will replace edited HTML in: ${names}. The current HTML will be saved so Restore original styles can put it back.`,
+            `Apply ${theme?.name ?? themeSlug}`,
+        );
+        if (!confirmed) {
+            setResult({ tone: 'neutral', text: 'No tracker edits were changed.' });
+            return null;
+        }
+        const result = await runAgentBatch(agents, agent => applyToAgent(agent, { force: true }));
+        setResult(summarizeApplyResult(result), { notify: true });
+        return result;
+    });
+}
+
+function needsDestructiveRestore(agent, report, settings) {
+    const unsafe = report.perScript.some(entry => ['foreign', 'upstream-changed'].includes(entry.status));
+    const ledgerMissingForTheme = !settings.ledger[agent.id]
+        && ['pristine', 'outdated', 'foreign', 'upstream-changed'].includes(report.status);
+    return unsafe || ledgerMissingForTheme;
+}
+
+function restoreAgents(agents, { label, settingsPatch }) {
+    return runOperation('Checking tracker ownership', async () => {
+        const settings = getSettings();
+        const reports = new Map(agents.map(agent => [agent.id, inspectAgent(agent, settings)]));
+        const forceAgents = agents.filter(agent => needsDestructiveRestore(
+            agent,
+            reports.get(agent.id),
+            settings,
+        ));
+
+        if (forceAgents.length) {
+            const names = formatNames(forceAgents);
+            const confirmed = await confirmAction(
+                'Restore original styles?',
+                `Restoring ${label} requires replacing script content without a complete ownership record: ${names}. Any unrecorded hand edits in those trackers will be overwritten.`,
+                `Restore ${forceAgents.length} tracker(s)`,
+            );
+            if (!confirmed) {
+                setResult({ tone: 'neutral', text: 'No tracker styles were restored.' });
+                return null;
+            }
+        }
+
+        settingsPatch();
+        const forced = new Set(forceAgents.map(agent => agent.id));
+        const result = await runAgentBatch(
+            agents,
+            agent => revertAgent(agent, { force: forced.has(agent.id) }),
+            { restoring: true },
+        );
+        setResult(summarizeApplyResult(result), { notify: true });
+        return result;
+    });
+}
+
+function statusBadge(status, { id } = {}) {
+    return el('span', {
+        id,
+        class: 'rat-status',
+        'data-status': status,
+        title: STATUS_HELP[status] ?? '',
+        text: STATUS_LABELS[status] ?? status,
+    });
+}
+
+function renderScope(settings, host, agents) {
+    const content = view.sections.scope.content;
+    content.textContent = '';
+    if (!host.ok) {
+        content.append(el('div', {
+            class: 'rat-callout',
+            'data-tone': 'warning',
+            text: `${host.reason}. Tracker overrides are unavailable.`,
+        }));
+        return;
+    }
+    if (!agents.length) {
+        content.append(el('div', { class: 'rat-empty' }, [
+            el('strong', { text: 'No compatible trackers installed' }),
+            el('p', { text: 'Install a bundled In-Chat Agent tracker to set an override.' }),
+        ]));
+        return;
+    }
+
     const byTemplate = new Map();
     for (const agent of agents) {
         const templateId = agent.sourceTemplateId ?? '';
@@ -283,321 +1037,377 @@ async function buildScopeTable(settings, refresh) {
         byTemplate.get(templateId).push(agent);
     }
 
-    if (!agents.length) {
-        wrapper.append(el('div', {
-            class: 'rat-note',
-            text: 'No tracker agents installed yet.',
-        }));
-        return wrapper;
-    }
-
-    const table = el('table', { class: 'rat-scope-table' });
-    table.append(el('thead', {}, el('tr', {}, [
-        el('th', { text: 'Tracker' }),
-        el('th', { text: 'Theme' }),
-        el('th', { text: 'State' }),
-        el('th', { text: '' }),
-    ])));
-
-    const body = el('tbody');
+    content.append(el('p', {
+        class: 'rat-note',
+        text: 'Overrides affect every installed agent from that tracker template. Expand duplicate entries to review each agent.',
+    }));
+    const list = el('div', { class: 'rat-scope-list' });
     for (const templateId of THEMABLE_TEMPLATE_IDS) {
         const templateAgents = byTemplate.get(templateId) ?? [];
         if (!templateAgents.length) {
             continue;
         }
-
         const reports = templateAgents.map(agent => inspectAgent(agent, settings));
-        const worst = reports.find(report => report.status !== 'pristine') ?? reports[0];
+        const worst = summarizeTemplateReports(reports);
+        const label = TEMPLATE_LABELS[templateId] ?? templateId;
+        const titleId = `rat_scope_title_${templateId}`;
+        const effective = resolveThemeSlug(templateId, settings);
 
         const themeSelect = groupedSelect(
             `rat_scope_${templateId}`,
             themeGroups(settings, { includeInherit: true }),
             settings.overrides[templateId] ?? '',
-            async value => {
-                const overrides = { ...settings.overrides };
-                if (value) {
-                    overrides[templateId] = value;
-                } else {
-                    delete overrides[templateId];
-                }
-                updateSettings({ overrides });
-                for (const agent of templateAgents) {
-                    const result = value === STOCK_THEME
-                        ? await revertAgent(agent)
-                        : await applyToAgent(agent);
-                    if (!result.ok && !result.blocked) {
-                        toast('error', result.reason);
-                    }
-                }
-                refresh();
-            },
+            value => applyTemplateOverride(templateId, value, templateAgents),
+            { focusKey: `scope-${templateId}` },
         );
 
-        const forceButton = el('div', { class: 'menu_button', text: 'Force' });
-        forceButton.addEventListener('click', async () => {
-            for (const agent of templateAgents) {
-                await applyToAgent(agent, { force: true });
-            }
-            toast('success', 'Applied over your edits.');
-            refresh();
-        });
+        const agentList = el('ul', { class: 'rat-agent-list' });
+        for (const report of reports) {
+            agentList.append(el('li', {}, [
+                el('span', { text: report.agentName || report.agentId }),
+                statusBadge(report.status),
+            ]));
+        }
+        const agentDetail = templateAgents.length > 1
+            ? el('details', { class: 'rat-agent-details' }, [
+                el('summary', { text: `${templateAgents.length} installed agents` }),
+                agentList,
+            ])
+            : agentList;
 
-        const revertButton = el('div', { class: 'menu_button', text: 'Revert' });
-        revertButton.addEventListener('click', async () => {
-            for (const agent of templateAgents) {
-                await revertAgent(agent);
-            }
-            toast('success', 'Back to stock.');
-            refresh();
-        });
+        const actions = el('div', { class: 'rat-action-row' });
+        const hasForeign = reports.some(report => report.status === 'foreign');
+        if (hasForeign && effective !== STOCK_THEME) {
+            actions.append(button(
+                'Apply over edits',
+                () => forceApplyTemplate(templateId, templateAgents),
+                {
+                    focusKey: `force-${templateId}`,
+                    ariaLabel: `Apply ${label} theme over external edits`,
+                },
+            ));
+        }
+        const restorable = reports.some((report, index) => report.status !== 'stock'
+            || Boolean(settings.ledger[templateAgents[index].id]));
+        const restoreButton = button(
+            'Restore original styles',
+            () => restoreAgents(templateAgents, {
+                label,
+                settingsPatch: () => setOverride(templateId, STOCK_THEME),
+            }),
+            {
+                disabled: !restorable,
+                focusKey: `restore-${templateId}`,
+                ariaLabel: `Restore original styles for ${label}`,
+            },
+        );
+        if (!restorable) {
+            restoreButton.dataset.ratStaticDisabled = 'true';
+        }
+        actions.append(restoreButton);
 
-        const actions = el('div', { class: 'flex-container' }, [
-            worst.status === 'foreign' ? forceButton : null,
-            revertButton,
-        ]);
-
-        body.append(el('tr', {}, [
-            el('td', { text: TEMPLATE_LABELS[templateId] ?? templateId }),
-            el('td', {}, themeSelect),
-            el('td', {}, el('span', {
-                class: 'rat-status',
-                'data-status': worst.status,
-                text: STATUS_LABELS[worst.status] ?? worst.status,
-            })),
-            el('td', {}, actions),
+        list.append(el('article', {
+            class: 'rat-scope-card',
+            'data-status': worst,
+            'aria-labelledby': titleId,
+        }, [
+            el('div', { class: 'rat-scope-head' }, [
+                el('div', {}, [
+                    el('h4', { id: titleId, text: label }),
+                    el('p', {
+                        text: templateAgents.length === 1
+                            ? '1 installed agent'
+                            : `${templateAgents.length} installed agents`,
+                    }),
+                ]),
+                statusBadge(worst),
+            ]),
+            fieldRow(`Theme for ${label}`, themeSelect),
+            agentDetail,
+            actions,
         ]));
     }
-
-    table.append(body);
-    wrapper.append(table);
-    return wrapper;
-}
-
-function buildOptions(settings, refresh) {
-    const options = settings.options;
-    const wrapper = el('div', { class: 'rat-toolbar' });
-
-    wrapper.append(fieldRow('Density', select(
-        'rat_density',
-        DENSITIES.map(value => ({ value, label: value })),
-        options.density,
-        value => {
-            updateSettings({ options: { density: value } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(fieldRow('Panels', select(
-        'rat_open_defaults',
-        OPEN_DEFAULTS.map(value => ({ value, label: value.replace('-', ' ') })),
-        options.openDefaults,
-        value => {
-            updateSettings({ options: { openDefaults: value } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(optionRow('Use SillyBunny theme colours', checkbox(
-        'rat_adaptive', options.adaptiveNeutrals,
-        value => {
-            updateSettings({ options: { adaptiveNeutrals: value } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(optionRow('Relationship meter bars', checkbox(
-        'rat_meters', options.meters,
-        value => {
-            updateSettings({ options: { meters: value } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(optionRow('Restyle bold text', checkbox(
-        'rat_bold', options.restyleBold,
-        value => {
-            updateSettings({ options: { restyleBold: value } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(optionRow('Plain glyphs', checkbox(
-        'rat_glyphs', options.glyphs === 'none',
-        value => {
-            updateSettings({ options: { glyphs: value ? 'none' : 'theme' } });
-            refresh();
-        },
-    )));
-
-    wrapper.append(optionRow('Re-apply after template updates', checkbox(
-        'rat_auto', settings.autoReapply,
-        value => updateSettings({ autoReapply: value }),
-    )));
-
-    return wrapper;
-}
-
-function buildToolbar(settings, refresh) {
-    const toolbar = el('div', { class: 'rat-toolbar' });
-
-    toolbar.append(fieldRow('Preview shape', select(
-        'rat_preview_archetype',
-        Object.keys(PREVIEW_KEYS).map(value => ({ value, label: ARCHETYPE_LABELS[value] ?? value })),
-        previewArchetype,
-        value => {
-            previewArchetype = value;
-            refresh();
-        },
-    )));
-
-    const applyButton = el('div', { class: 'menu_button', text: 'Re-apply' });
-    applyButton.addEventListener('click', async () => {
-        reportApply(await applyAll());
-        refresh();
-    });
-
-    const revertButton = el('div', { class: 'menu_button', text: 'Revert all' });
-    revertButton.addEventListener('click', async () => {
-        updateSettings({ theme: STOCK_THEME, overrides: {} });
-        reportApply(await applyAll());
-        refresh();
-    });
-
-    const exportButton = el('div', { class: 'menu_button', text: 'Export' });
-    exportButton.addEventListener('click', () => exportThemes(settings));
-
-    const importButton = el('div', { class: 'menu_button', text: 'Import' });
-    importButton.addEventListener('click', () => importThemes(refresh));
-
-    toolbar.append(applyButton, revertButton, exportButton, importButton);
-    return toolbar;
+    content.append(list);
 }
 
 function exportThemes(settings) {
-    const payload = {
-        format: 'sillybunny-regex-agent-themes',
-        version: 1,
-        themes: settings.customThemes,
-    };
+    const payload = createCustomThemeExport(settings.customThemes);
     const blob = new Blob([JSON.stringify(payload, null, 4)], { type: 'application/json' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'regex-agent-themes.json';
     link.click();
-    URL.revokeObjectURL(link.href);
+    setTimeout(() => URL.revokeObjectURL(link.href), 0);
+    setResult({
+        tone: 'success',
+        text: `Exported ${Object.keys(settings.customThemes).length} custom theme(s).`,
+    });
 }
 
-function importThemes(refresh) {
-    const input = el('input', { type: 'file', accept: '.json' });
-    input.addEventListener('change', async () => {
+function importThemes() {
+    const input = el('input', { type: 'file', accept: '.json,application/json' });
+    input.addEventListener('change', () => {
         const file = input.files?.[0];
         if (!file) {
             return;
         }
-        try {
-            const payload = JSON.parse(await file.text());
-            if (payload.format !== 'sillybunny-regex-agent-themes') {
-                toast('error', 'That file is not a Regex Agent Themes export.');
-                return;
+        void runOperation('Importing custom themes', async () => {
+            if (file.size > CUSTOM_THEME_LIMITS.fileBytes) {
+                setResult({
+                    tone: 'error',
+                    text: `That file exceeds the ${Math.round(CUSTOM_THEME_LIMITS.fileBytes / 1024)} KB import limit.`,
+                }, { notify: true });
+                return null;
             }
-            const settings = getSettings();
-            updateSettings({ customThemes: { ...settings.customThemes, ...payload.themes } });
-            toast('success', `Imported ${Object.keys(payload.themes ?? {}).length} theme(s).`);
-            refresh();
-        } catch (error) {
-            toast('error', `Could not read that file: ${error.message}`);
-        }
+            const before = getSettings();
+            const plan = parseCustomThemeImport(await file.text(), before.customThemes);
+            if (!plan.ok) {
+                setResult({ tone: 'error', text: plan.error }, { notify: true });
+                return null;
+            }
+            if (!plan.accepted.length) {
+                const reason = plan.rejected[0]
+                    ? `${plan.rejected[0].slug}: ${plan.rejected[0].reason}`
+                    : 'No supported themes were present.';
+                setResult({ tone: 'warning', text: `No themes were imported. ${reason}` }, { notify: true });
+                return null;
+            }
+
+            const describe = (slugs) => {
+                const names = slugs.slice(0, 8).map(slug => plan.themes[slug]?.name ?? slug);
+                if (slugs.length > names.length) names.push(`and ${slugs.length - names.length} more`);
+                return names.join(', ');
+            };
+            const rejected = plan.rejected.slice(0, 4)
+                .map(item => `${item.slug}: ${item.reason}`)
+                .join(' ');
+            const summary = [
+                `Ready to import ${plan.accepted.length}: ${describe(plan.accepted)}.`,
+                plan.overwritten.length
+                    ? `This will replace ${plan.overwritten.length} existing theme(s): ${describe(plan.overwritten)}.`
+                    : '',
+                plan.rejected.length
+                    ? `${plan.rejected.length} rejected. ${rejected}${plan.rejected.length > 4 ? ' More were rejected.' : ''}`
+                    : '',
+            ].filter(Boolean).join(' ');
+            const confirmed = await confirmAction('Import custom themes?', summary, 'Import themes');
+            if (!confirmed) {
+                setResult({ tone: 'neutral', text: 'No custom themes were imported.' });
+                return null;
+            }
+
+            const after = updateSettings({ customThemes: plan.themes });
+            setResult({
+                tone: plan.rejected.length ? 'warning' : 'success',
+                text: `Imported ${plan.accepted.length} custom theme(s)`
+                    + `${plan.overwritten.length ? `; replaced ${plan.overwritten.length}` : ''}`
+                    + `${plan.rejected.length ? `; rejected ${plan.rejected.length}` : ''}.`,
+            }, { notify: true });
+            return after;
+        });
     });
     input.click();
 }
 
-async function renderContent(content) {
-    const settings = getSettings();
+function removeCustomTheme(slug) {
+    return runOperation('Waiting for confirmation', async () => {
+        const settings = getSettings();
+        const theme = settings.customThemes[slug];
+        if (!theme) {
+            return null;
+        }
+        const inUse = settings.theme === slug || Object.values(settings.overrides).includes(slug);
+        const confirmed = await confirmAction(
+            'Remove custom theme?',
+            inUse
+                ? `${theme.name ?? slug} is currently selected. Removing it will change those selections to the original style.`
+                : `Remove ${theme.name ?? slug} from this browser?`,
+            'Remove theme',
+        );
+        if (!confirmed) {
+            setResult({ tone: 'neutral', text: 'The custom theme was kept.' });
+            return null;
+        }
+        const customThemes = { ...settings.customThemes };
+        delete customThemes[slug];
+        updateSettings({ customThemes });
+        setResult({ tone: 'success', text: `Removed ${theme.name ?? slug}.` });
+        return true;
+    });
+}
+
+function restoreAll(agents) {
+    return restoreAgents(agents, {
+        label: 'all installed trackers',
+        settingsPatch: () => updateSettings({ theme: STOCK_THEME, overrides: {} }),
+    });
+}
+
+function renderMaintenance(settings, host, agents) {
+    const content = view.sections.maintenance.content;
     content.textContent = '';
 
-    content.append(el('div', {
-        class: 'rat-note',
-        text: 'Changes how the bundled trackers and companion panels look. '
-            + 'Also updates trackers already in your chat.',
-    }));
+    content.append(el('div', { class: 'rat-maintenance-group' }, [
+        el('div', {}, [
+            el('h4', { text: 'Repair installed themes' }),
+            el('p', { text: 'Re-apply the selected themes after template or option changes.' }),
+        ]),
+        button('Re-apply selected themes', () => runOperation('Re-applying themes', async () => {
+            const result = await applyAll();
+            if (result.ok) {
+                uiState.optionsDirty = false;
+            }
+            setResult(summarizeApplyResult(result), { notify: true });
+            return result;
+        }), { disabled: !host.ok || !agents.length, focusKey: 'reapply-all' }),
+    ]));
 
-    if (detectEncodedTags()) {
-        content.append(el('div', {
-            class: 'rat-warning',
-            text: '"Show tags in chat as plain text" is on, so tracker HTML shows up as text. '
-                + 'Turn it off in User Settings. It breaks the stock trackers too.',
-        }));
+    const customList = el('div', { class: 'rat-custom-list' });
+    const customThemes = Object.values(settings.customThemes);
+    if (customThemes.length) {
+        for (const theme of customThemes) {
+            customList.append(el('div', { class: 'rat-custom-row' }, [
+                el('span', { text: theme.name ?? theme.slug }),
+                button('Remove', () => removeCustomTheme(theme.slug), {
+                    focusKey: `remove-custom-${theme.slug}`,
+                    ariaLabel: `Remove custom theme ${theme.name ?? theme.slug}`,
+                }),
+            ]));
+        }
+    } else {
+        customList.append(el('p', { class: 'rat-note', text: 'No custom themes imported.' }));
     }
+    const exportButton = button('Export custom themes', () => exportThemes(getSettings()), {
+        disabled: !customThemes.length,
+        focusKey: 'export-custom',
+    });
+    if (!customThemes.length) {
+        exportButton.dataset.ratStaticDisabled = 'true';
+    }
+    content.append(el('div', { class: 'rat-maintenance-group' }, [
+        el('div', {}, [
+            el('h4', { text: 'Custom themes' }),
+            el('p', { text: 'Import or export the versioned custom-theme JSON format.' }),
+        ]),
+        el('div', { class: 'rat-action-row' }, [
+            button('Import custom themes', importThemes, { focusKey: 'import-custom' }),
+            exportButton,
+        ]),
+        customList,
+    ]));
 
-    content.append(fieldRow('Theme', groupedSelect(
-        'rat_theme', themeGroups(settings), settings.theme,
-        async value => {
-            updateSettings({ theme: value });
-            reportApply(await applyAll());
-            refresh(content);
-        },
-    )));
-
-    const again = () => refresh(content);
-
-    content.append(section('preview', 'Themes', (host) => {
-        host.append(buildToolbar(settings, again));
-        host.append(buildGallery(settings, again));
-    }));
-
-    content.append(section('options', 'Options', (host) => {
-        host.append(buildOptions(settings, again));
-    }));
-
-    content.append(section('scope', 'Per-tracker', (host) => {
-        host.append(el('div', { class: 'rat-note', text: 'Loading…' }));
-        buildScopeTable(settings, again).then((table) => {
-            host.textContent = '';
-            host.append(table);
-        });
-    }));
+    const dangerDescriptionId = 'rat_restore_all_description';
+    const restoreButton = button('Restore all original styles', () => restoreAll(agents), {
+        className: 'menu_button rat-danger-button',
+        disabled: !host.ok || !agents.length,
+        focusKey: 'restore-all',
+        description: dangerDescriptionId,
+    });
+    if (!host.ok || !agents.length) {
+        restoreButton.dataset.ratStaticDisabled = 'true';
+    }
+    content.append(el('section', {
+        class: 'rat-danger-zone',
+        'aria-labelledby': 'rat_danger_title',
+    }, [
+        el('div', {}, [
+            el('h4', { id: 'rat_danger_title', text: 'Restore original styles' }),
+            el('p', {
+                id: dangerDescriptionId,
+                text: 'Removes extension-owned themes from every installed tracker. Trackers with unrecorded edits are named before any destructive overwrite.',
+            }),
+        ]),
+        restoreButton,
+    ]));
 }
 
-let refreshHandle = null;
+async function renderView({ focus = captureFocus() } = {}) {
+    if (!view) {
+        return;
+    }
+    const generation = ++renderGeneration;
+    const settings = getSettings();
+    const host = await loadHost();
+    if (!view || generation !== renderGeneration) {
+        return;
+    }
+    const agents = host.ok ? themableAgents(host.store.getAgents() ?? []) : [];
+    const reports = agents.map(agent => inspectAgent(agent, settings));
 
-function refresh(content) {
+    renderOverview(settings, host, agents, reports);
+    renderBrowse(settings);
+    renderOptions(settings);
+    renderScope(settings, host, agents);
+    renderMaintenance(settings, host, agents);
+    updateBusyState();
+    queueMicrotask(() => restoreFocus(focus));
+}
+
+function refresh() {
     clearTimeout(refreshHandle);
-    refreshHandle = setTimeout(() => renderContent(content), 0);
+    refreshHandle = setTimeout(() => {
+        void renderView();
+    }, 0);
 }
 
-/** Mounts the drawer. Idempotent, so a re-activation cannot duplicate it. */
-export function mountSettings() {
-    if (document.getElementById(DRAWER_ID)) {
-        return () => refresh(document.querySelector(`#${DRAWER_ID} .inline-drawer-content`));
-    }
-
-    const host = document.getElementById('extensions_settings2')
-        ?? document.getElementById('extensions_settings');
-    if (!host) {
-        return () => {};
-    }
-
-    const content = el('div', { class: 'inline-drawer-content' });
+function createView(host) {
+    disconnectDrawerStateObservers();
+    const contentId = 'rat_drawer_content';
+    const content = el('div', {
+        id: contentId,
+        class: 'inline-drawer-content rat-root-content',
+        'aria-hidden': 'true',
+    });
     content.style.display = 'none';
+    const rootToggle = makeDrawerToggle('rat_drawer_toggle', contentId, 'Regex Agent Themes', 2, false);
+    const sections = {
+        overview: makeSection('overview', 'Overview'),
+        browse: makeSection('browse', 'Browse themes'),
+        options: makeSection('options', 'Options'),
+        scope: makeSection('scope', 'Tracker overrides'),
+        maintenance: makeSection('maintenance', 'Maintenance'),
+    };
+    content.append(...Object.values(sections).map(section => section.drawer));
 
-    const toggle = el('div', { class: 'inline-drawer-toggle inline-drawer-header' }, [
-        el('b', { text: 'Regex Agent Themes' }),
-        el('div', { class: 'inline-drawer-icon fa-solid fa-circle-chevron-down down' }),
-    ]);
+    const drawer = el('div', { class: 'inline-drawer' }, [rootToggle, content]);
+    observeDrawerState(drawer, rootToggle, content);
 
     const container = el('div', {
         class: 'extension_container',
         id: DRAWER_ID,
         'data-extension-name': MODULE_NAME,
-    }, el('div', { class: 'inline-drawer' }, [toggle, content]));
-
+        'aria-busy': 'false',
+    }, drawer);
     host.append(container);
-    renderContent(content);
-    return () => refresh(content);
+    return { container, drawer, rootToggle, content, sections, resultHost: null };
+}
+
+/** Mounts the drawer. Idempotent, so a re-activation cannot duplicate it. */
+export function mountSettings() {
+    if (view?.container?.isConnected) {
+        return refresh;
+    }
+    if (document.getElementById(DRAWER_ID)) {
+        return () => {};
+    }
+    const host = document.getElementById('extensions_settings2')
+        ?? document.getElementById('extensions_settings');
+    if (!host) {
+        return () => {};
+    }
+    view = createView(host);
+    void renderView({ focus: null });
+    return refresh;
 }
 
 export function removeSettings() {
-    document.getElementById(DRAWER_ID)?.remove();
+    clearTimeout(refreshHandle);
+    refreshHandle = null;
+    renderGeneration++;
+    disconnectThumbnailObserver();
+    disconnectDrawerStateObservers();
+    view?.container?.remove();
+    view = null;
 }
 
-export { TEMPLATE_LABELS, STATUS_LABELS, ARCHETYPE_LABELS };
+export { TEMPLATE_LABELS, STATUS_LABELS, ARCHETYPE_LABELS, DENSITIES, OPEN_DEFAULTS };

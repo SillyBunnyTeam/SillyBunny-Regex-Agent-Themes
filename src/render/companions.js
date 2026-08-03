@@ -10,108 +10,126 @@
  */
 
 import { accentAt, alpha } from '../tokens.js';
-import { decl, part, rootAttrs } from './parts.js';
+import {
+    decl, dynamicBackground, layeredBackground, part, radiusCorners, rootAttrs,
+    surfaceBackground, surfaceFill,
+} from './parts.js';
 
 const PROMPT_USER = '{{user}}@st:~$';
 
 /** Archetype G: a framed terminal window wrapping the model's raw block. */
 export function renderTerminal(spec, tokens, options) {
     const term = tokens.term;
-    const accent = term.accent;
+    const scopeClass = `rat-tw-${spec.ns}-${tokens.slug}`;
+    const scope = `.${scopeClass}`;
     const scanline = tokens.scan
-        ? `repeating-linear-gradient(0deg,${tokens.scan.color} 0,${tokens.scan.color} 1px,transparent 1px,transparent ${tokens.scan.size}),`
-        : 'linear-gradient(rgba(255,255,255,0.025) 50%,rgba(0,0,0,0.035) 50%),';
+        ? `repeating-linear-gradient(0deg,${tokens.scan.color} 0,${tokens.scan.color} 1px,transparent 1px,transparent ${tokens.scan.size})`
+        : 'linear-gradient(rgba(255,255,255,0.025) 50%,rgba(0,0,0,0.035) 50%)';
+    const background = layeredBackground(tokens, [scanline, term.bg], { canvas: true });
+    const panel = layeredBackground(tokens, [term.panel], { canvas: true });
+    const cursorCss = tokens.glyphMode === 'none'
+        ? ''
+        : `${scope} .rat-tw-cursor::after { content: "\\258e"; opacity: 0.8; }`;
 
     const css = `
-.rat-tw {
+${scope}.rat-tw {
   max-width: 760px;
   margin: 1em auto;
   border: 1px solid ${term.border};
   border-radius: ${tokens.radius.body};
-  background: ${scanline}${term.bg};
-  background-size: 100% 4px, 100% 100%;
-  color: ${term.text};
+  background: ${background};
+  color: ${tokens.on.term.text};
   font-family: ${term.font};
+  font-size: ${tokens.type.bodySize};
+  line-height: ${tokens.type.lineHeight};
   box-shadow: 0 0 22px ${term.glow}, inset 0 0 30px rgba(0,0,0,0.35);
   overflow: hidden;
 }
-.rat-tw-head {
+${scope} .rat-tw-head {
   display: flex;
   align-items: center;
   gap: 0.5em;
   padding: 0.65em 0.85em;
-  background: ${term.panel};
+  background: ${panel};
   border-bottom: 1px solid ${term.border};
-  color: ${accent};
+  color: ${tokens.on.term.accent};
+  font-size: ${tokens.type.headSize};
   letter-spacing: 0.04em;
   font-weight: 700;
-  cursor: pointer;
   list-style: none;
 }
-.rat-tw-dot {
+${scope} summary.rat-tw-head { cursor: pointer; }
+${scope} .rat-tw-dot {
   width: 0.72em;
   height: 0.72em;
   border-radius: 50%;
   display: inline-block;
   opacity: 0.9;
 }
-.rat-tw-dot-r { background: #ff5f56; }
-.rat-tw-dot-y { background: #ffbd2e; }
-.rat-tw-dot-g { background: #27c93f; }
-.rat-tw-title { margin-left: 0.35em; }
-.rat-tw-status {
+${scope} .rat-tw-dot-r { background: #ff5f56; }
+${scope} .rat-tw-dot-y { background: #ffbd2e; }
+${scope} .rat-tw-dot-g { background: #27c93f; }
+${scope} .rat-tw-title { margin-left: 0.35em; }
+${scope} .rat-tw-status {
   margin-left: auto;
   font-weight: 400;
-  font-size: 0.82em;
-  color: ${term.muted};
+  font-size: ${tokens.type.labelSize};
+  color: ${tokens.on.term.muted};
 }
-.rat-tw-body { padding: 0.85em; }
-.rat-tw-body > details > summary {
+${scope} .rat-tw-body { padding: 0.85em; }
+${scope} .rat-tw-body > details > summary {
   cursor: pointer;
-  color: ${accent};
+  color: ${tokens.on.term.prompt};
+  font-size: ${tokens.type.headSize};
   letter-spacing: 0.04em;
   margin-bottom: 0.6em;
 }
-.rat-tw-out {
+${scope} .rat-tw-out {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   margin: 0;
-  color: ${term.text};
+  color: ${tokens.on.term.text};
 }
-.rat-tw-prompt { color: ${term.accentDim}; }
-.rat-tw-badge {
+${scope} .rat-tw-prompt { color: ${tokens.on.term.prompt}; }
+${scope} .rat-tw-badge {
   display: inline-block;
   padding: 0.15em 0.6em;
   border: 1px solid ${term.border};
   border-radius: ${tokens.radius.slot};
-  color: ${term.gold};
+  color: ${tokens.on.term.badge};
   font-weight: 700;
 }
-.rat-tw-cursor::after { content: "\\258e"; opacity: 0.8; }`;
+${cursorCss}`;
 
-    const dots = '<span class="rat-tw-dot rat-tw-dot-r"></span>'
+    const dots = tokens.glyphMode === 'none' ? '' : '<span aria-hidden="true">'
+        + '<span class="rat-tw-dot rat-tw-dot-r"></span>'
         + '<span class="rat-tw-dot rat-tw-dot-y"></span>'
-        + '<span class="rat-tw-dot rat-tw-dot-g"></span>';
+        + '<span class="rat-tw-dot rat-tw-dot-g"></span></span>';
     const status = spec.status ? `<span class="rat-tw-status">${spec.status}</span>` : '';
     const titleRow = `${dots}<span class="rat-tw-title">${spec.title}</span>${status}`;
     const badge = spec.badge ? `<span class="rat-tw-badge">${spec.badge}</span>\n` : '';
-    const open = options.openDefaults === 'all-closed' ? '' : ' open';
+    const expanded = options.openDefaults === 'all-open'
+        || (options.openDefaults !== 'all-closed' && spec.open);
+    const open = expanded ? ' open' : '';
+    const cursor = tokens.glyphMode === 'none'
+        ? ''
+        : '<span aria-hidden="true" class="rat-tw-cursor"></span>';
 
     const output = `<div class="rat-tw-out"${part('terminal-output')}>`
         + `<span class="rat-tw-prompt">${PROMPT_USER} ${spec.prompt}</span>\n`
         + badge
         + `\n$${spec.body.g}\n\n`
-        + `<span class="rat-tw-prompt rat-tw-cursor">${PROMPT_USER} </span></div>`;
+        + `<span class="rat-tw-prompt">${PROMPT_USER} </span>${cursor}</div>`;
 
     // With a summary label the window chrome stays static and only the report collapses;
     // without one the whole window collapses from its title bar, as the stock CYOA does.
     const inner = spec.summary
-        ? `<div class="rat-tw-head"${part('header')}>${titleRow}</div>`
-            + `<div class="rat-tw-body"><details${open}><summary>${spec.summary}</summary>${output}</details></div>`
+        ? `<div class="rat-tw-head"${part('chrome')}>${titleRow}</div>`
+            + `<div class="rat-tw-body"><details${open}><summary${part('header')}>${spec.summary}</summary>${output}</details></div>`
         : `<details${open}><summary class="rat-tw-head"${part('header')}>${titleRow}</summary>`
             + `<div class="rat-tw-body">${output}</div></details>`;
 
-    return `<style>${css}\n</style><div class="rat-tw"${rootAttrs(spec, tokens)}${part('root')}>${inner}</div>`;
+    return `<style>${css}\n</style><div${rootAttrs(spec, tokens, ['rat-tw', scopeClass])}${part('root')}>${inner}</div>`;
 }
 
 /** Archetype H: shell / row / close triples that bracket a run of message rows. */
@@ -132,10 +150,11 @@ function streamShell(spec, tokens) {
         padding: tokens.space.bodyPad,
         'border-radius': spec.set === 'phone' ? '30px' : tokens.radius.body,
         border: `${tokens.line.width} ${tokens.line.style} ${tokens.line.head}`,
-        background: `linear-gradient(145deg,${tokens.surface.bodyFrom},${tokens.surface.bodyTo})`,
+        background: surfaceBackground(tokens, tokens.surface.bodyFrom, tokens.surface.bodyTo, '145deg'),
         'box-shadow': tokens.shadow.head,
         'font-family': tokens.type.bodyFamily,
-        color: tokens.ink.body,
+        'font-size': tokens.type.bodySize,
+        color: tokens.on.body,
         'line-height': tokens.type.lineHeight,
         position: spec.chrome === 'texture' ? 'relative' : '',
         overflow: spec.chrome === 'texture' ? 'hidden' : '',
@@ -166,13 +185,13 @@ function streamShell(spec, tokens) {
         : (spec.meta ? `$${spec.meta.g}` : '');
     const badge = spec.badge
         ? `<span${decl({
-            'font-size': '0.72em', 'font-weight': '700', padding: '3px 8px',
+            'font-size': tokens.type.labelSize, 'font-weight': '700', padding: '3px 8px',
             'border-radius': tokens.radius.pill,
-            background: alpha(accent, 0.22), color: tokens.ink.strong,
+            background: surfaceFill(tokens, alpha(accent, 0.22)), color: tokens.on.strong,
         })}>${spec.badge}</span>`
         : '';
 
-    const header = `<div${part('header')}${decl({
+    const header = `<div${part('chrome')}${decl({
         display: 'flex', 'align-items': 'center', 'justify-content': 'space-between',
         gap: tokens.space.gap, 'margin-bottom': tokens.space.gap,
         position: spec.chrome === 'texture' ? 'relative' : '',
@@ -181,7 +200,7 @@ function streamShell(spec, tokens) {
     })}>`
         + `<div${decl({ 'font-weight': '700', 'letter-spacing': '0.02em', 'min-width': '0' })}>${titleText}</div>`
         + `<div${decl({ display: 'flex', gap: '6px', 'align-items': 'center', 'flex-wrap': 'wrap' })}>`
-        + (metaText ? `<span${decl({ 'font-size': '0.78em', opacity: '0.82' })}>${metaText}</span>` : '')
+        + (metaText ? `<span${decl({ 'font-size': tokens.type.labelSize, color: tokens.on.muted })}>${metaText}</span>` : '')
         + badge
         + '</div></div>';
 
@@ -189,12 +208,12 @@ function streamShell(spec, tokens) {
         ? `<div${decl({
             padding: tokens.space.bodyPad,
             'border-radius': '23px',
-            background: tokens.surface.row,
+            background: surfaceFill(tokens, tokens.surface.row),
             border: `1px solid ${alpha(accent, 0.12)}`,
         })}>`
         : '';
 
-    const column = `<div${part('stream-body')}${decl({
+    const column = `<div role="feed"${part('stream-body')}${decl({
         display: 'flex', 'flex-direction': 'column', gap: tokens.space.gap,
         position: spec.chrome === 'texture' ? 'relative' : '',
     })}>`;
@@ -218,8 +237,9 @@ function streamRow(spec, tokens, options) {
         : `1px solid ${alpha(accent, 0.4)}`;
 
     const isGreen = spec.tone === 'green';
+    const [bubbleTopLeft, bubbleTopRight, bubbleBottomRight] = radiusCorners(tokens.radius.body);
     const bubbleRadius = spec.variant === 'bubble'
-        ? `${tokens.radius.body} ${tokens.radius.body} ${tokens.radius.body} 6px`
+        ? `${bubbleTopLeft} ${bubbleTopRight} ${bubbleBottomRight} 6px`
         : tokens.radius.row;
 
     const bodyStyle = decl({
@@ -227,14 +247,13 @@ function streamRow(spec, tokens, options) {
         'max-width': '100%',
         padding: `${tokens.space.rowPadY} ${tokens.space.rowPadX}`,
         'border-radius': spec.variant === 'block' ? tokens.radius.row : bubbleRadius,
-        background: isGreen
-            ? `linear-gradient(135deg,${alpha('#0f2a18', 0.38)},${tokens.surface.row})`
-            : (spec.variant === 'bubble'
-                ? `linear-gradient(135deg,${alpha(accent, 0.26)},${tokens.surface.row})`
-                : tokens.surface.row),
+        background: surfaceFill(tokens, isGreen || spec.variant === 'bubble'
+            ? tokens.surface.rowAlt
+            : tokens.surface.row),
         border: `1px solid ${isGreen ? 'rgba(120,220,150,0.42)' : alpha(accent, 0.2)}`,
-        color: isGreen ? '#7fe6a1' : tokens.ink.body,
+        color: tokens.on.body,
         'font-family': isGreen ? 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace' : tokens.type.bodyFamily,
+        'font-size': tokens.type.bodySize,
         'white-space': 'pre-wrap',
         'overflow-wrap': 'anywhere',
         'box-shadow': spec.variant === 'bubble' && tokens.shadow.chip !== 'none' ? tokens.shadow.chip : '',
@@ -243,10 +262,10 @@ function streamRow(spec, tokens, options) {
     const bodySpan = `<span${part('stream-text')}${bodyStyle}>$${spec.body.g}</span>`;
 
     if (!spec.speaker) {
-        return `<div${part('stream-row')}${decl({
+        return `<article${rootAttrs(spec, tokens)}${part('stream-row')}${decl({
             display: 'flex', 'flex-direction': 'column', gap: tokens.space.rowGap,
             'align-items': 'flex-start', 'max-width': '100%',
-        })}>${bodySpan}</div>`;
+        })}>${bodySpan}</article>`;
     }
 
     const name = `<b${part('stream-name')}${decl({
@@ -257,63 +276,71 @@ function streamRow(spec, tokens, options) {
         'white-space': 'nowrap',
         padding: '4px 9px',
         'border-radius': tokens.radius.pill,
-        background: nameBackground,
+        background: dynamicBackground(tokens, [nameBackground]),
         border: nameBorder,
-        color: tokens.ink.strong,
+        color: tokens.on.safety,
     })}>$${spec.speaker.g}</b>`;
 
     const meta = spec.meta
         ? `<small${part('stream-meta')}${decl({
-            opacity: '0.66', 'font-size': '0.76em', overflow: 'hidden',
+            color: tokens.on.muted, 'font-size': tokens.type.labelSize, overflow: 'hidden',
             'text-overflow': 'ellipsis', 'white-space': 'nowrap',
         })}>$${spec.meta.g}</small>`
         : '';
 
     // The parchment variant sets its byline as a baseline-aligned row rather than a pill.
     if (spec.variant === 'block') {
-        return `<div${part('stream-row')}${decl({ padding: '3px 0 0' })}>`
+        return `<article${rootAttrs(spec, tokens)}${part('stream-row')}${decl({ padding: '3px 0 0' })}>`
             + `<div${decl({
                 display: 'flex', 'align-items': 'baseline', 'justify-content': 'space-between',
-                gap: tokens.space.gap, 'margin-bottom': '4px', color: tokens.ink.label,
+                gap: tokens.space.gap, 'margin-bottom': '4px', color: tokens.on.label,
             })}><b${part('stream-name')}>$${spec.speaker.g}</b>${meta}</div>`
-            + bodySpan + '</div>';
+            + bodySpan + '</article>';
     }
 
-    return `<div${part('stream-row')}${decl({
+    return `<article${rootAttrs(spec, tokens)}${part('stream-row')}${decl({
         display: 'flex', 'flex-direction': 'column', gap: tokens.space.rowGap,
         'align-items': 'flex-start', 'max-width': '100%',
     })}>`
         + `<div${decl({ display: 'flex', 'align-items': 'center', gap: '6px', 'max-width': '100%', 'min-width': '0' })}>`
         + name + meta + '</div>'
-        + bodySpan + '</div>';
+        + bodySpan + '</article>';
 }
 
 /** Archetype I: one speaker-labelled turn in a plain transcript. */
 export function renderTranscript(spec, tokens) {
     const accent = accentAt(tokens, spec.accent);
-    return `<div${rootAttrs(spec, tokens)}${part('root')}${decl({
+    const nameBackground = dynamicBackground(tokens, [alpha(accent, 0.24)]);
+    return `<article${rootAttrs(spec, tokens)}${part('root')}${decl({
         display: 'flex', 'flex-direction': 'column', gap: tokens.space.rowGap,
         margin: `0 0 ${tokens.space.gap}`, 'max-width': '100%',
+        padding: tokens.space.rowPadY,
+        background: surfaceBackground(tokens, tokens.surface.bodyFrom, tokens.surface.bodyTo),
+        color: tokens.on.body,
+        'font-family': tokens.type.bodyFamily,
+        'font-size': tokens.type.bodySize,
+        'border-radius': tokens.radius.body,
     })}>`
         + `<div${decl({ display: 'flex', 'align-items': 'center', gap: '7px', 'min-width': '0' })}>`
         + `<b${part('stream-name')}${decl({
             display: 'inline-block', 'max-width': '180px', overflow: 'hidden',
             'text-overflow': 'ellipsis', 'white-space': 'nowrap',
             padding: '3px 8px', 'border-radius': tokens.radius.pill,
-            background: alpha(accent, 0.24),
+            background: nameBackground,
             border: `1px solid ${alpha(accent, 0.32)}`,
-            color: tokens.ink.strong,
+            color: tokens.on.safety,
         })}>$${spec.speaker.g}</b></div>`
         + `<div${part('stream-text')}${decl({
             padding: `${tokens.space.rowPadY} ${tokens.space.rowPadX}`,
             'border-radius': tokens.radius.row,
-            background: tokens.surface.row,
+            background: surfaceFill(tokens, tokens.surface.row),
             border: `1px solid ${alpha(accent, 0.16)}`,
+            color: tokens.on.body,
             'line-height': tokens.type.lineHeight,
             'white-space': 'pre-wrap',
             'overflow-wrap': 'anywhere',
         })}>$${spec.body.g}</div>`
-        + '</div>';
+        + '</article>';
 }
 
 /**
@@ -322,7 +349,14 @@ export function renderTranscript(spec, tokens) {
  */
 export function renderBold(spec, tokens, options) {
     if (!options.restyleBold) {
-        return '<b>$1</b>';
+        return '<strong>$1</strong>';
     }
-    return `<b${decl({ color: accentAt(tokens, spec.accent) })}>$1</b>`;
+    return `<strong${rootAttrs(spec, tokens)}${part('root')}${decl({
+        color: 'inherit',
+        'font-weight': tokens.type.valueWeight,
+        'text-decoration': 'underline',
+        'text-decoration-color': accentAt(tokens, spec.accent),
+        'text-decoration-thickness': '2px',
+        'text-underline-offset': '2px',
+    })}>$1</strong>`;
 }

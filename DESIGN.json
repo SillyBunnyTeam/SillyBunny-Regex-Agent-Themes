@@ -22,8 +22,7 @@
             "frame",
             "scan",
             "ornament",
-            "extra",
-            "css"
+            "extra"
         ],
         "literalColoursOnly": true,
         "hostVariablesAllowedIn": [

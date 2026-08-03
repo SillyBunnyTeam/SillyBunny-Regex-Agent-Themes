@@ -13,13 +13,16 @@
  */
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import css from '@adobe/css-tools';
 
 import { ARCHETYPES, SPECS } from '../src/specs.js';
-import { THEMES } from '../src/themes/index.js';
+import { getStock } from '../src/stock.js';
+import { THEMES, THEME_BY_SLUG } from '../src/themes/index.js';
 import { MULTILINE_ARCHETYPES, buildReplaceString } from '../src/render/index.js';
 import { resolveTheme } from '../src/tokens.js';
+import { frameDecoration } from '../src/render/parts.js';
 
 const OPTION_SETS = [
     {},
@@ -27,6 +30,7 @@ const OPTION_SETS = [
     { density: 'compact', glyphs: 'none' },
     { density: 'roomy', adaptiveNeutrals: true, openDefaults: 'all-open' },
 ];
+const STYLESHEET = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
 
 function eachGenerated(callback) {
     for (const theme of THEMES) {
@@ -86,6 +90,21 @@ test('style attributes never contain a double quote', () => {
     });
 });
 
+test('opening tags never contain duplicate attributes', () => {
+    eachGenerated((output, spec, theme) => {
+        const markup = output.replace(/<style>[\s\S]*?<\/style>/g, '');
+        for (const tag of markup.matchAll(/<[a-z][^>]*>/gi)) {
+            const names = [...tag[0].matchAll(/\s([^\s=/>]+)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/g)]
+                .map(match => match[1].toLowerCase());
+            assert.equal(
+                new Set(names).size,
+                names.length,
+                `${theme.slug}/${spec.key}: duplicate attribute in ${tag[0]}`,
+            );
+        }
+    });
+});
+
 test('only the terminal archetype spans multiple lines', () => {
     eachGenerated((output, spec, theme) => {
         if (MULTILINE_ARCHETYPES.includes(spec.archetype)) {
@@ -134,6 +153,20 @@ test('every emitted style block parses and keeps its selectors matchable', () =>
         const ast = css.parse(blocks[0]);
         assert.ok(ast.stylesheet.rules.length > 0);
 
+        const scopeClass = `rat-tw-${spec.ns}-${theme.slug}`;
+        for (const rule of ast.stylesheet.rules.filter(item => item.type === 'rule')) {
+            for (const selector of rule.selectors) {
+                assert.ok(
+                    selector.includes(`.${scopeClass}`),
+                    `${theme.slug}/${spec.key}: unscoped terminal selector ${selector}`,
+                );
+            }
+            if (rule.declarations.some(item => item.property === 'cursor' && item.value === 'pointer')) {
+                assert.ok(rule.selectors.every(selector => selector.includes('summary')),
+                    `${theme.slug}/${spec.key}: static chrome has a pointer cursor`);
+            }
+        }
+
         // Selectors must not be pre-prefixed, or the rewrite makes them custom-custom-*.
         assert.ok(!blocks[0].includes('.custom-'), `${theme.slug}/${spec.key}: pre-prefixed selector`);
         assert.ok(!blocks[0].includes('@import'), 'CSS @import is stripped by the sanitizer');
@@ -148,6 +181,44 @@ test('every emitted style block parses and keeps its selectors matchable', () =>
         assert.ok(markupClasses.size > 0);
         for (const name of markupClasses) {
             assert.ok(blocks[0].includes(`.${name}`), `${theme.slug}: no rule for .${name}`);
+        }
+    });
+});
+
+test('interactive header hooks are emitted only on summary controls', () => {
+    eachGenerated((output, spec, theme) => {
+        const markup = output.replace(/<style>[\s\S]*?<\/style>/g, '');
+        for (const match of markup.matchAll(/<([a-z]+)\b[^>]*data-rat-part="header"/gi)) {
+            assert.equal(match[1], 'summary', `${theme.slug}/${spec.key}: header hook on <${match[1]}>`);
+        }
+    });
+});
+
+test('empty-row CSS only targets rows that actually carry a row value', () => {
+    assert.match(
+        STYLESHEET,
+        /\[data-rat-part='row'\]:has\(> \[data-rat-part='row-value'\]\):not/,
+    );
+});
+
+test('border-radius declarations contain valid one-to-four-value shorthands', () => {
+    eachGenerated((output, spec, theme) => {
+        for (const match of output.matchAll(/border-radius:([^;"}\n]+)/g)) {
+            const values = match[1].trim().split(/\s+/);
+            assert.ok(values.length >= 1 && values.length <= 4,
+                `${theme.slug}/${spec.key}: invalid radius ${match[1]}`);
+        }
+    });
+});
+
+test('meaningful generated text is not dimmed with opacity', () => {
+    const meaningful = /data-rat-part="(?:row-label|section-label|stat-label|stat-value|stream-meta|stream-name|stream-text)"/;
+    eachGenerated((output, spec, theme) => {
+        const markup = output.replace(/<style>[\s\S]*?<\/style>/g, '');
+        for (const tag of markup.matchAll(/<[a-z][^>]*>/gi)) {
+            if (meaningful.test(tag[0])) {
+                assert.ok(!/opacity\s*:/.test(tag[0]), `${theme.slug}/${spec.key}: dimmed text ${tag[0]}`);
+            }
         }
     });
 });
@@ -192,6 +263,70 @@ test('every theme resolves to a complete token set', () => {
         assert.ok(theme.name, `${theme.slug}: no display name`);
         assert.ok(theme.family, `${theme.slug}: no family`);
         assert.match(theme.slug, /^[a-z0-9-]+$/, `${theme.slug}: bad slug`);
+    }
+});
+
+test('plain glyph mode removes decoration while preserving meaningful text', () => {
+    const theme = THEME_BY_SLUG.get('grimoire');
+    const render = key => buildReplaceString(SPECS.find(spec => spec.key === key), theme, {
+        glyphs: 'none',
+        restyleBold: true,
+    }).replace(/<style>[\s\S]*?<\/style>/g, '');
+
+    for (const key of ['scene', 'relationship', 'npc-upgrade', 'npc-rel', 'level-up']) {
+        const output = render(key);
+        for (const glyph of ['📍', '🕐', '💞', '❤', '◆', '⬆️', '⚡', '✦', '❦', '❧']) {
+            assert.ok(!output.includes(glyph), `${key}: retained ${glyph}`);
+        }
+        assert.ok(!output.includes('rat-tw-dot'), `${key}: retained terminal dots`);
+        assert.ok(!output.includes('rat-tw-cursor'), `${key}: retained terminal cursor`);
+    }
+    assert.match(render('npc-upgrade'), />to<|aria-label="to"/);
+});
+
+test('lists, stats, streams, and transcripts emit semantic structures', () => {
+    const theme = THEME_BY_SLUG.get('paper-minimal');
+    const render = key => buildReplaceString(SPECS.find(spec => spec.key === key), theme, {});
+    assert.match(render('choices'), /<ul\b[\s\S]*<li\b/);
+    assert.match(render('parallel'), /<dl\b[\s\S]*<dt\b[\s\S]*<dd\b/);
+    assert.match(render('relationship'), /<dl\b[\s\S]*<dt\b[\s\S]*<dd\b/);
+    assert.match(render('chatroom'), /^<div\b/);
+    const streamRow = SPECS.find(spec => spec.key === 'chatroom' && spec.role === 'row');
+    assert.match(buildReplaceString(streamRow, theme, {}), /^<article\b/);
+    assert.match(render('chat-only'), /^<article\b/);
+});
+
+test('terminal scopes remain disjoint across themes', () => {
+    const spec = SPECS.find(item => item.archetype === ARCHETYPES.TERMINAL);
+    const firstTheme = THEME_BY_SLUG.get('phosphor-green');
+    const secondTheme = THEME_BY_SLUG.get('candy-gloss');
+    const first = buildReplaceString(spec, firstTheme, {});
+    const second = buildReplaceString(spec, secondTheme, {});
+    const firstScope = `rat-tw-${spec.ns}-${firstTheme.slug}`;
+    const secondScope = `rat-tw-${spec.ns}-${secondTheme.slug}`;
+    assert.ok(first.includes(firstScope));
+    assert.ok(second.includes(secondScope));
+    assert.ok(!first.includes(secondScope));
+    assert.ok(!second.includes(firstScope));
+});
+
+test('bold-off is byte-identical to stock and styled bold keeps semantic ownership', () => {
+    for (const spec of SPECS.filter(item => item.archetype === ARCHETYPES.BOLD)) {
+        const stock = getStock(spec.templateId, spec.scriptId);
+        for (const theme of THEMES) {
+            assert.equal(buildReplaceString(spec, theme, { restyleBold: false }), stock.replaceString);
+            const styled = buildReplaceString(spec, theme, { restyleBold: true });
+            assert.match(styled, /^<strong\b/);
+            assert.ok(styled.includes('data-rat='));
+            assert.ok(!styled.includes('<b'));
+        }
+    }
+});
+
+test('every declared frame produces decoration', () => {
+    for (const theme of THEMES.filter(item => item.frame)) {
+        const tokens = resolveTheme(theme, {});
+        assert.notEqual(frameDecoration(tokens, tokens.accents[0]), '', `${theme.slug}: inert ${theme.frame}`);
     }
 });
 

@@ -5,8 +5,9 @@
     "type": "module",
     "description": "Swappable HTML themes for SillyBunny's bundled In-Chat Agent trackers and companion panels.",
     "scripts": {
-        "test": "node --experimental-test-module-mocks --test test/*.test.js",
-        "test:pure": "node --test test/specs.test.js test/invariants.test.js test/apply.test.js",
+        "test": "npm run test:pure && npm run test:host",
+        "test:pure": "node --experimental-test-module-mocks --test test/apply-engine.test.js test/apply.test.js test/commands.test.js test/contrast.test.js test/custom-themes.test.js test/host.test.js test/invariants.test.js test/lifecycle.test.js test/release.test.js test/settings.test.js test/specs.test.js test/ui.test.js",
+        "test:host": "RAT_REQUIRE_HOST=1 node --experimental-test-module-mocks --test test/contract.test.js test/integration.test.js test/interpolate.test.js",
         "generate:stock": "node scripts/generate-stock.mjs"
     },
     "repository": {
@@ -15,6 +16,9 @@
     },
     "license": "AGPL-3.0",
     "engines": {
-        "node": ">=18"
+        "node": ">=22.3.0"
+    },
+    "devDependencies": {
+        "@adobe/css-tools": "4.4.4"
     }
 }

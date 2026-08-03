@@ -89,7 +89,6 @@ export const FANTASY_BOLD = [
             headSize: '13px', bodySize: '13px', headTracking: '0.08em',
         },
         glyph: { section: '✧', sectionAlt: '✦', bullet: '·', sep: '❖', chevron: '▾' },
-        css: '[data-rat-part="section"]+[data-rat-part="section"]::before{content:"";display:block;height:1px;margin:-4px 12% 8px;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.55),transparent)}',
     },
     {
         slug: 'eldritch-deep',
@@ -228,7 +227,6 @@ export const FANTASY_BOLD = [
         },
         glyph: { section: '★', sectionAlt: '☆', bullet: '▸', sep: '!', chevron: '▼' },
         extra: { chip: 'position:relative' },
-        css: '[data-rat-arch="chip"]::after{content:"";position:absolute;left:12px;bottom:-6px;width:0;height:0;border:6px solid transparent;border-top-color:#1a1a1a}',
     },
     {
         slug: 'monochrome-slate',

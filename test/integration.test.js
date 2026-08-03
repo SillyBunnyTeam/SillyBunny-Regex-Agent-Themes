@@ -74,7 +74,7 @@ test('every markup spec consumes its sample block and leaves no placeholders', {
 
             // Chips flow inside prose, so only block archetypes start with their own tag.
             if (spec.archetype !== ARCHETYPES.CHIP) {
-                assert.match(out.trimStart(), /^<(?:details|div|span|style)/, `${spec.key}: unexpected start`);
+                assert.match(out.trimStart(), /^<(?:article|details|div|span|style)/, `${spec.key}: unexpected start`);
             }
         }
     }
@@ -109,18 +109,18 @@ test('sample field values reach the rendered output', { skip }, async () => {
     assert.ok(out.includes('The city hums below.'));
 });
 
-test('the parallel tracker never renders a bare label separator', { skip }, async () => {
+test('the parallel tracker keeps separators inside surviving rows', { skip }, async () => {
     const engine = await loadRegexEngine(mock);
     const spec = SPECS.find(item => item.key === 'parallel');
 
     const full = renderTemplate(engine, 'tpl-parallel-tracker', 'nordic-frost', SAMPLES.parallel.full);
     assert.equal((full.match(/data-rat-part="pair"/g) ?? []).length, 3);
+    assert.ok(full.includes('data-rat-part="pair-separator"'), 'durable pair separator missing');
 
     const partial = renderTemplate(engine, 'tpl-parallel-tracker', 'nordic-frost', SAMPLES.parallel.partial);
-    // Stock leaves `<b ...>:</b>` behind here. The generated cleanup script removes the
-    // whole row instead, and the colon lives in CSS rather than the markup either way.
-    assert.ok(!/>\s*:\s*</.test(partial), 'bare colon leaked into partial render');
     assert.equal((partial.match(/data-rat-part="pair"/g) ?? []).length, 1, 'empty pair rows survived');
+    assert.equal((partial.match(/data-rat-part="pair-separator"/g) ?? []).length, 1,
+        'separator survived outside a populated pair row');
 });
 
 test('empty choice and direction slots are removed', { skip }, async () => {
@@ -143,6 +143,8 @@ test('optional NPC support sections collapse when the model omits them', { skip 
 
     const partial = renderTemplate(engine, 'tpl-npc-profiles', 'herbarium', SAMPLES['npc-support'].partial);
     assert.ok(partial.includes('Ezra Kolt'), 'basics section lost');
+    assert.equal((partial.match(/data-rat-part="section"/g) ?? []).length, 1,
+        'empty optional sections survived');
 });
 
 test('the meter chain turns n/m into a bar and leaves prose alone', { skip }, async () => {
@@ -153,6 +155,8 @@ test('the meter chain turns n/m into a bar and leaves prose alone', { skip }, as
         SAMPLES.relationship.full, { meters: true },
     );
     assert.ok(numeric.includes('data-rat-part="meterbar"'), 'no bar rendered');
+    assert.ok(numeric.includes('role="progressbar"'), 'meter lacks progress semantics');
+    assert.ok(numeric.includes('aria-valuenow="7"'), 'meter value was not exposed');
     assert.ok(numeric.includes('calc(100% * 7 / 10)'), 'affection width not interpolated');
     assert.ok(numeric.includes('calc(100% * 5 / 10)'), 'trust width not interpolated');
 
@@ -203,7 +207,8 @@ test('terminal panels emit style selectors that survive the sanitizer rewrite', 
     const out = renderTemplate(engine, 'tpl-level-up-companion', 'phosphor-green', SAMPLES['level-up'].full);
 
     assert.ok(out.startsWith('<style>'), 'style block missing');
-    assert.ok(out.includes('class="rat-tw"'), 'root class missing');
+    assert.match(out, /class="[^"]*\brat-tw\b[^"]*"/, 'root class missing');
+    assert.ok(out.includes('.rat-tw-levelup-phosphor-green'), 'terminal scope missing');
     // decodeStyleTags rewrites `.rat-tw` to `.custom-rat-tw`, and the DOMPurify hook
     // rewrites class="rat-tw" the same way, so the pair must be unprefixed on both sides.
     assert.ok(!out.includes('.custom-rat-tw'), 'selector was pre-prefixed and will not match');

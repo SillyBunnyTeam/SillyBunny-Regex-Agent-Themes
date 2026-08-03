@@ -7,8 +7,9 @@ import { SETTINGS_KEY, STOCK_THEME } from './constants.js';
 import { THEME_BY_SLUG } from './themes/index.js';
 import { THEMABLE_TEMPLATE_IDS } from './specs.js';
 import { getContext } from './host.js';
+import { validateCustomThemeMap } from './custom-themes.js';
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const DENSITIES = ['compact', 'normal', 'roomy'];
 const OPEN_DEFAULTS = ['theme', 'all-open', 'all-closed'];
@@ -37,25 +38,7 @@ function clampEnum(value, allowed, fallback) {
 }
 
 function isKnownTheme(slug, customThemes) {
-    return slug === STOCK_THEME || THEME_BY_SLUG.has(slug) || Boolean(customThemes[slug]);
-}
-
-function validCustomThemes(raw) {
-    const out = {};
-    if (!raw || typeof raw !== 'object') {
-        return out;
-    }
-    for (const [slug, theme] of Object.entries(raw)) {
-        if (!/^[a-z0-9-]{2,48}$/.test(slug) || !theme || typeof theme !== 'object') {
-            continue;
-        }
-        // A custom theme may never shadow a shipped one, or reverting would be ambiguous.
-        if (THEME_BY_SLUG.has(slug)) {
-            continue;
-        }
-        out[slug] = { ...theme, slug, family: 'custom' };
-    }
-    return out;
+    return slug === STOCK_THEME || THEME_BY_SLUG.has(slug) || Object.hasOwn(customThemes, slug);
 }
 
 function validOverrides(raw, customThemes) {
@@ -70,6 +53,52 @@ function validOverrides(raw, customThemes) {
         if (typeof slug === 'string' && slug !== '' && isKnownTheme(slug, customThemes)) {
             out[templateId] = slug;
         }
+    }
+    return out;
+}
+
+function validScriptStates(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        return out;
+    }
+    for (const [scriptId, state] of Object.entries(raw)) {
+        if (!scriptId || !state || typeof state !== 'object' || Array.isArray(state)) {
+            continue;
+        }
+        const clean = {};
+        if (typeof state.applied === 'string') {
+            clean.applied = state.applied;
+        }
+        if (typeof state.findRegex === 'string') {
+            clean.findRegex = state.findRegex;
+        }
+        if (Array.isArray(state.generated)) {
+            clean.generated = state.generated.filter(value => typeof value === 'string');
+        }
+        if (Object.keys(clean).length > 0) {
+            out[scriptId] = clean;
+        }
+    }
+    return out;
+}
+
+function validOriginals(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        return out;
+    }
+    for (const [scriptId, state] of Object.entries(raw)) {
+        if (!scriptId || !state || typeof state !== 'object' || Array.isArray(state)) {
+            continue;
+        }
+        if (typeof state.replaceString !== 'string' || typeof state.findRegex !== 'string') {
+            continue;
+        }
+        out[scriptId] = {
+            replaceString: state.replaceString,
+            findRegex: state.findRegex,
+        };
     }
     return out;
 }
@@ -91,7 +120,11 @@ function validLedger(raw) {
             appliedAt: Number(entry.appliedAt) || 0,
             versionBefore: Number(entry.versionBefore) || 0,
             phaseLockedBefore: Boolean(entry.phaseLockedBefore),
-            scripts: entry.scripts && typeof entry.scripts === 'object' ? entry.scripts : {},
+            scripts: validScriptStates(entry.scripts),
+            originals: validOriginals(entry.originals),
+            added: Array.isArray(entry.added)
+                ? [...new Set(entry.added.filter(value => typeof value === 'string' && value))]
+                : [],
         };
     }
     return out;
@@ -116,7 +149,7 @@ export function getSettings() {
     }
 
     const raw = migrate(bag[SETTINGS_KEY]);
-    const customThemes = validCustomThemes(raw.customThemes);
+    const customThemes = validateCustomThemeMap(raw.customThemes).themes;
     const options = raw.options && typeof raw.options === 'object' ? raw.options : {};
 
     const clean = {

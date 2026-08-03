@@ -33,7 +33,8 @@ export const FAMILIES = Object.freeze([
 export const THEME_BY_SLUG = new Map(THEMES.map(theme => [theme.slug, theme]));
 
 export function getTheme(slug, customThemes = {}) {
-    return THEME_BY_SLUG.get(slug) ?? customThemes[slug] ?? null;
+    return THEME_BY_SLUG.get(slug)
+        ?? (Object.hasOwn(customThemes, slug) ? customThemes[slug] : null);
 }
 
 export function themesInFamily(familyId) {

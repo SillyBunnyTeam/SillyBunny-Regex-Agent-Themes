@@ -7,13 +7,15 @@
  */
 
 import { mountSettings, removeSettings } from './src/ui.js';
-import { registerCommands } from './src/commands.js';
+import { registerCommands, unregisterCommands } from './src/commands.js';
 import { getSettings, pruneLedger } from './src/settings.js';
 import { reconcile } from './src/apply.js';
 import { getContext, waitForAgents } from './src/host.js';
 
 let booted = false;
 let refresh = () => {};
+let activation = 0;
+let bootController = null;
 const subscriptions = [];
 
 function subscribe(eventType, handler) {
@@ -32,16 +34,19 @@ function subscribe(eventType, handler) {
  * The boot pass runs once. In-Chat Agents loads its agents from settings asynchronously, so
  * this waits for the store rather than assuming it is populated.
  */
-async function reconcileOnce() {
-    const host = await waitForAgents();
-    if (!host.ok) {
+async function reconcileOnce(epoch, signal) {
+    const host = await waitForAgents({ signal });
+    if (!host.ok || !host.ready || signal.aborted || epoch !== activation) {
         return;
     }
 
     pruneLedger((host.store.getAgents() ?? []).map(agent => agent.id));
 
-    const result = await reconcile();
-    if (!result.ok) {
+    if (signal.aborted || epoch !== activation) {
+        return;
+    }
+    const result = await reconcile({ signal });
+    if (!result.ok || result.cancelled || signal.aborted || epoch !== activation) {
         return;
     }
 
@@ -50,10 +55,21 @@ async function reconcileOnce() {
             `Regex Agent Themes: put your theme back on ${result.repaired} tracker(s) after a template update.`,
         );
     }
+    if (result.reverted > 0) {
+        globalThis.toastr?.info?.(
+            `Regex Agent Themes: restored ${result.reverted} tracker(s) to their original style.`,
+        );
+    }
     if (result.needsAttention.length > 0) {
         const names = result.needsAttention.map(item => item.agentName).join(', ');
         globalThis.toastr?.warning?.(
             `Regex Agent Themes: skipped ${result.needsAttention.length} tracker(s) that were edited outside the extension (${names}).`,
+        );
+    }
+    if (result.failed.length > 0) {
+        const names = result.failed.map(item => item.agentName).join(', ');
+        globalThis.toastr?.error?.(
+            `Regex Agent Themes: could not update ${result.failed.length} tracker(s) (${names}).`,
         );
     }
     refresh();
@@ -64,6 +80,9 @@ export function init() {
         return;
     }
     booted = true;
+    const epoch = ++activation;
+    bootController = new AbortController();
+    const { signal } = bootController;
 
     getSettings();
     refresh = mountSettings() ?? (() => {});
@@ -77,12 +96,23 @@ export function init() {
 
     // APP_READY is sticky in SillyBunny's emitter, so subscribing after it has already
     // fired still runs the handler.
-    subscribe(events.APP_READY, reconcileOnce);
+    subscribe(events.APP_READY, () => {
+        void reconcileOnce(epoch, signal).catch((error) => {
+            if (!signal.aborted && epoch === activation) {
+                console.error('Regex Agent Themes boot reconciliation failed', error);
+            }
+        });
+    });
     subscribe(events.SETTINGS_UPDATED, () => refresh());
     subscribe(events.CHAT_CHANGED, () => refresh());
 }
 
 export function deactivate() {
+    booted = false;
+    activation++;
+    bootController?.abort();
+    bootController = null;
+    unregisterCommands();
     removeSettings();
 
     const context = getContext();
@@ -92,5 +122,4 @@ export function deactivate() {
     }
 
     refresh = () => {};
-    booted = false;
 }

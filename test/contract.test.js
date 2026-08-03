@@ -97,18 +97,18 @@ test('the destructive template-update path still behaves as assumed', { skip }, 
 
 test('the agent store still exports what the host adapter needs', { skip }, () => {
     const store = read('public/scripts/extensions/in-chat-agents/agent-store.js');
-    for (const name of ['getAgents', 'getAgentById', 'getAgentRegexScripts', 'saveAgent']) {
+    for (const name of ['getAgents', 'saveAgent']) {
         assert.ok(
             new RegExp(`export (?:async )?function ${name}\\b`).test(store),
             `agent-store.js no longer exports ${name}`,
         );
     }
 
-    const runner = read('public/scripts/extensions/in-chat-agents/agent-runner.js');
-    assert.ok(
-        runner.includes('export function refreshRegexSnapshotsForAgent'),
-        'agent-runner.js no longer exports refreshRegexSnapshotsForAgent',
-    );
+    const scripts = read('public/scripts/extensions/in-chat-agents/regex-scripts.js');
+    assert.match(scripts, /export function normalizeRegexScript\b/);
+
+    const context = read('public/scripts/st-context.js');
+    assert.ok(context.includes('updateMessageBlock'), 'extension context no longer exposes message repainting');
 });
 
 test('message snapshots still resolve scripts by live reference', { skip }, () => {

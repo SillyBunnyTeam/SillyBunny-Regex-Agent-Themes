@@ -10,7 +10,7 @@
  * Pure functions only, so the whole table is unit-testable without a DOM.
  */
 
-import { STOCK_REPLACE_STRINGS, getStock } from './stock.js';
+import { getStock } from './stock.js';
 
 export const STATUS = Object.freeze({
     PRISTINE: 'pristine',
@@ -23,6 +23,14 @@ export const STATUS = Object.freeze({
 
 /** Statuses that may be rewritten without asking. */
 export const AUTO_APPLY = Object.freeze([STATUS.STOCK, STATUS.OUTDATED]);
+
+function hasOwnershipMarker(value, spec) {
+    if (typeof value !== 'string' || !spec?.archetype) {
+        return false;
+    }
+    return /\bdata-rat="[a-z0-9-]{2,48}@\d+"/.test(value)
+        && value.includes(`data-rat-arch="${spec.archetype}"`);
+}
 
 /**
  * @param {object} params
@@ -49,8 +57,8 @@ export function classifyScript({ script, spec, expected, expectedFindRegex, ledg
     }
 
     // A cleanup script's pattern matches our own generated markup, so the pattern is the
-    // only part of it that carries a theme. Only this extension ever writes it, so an
-    // unrecognised pattern means an older theme, not a hand edit.
+    // only part of it that carries a theme. Without a matching ledger entry an unfamiliar
+    // pattern may be a hand edit and must not be rewritten automatically.
     if (spec.regenerateFindRegex) {
         if (expectedFindRegex && script.findRegex === expectedFindRegex) {
             return STATUS.PRISTINE;
@@ -58,7 +66,10 @@ export function classifyScript({ script, spec, expected, expectedFindRegex, ledg
         if (stock && script.findRegex === stock.findRegex) {
             return STATUS.STOCK;
         }
-        return STATUS.OUTDATED;
+        if (ledgerEntry?.findRegex === script.findRegex) {
+            return STATUS.OUTDATED;
+        }
+        return STATUS.FOREIGN;
     }
 
     const current = script.replaceString ?? '';
@@ -71,17 +82,19 @@ export function classifyScript({ script, spec, expected, expectedFindRegex, ledg
         return STATUS.STOCK;
     }
 
-    // Any stock string from any template also counts as stock, since templates share markup.
-    if (STOCK_REPLACE_STRINGS.has(current)) {
-        return STATUS.STOCK;
-    }
-
     // We wrote this before, under a different theme, engine version or option set.
     if (ledgerEntry?.applied && ledgerEntry.applied === current) {
         return STATUS.OUTDATED;
     }
 
     if (ledgerEntry?.generated?.includes(current)) {
+        return STATUS.OUTDATED;
+    }
+
+    // The renderer embeds both its engine marker and archetype on generated roots. This
+    // recovers ownership after settings loss without treating unrelated empty or shared
+    // stock replacements as safe.
+    if (hasOwnershipMarker(current, spec)) {
         return STATUS.OUTDATED;
     }
 

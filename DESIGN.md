@@ -58,7 +58,8 @@ A theme declares its palette in four parts and the renderers read nothing else:
 
 Colours are literal values. `color-mix()` and `var(--SmartTheme*)` only appear in the three
 adaptive themes, where reading the host is the point, and every `var()` there has a literal
-fallback.
+fallback. Renderers derive semantic foregrounds from the authored palette. When a transparent,
+adaptive, or low-contrast surface cannot prove AA contrast, it receives a local safety layer.
 
 Body text has to clear WCAG AA against its own background. That includes the themes whose whole
 idea is low contrast.
@@ -68,9 +69,9 @@ idea is low contrast.
 Themes pick a display family for headers and a reading family for bodies, from system font stacks
 only. No `@font-face`, no CDN. The app runs locally and a missing font should fall back, not hang.
 
-The scale is head, body, label, value, chip and line height, scaled as a group by the density
-setting. A theme may re-case a label. It may not re-word one, because those strings are
-SillyBunny's own copy.
+The scale is head, body, label, value, chip and line height. Density primarily changes spacing;
+compact mode does not shrink type, and every role has a readable floor. A theme may re-case a
+label. It may not re-word one, because those strings are SillyBunny's own copy.
 
 ## Shapes
 
@@ -90,8 +91,9 @@ Nine archetypes, and the archetype decides the shape, not the theme:
 
 Themes customise those through tokens. When tokens are not enough there are four escape hatches,
 and you use the smallest one that works: `frame` (corner brackets, rivets, ruler ticks, halftone,
-bevel), `scan` (a scanline or grid layer), `ornament` (raw HTML at eight named anchors), `extra`
-(a verbatim declaration appendix per part). Most themes never leave tokens.
+die-cut, bevel), `scan` (a scanline or grid layer), `ornament` (raw HTML at eight named anchors),
+`extra` (a verbatim declaration appendix per part). Most themes never leave tokens. Imported custom
+themes cannot use the trusted raw HTML or declaration escape hatches.
 
 ## Motion
 

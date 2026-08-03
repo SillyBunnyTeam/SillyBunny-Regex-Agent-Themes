@@ -39,7 +39,7 @@ export function buildAgentScripts(templateId, stockScripts, theme, options = {},
     const added = [];
     const skipped = [];
     const scripts = [];
-    const slotSpecs = [];
+    const cleanupSpecs = [];
     let wantsMeter = false;
 
     for (const script of stockScripts) {
@@ -86,20 +86,21 @@ export function buildAgentScripts(templateId, stockScripts, theme, options = {},
         if (spec.archetype === ARCHETYPES.SLOTS && spec.key !== 'choices') {
             // The CYOA agent ships its own cleanup script; the direction menu and parallel
             // tracker do not, so they need one appended.
-            slotSpecs.push(spec);
+            cleanupSpecs.push(spec);
+        }
+        if (spec.archetype === ARCHETYPES.PROFILE && spec.optionalSections?.length) {
+            cleanupSpecs.push(spec);
         }
         if (spec.archetype === ARCHETYPES.STATCARD && merged.meters) {
             wantsMeter = true;
         }
     }
 
-    if (merged.cleanupScripts !== false) {
-        for (const spec of slotSpecs) {
-            const cleanup = buildExtraCleanupScript(agentId, spec, theme, merged);
-            if (cleanup) {
-                scripts.push(cleanup);
-                added.push(cleanup.id);
-            }
+    for (const spec of cleanupSpecs) {
+        const cleanup = buildExtraCleanupScript(agentId, spec, theme, merged);
+        if (cleanup) {
+            scripts.push(cleanup);
+            added.push(cleanup.id);
         }
     }
 
@@ -112,27 +113,122 @@ export function buildAgentScripts(templateId, stockScripts, theme, options = {},
     return { scripts, themed, added, skipped };
 }
 
+function matchesTarget(script, target) {
+    return script.findRegex === target.findRegex && script.replaceString === target.replaceString;
+}
+
+function matchesRecordedState(templateId, script, recorded) {
+    const applied = recorded?.applied === script.replaceString
+        || recorded?.generated?.includes(script.replaceString);
+    if (!applied) {
+        return false;
+    }
+    if (typeof recorded.findRegex === 'string') {
+        return recorded.findRegex === script.findRegex;
+    }
+
+    const spec = getSpec(templateId, script.id);
+    const stock = getStock(templateId, script.id);
+    return !spec?.regenerateFindRegex && (!stock || stock.findRegex === script.findRegex);
+}
+
+function restoreTarget(templateId, scriptId, ledgerEntry) {
+    const original = ledgerEntry?.originals?.[scriptId];
+    if (original) {
+        return original;
+    }
+    const stock = getStock(templateId, scriptId);
+    return stock ? { findRegex: stock.findRegex, replaceString: stock.replaceString } : null;
+}
+
 /**
- * Restores a script list to the shipped baseline, dropping everything this extension
- * appended. `overrides` supplies text captured from genuine hand edits.
+ * Plans a restore without mutating the current list. Automatic restores only touch script
+ * ids recorded in the ledger and only while their bytes still match our last write.
  */
-export function revertAgentScripts(templateId, currentScripts, overrides = {}) {
+export function planRevertAgentScripts(templateId, currentScripts, ledgerEntry, { force = false } = {}) {
     const scripts = [];
+    const blocked = [];
+    const restored = [];
+    const removed = [];
+    const ledgerScripts = ledgerEntry?.scripts ?? {};
+    const added = new Set(ledgerEntry?.added ?? []);
+    const seen = new Set();
+
     for (const script of currentScripts) {
+        seen.add(script.id);
+
         if (isOwnedScript(script)) {
+            if (!ledgerEntry) {
+                if (force) {
+                    removed.push(script.id);
+                } else {
+                    scripts.push({ ...script });
+                }
+                continue;
+            }
+            if (!added.has(script.id)) {
+                scripts.push({ ...script });
+                continue;
+            }
+            const recorded = ledgerScripts[script.id];
+            if (force || !recorded || matchesRecordedState(templateId, script, recorded)) {
+                removed.push(script.id);
+            } else {
+                scripts.push({ ...script });
+                blocked.push({ scriptId: script.id, scriptName: script.scriptName, reason: 'changed after apply' });
+            }
             continue;
         }
-        const stock = getStock(templateId, script.id);
-        const override = overrides[script.id];
-        if (override) {
-            scripts.push({ ...script, ...override });
-        } else if (stock) {
-            scripts.push({ ...script, findRegex: stock.findRegex, replaceString: stock.replaceString });
+
+        const recorded = ledgerScripts[script.id];
+        if (!ledgerEntry && force) {
+            const stock = getStock(templateId, script.id);
+            if (stock) {
+                const target = { findRegex: stock.findRegex, replaceString: stock.replaceString };
+                scripts.push({ ...script, ...target });
+                if (!matchesTarget(script, target)) {
+                    restored.push(script.id);
+                }
+            } else {
+                scripts.push({ ...script });
+            }
+            continue;
+        }
+        if (!recorded) {
+            scripts.push({ ...script });
+            continue;
+        }
+
+        const target = restoreTarget(templateId, script.id, ledgerEntry);
+        if (!target || matchesTarget(script, target)) {
+            scripts.push({ ...script, ...(target ?? {}) });
+            continue;
+        }
+        if (force || matchesRecordedState(templateId, script, recorded)) {
+            scripts.push({ ...script, ...target });
+            restored.push(script.id);
         } else {
             scripts.push({ ...script });
+            blocked.push({ scriptId: script.id, scriptName: script.scriptName, reason: 'changed after apply' });
         }
     }
-    return scripts;
+
+    if (ledgerEntry) {
+        for (const scriptId of Object.keys(ledgerScripts)) {
+            if (!seen.has(scriptId) && !added.has(scriptId)) {
+                blocked.push({ scriptId, scriptName: scriptId, reason: 'missing after apply' });
+            }
+        }
+    }
+
+    return {
+        scripts,
+        blocked,
+        restored,
+        removed,
+        changed: restored.length + removed.length,
+        owned: Boolean(ledgerEntry),
+    };
 }
 
 export { ownedScriptId };

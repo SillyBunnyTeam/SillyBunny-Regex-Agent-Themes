@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildAgentScripts, isOwnedScript, revertAgentScripts } from '../src/build.js';
+import { buildAgentScripts, isOwnedScript, planRevertAgentScripts } from '../src/build.js';
 import { STOCK } from '../src/stock.js';
 import { THEME_BY_SLUG } from '../src/themes/index.js';
 import { ARCHETYPES, SPECS, getSpec } from '../src/specs.js';
@@ -101,6 +101,27 @@ test('cleanup scripts are appended for the menus that ship without one', () => {
     }
 });
 
+test('optional profile sections receive an unconditional cleanup script', () => {
+    const templateId = 'tpl-npc-profiles';
+    const built = buildAgentScripts(templateId, agentFor(templateId), THEME, {
+        cleanupScripts: false,
+    }, 'a1');
+    assert.ok(built.added.includes('rat:cleanup-npc-support:a1'));
+
+    const support = SPECS.find(spec => spec.key === 'npc-support');
+    const markup = built.scripts.find(script => script.id === support.scriptId).replaceString;
+    const cleanup = built.scripts.find(script => script.id === 'rat:cleanup-npc-support:a1');
+    const source = cleanup.findRegex.slice(1, cleanup.findRegex.lastIndexOf('/'));
+    const partial = markup
+        .replace('$1', 'Dock foreman')
+        .replace('$2', 'Ezra Kolt')
+        .replace(/\$[3-6]/g, '')
+        .replace(new RegExp(source, 'g'), '');
+
+    assert.equal((partial.match(/data-rat-part="section"/g) ?? []).length, 1);
+    assert.ok(partial.includes('Ezra Kolt'));
+});
+
 test('the meter script is only appended when meters are on', () => {
     const off = buildAgentScripts('tpl-relationship-tracker', agentFor('tpl-relationship-tracker'), THEME, {}, 'a1');
     assert.equal(off.added.length, 0);
@@ -135,11 +156,12 @@ test('a pattern that no longer matches the baseline is left alone', () => {
     assert.match(skipped[0], /findRegex differs/);
 });
 
-test('revert restores the shipped bytes and drops appended scripts', () => {
+test('a confirmed reset restores shipped bytes and drops appended scripts', () => {
     const templateId = 'tpl-cyoa-choices';
     const stock = agentFor(templateId);
     const { scripts } = buildAgentScripts(templateId, stock, THEME, { meters: true }, 'a1');
-    const reverted = revertAgentScripts(templateId, scripts);
+    const plan = planRevertAgentScripts(templateId, scripts, null, { force: true });
+    const reverted = plan.scripts;
 
     assert.equal(reverted.length, stock.length);
     for (const [index, script] of reverted.entries()) {
@@ -150,14 +172,56 @@ test('revert restores the shipped bytes and drops appended scripts', () => {
     assert.equal(reverted.filter(isOwnedScript).length, 0);
 });
 
-test('revert prefers a captured hand edit over the shipped bytes', () => {
+test('owned revert prefers a captured hand edit over shipped bytes', () => {
     const templateId = 'tpl-scene-tracker';
     const stock = agentFor(templateId);
     const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
 
-    const overrides = { [stock[0].id]: { replaceString: '<b>my own</b>' } };
-    const reverted = revertAgentScripts(templateId, scripts, overrides);
-    assert.equal(reverted[0].replaceString, '<b>my own</b>');
+    const entry = {
+        scripts: {
+            [stock[0].id]: {
+                applied: scripts[0].replaceString,
+                findRegex: scripts[0].findRegex,
+            },
+        },
+        originals: {
+            [stock[0].id]: {
+                replaceString: '<b>my own</b>',
+                findRegex: stock[0].findRegex,
+            },
+        },
+        added: [],
+    };
+    const plan = planRevertAgentScripts(templateId, scripts, entry);
+    assert.equal(plan.blocked.length, 0);
+    assert.equal(plan.scripts[0].replaceString, '<b>my own</b>');
+});
+
+test('automatic revert is a no-op without ownership ledger', () => {
+    const templateId = 'tpl-scene-tracker';
+    const scripts = agentFor(templateId);
+    scripts[0].replaceString = '<b>hand edited</b>';
+
+    const plan = planRevertAgentScripts(templateId, scripts, null);
+    assert.equal(plan.changed, 0);
+    assert.deepEqual(plan.scripts, scripts);
+});
+
+test('owned revert blocks a script changed after apply', () => {
+    const templateId = 'tpl-scene-tracker';
+    const stock = agentFor(templateId);
+    const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+    const applied = scripts[0].replaceString;
+    scripts[0].replaceString = '<b>edited later</b>';
+
+    const plan = planRevertAgentScripts(templateId, scripts, {
+        scripts: { [scripts[0].id]: { applied, findRegex: scripts[0].findRegex } },
+        originals: {},
+        added: [],
+    });
+    assert.equal(plan.changed, 0);
+    assert.deepEqual(plan.blocked.map(entry => entry.scriptId), [scripts[0].id]);
+    assert.equal(plan.scripts[0].replaceString, '<b>edited later</b>');
 });
 
 test('drift statuses roll up worst-first', () => {
@@ -251,13 +315,11 @@ test('the cleanup pattern does not change between themes', () => {
     assert.equal(new Set(patterns).size, 1, 'cleanup pattern differs by theme');
 });
 
-test('a cleanup script carrying an unrecognised pattern reads as outdated', () => {
+test('a cleanup script carrying an unrecognised pattern is protected without a ledger', () => {
     const templateId = 'tpl-cyoa-choices';
     const spec = SPECS.find(item => item.templateId === templateId && item.regenerateFindRegex);
     const target = getSpec(templateId, spec.cleanupFor);
 
-    // Only this extension ever writes that pattern, so anything unfamiliar is our own older
-    // output rather than a hand edit, and is safe to regenerate.
     assert.equal(
         classifyScript({
             script: { id: spec.scriptId, findRegex: '/<div class="pura-choice"><\\/div>/g', replaceString: '' },
@@ -265,6 +327,46 @@ test('a cleanup script carrying an unrecognised pattern reads as outdated', () =
             expected: null,
             expectedFindRegex: buildCleanupFindRegex(target, THEME, {}),
         }),
+        STATUS.FOREIGN,
+    );
+});
+
+test('a cleanup script matching its ledger reads as outdated', () => {
+    const templateId = 'tpl-cyoa-choices';
+    const spec = SPECS.find(item => item.templateId === templateId && item.regenerateFindRegex);
+    const target = getSpec(templateId, spec.cleanupFor);
+    const oldPattern = '/<div data-rat-part="old-slot"><\\/div>/g';
+
+    assert.equal(
+        classifyScript({
+            script: { id: spec.scriptId, findRegex: oldPattern, replaceString: '' },
+            spec,
+            expected: null,
+            expectedFindRegex: buildCleanupFindRegex(target, THEME, {}),
+            ledgerEntry: { applied: '', findRegex: oldPattern },
+        }),
         STATUS.OUTDATED,
     );
+});
+
+test('an unrelated empty replacement is foreign, not stock', () => {
+    const templateId = 'tpl-scene-tracker';
+    const stock = agentFor(templateId)[0];
+    const spec = getSpec(templateId, stock.id);
+    const expected = buildReplaceString(spec, THEME, {});
+
+    assert.equal(
+        classifyScript({ script: { ...stock, replaceString: '' }, spec, expected }),
+        STATUS.FOREIGN,
+    );
+});
+
+test('a generated ownership marker survives ledger loss', () => {
+    const templateId = 'tpl-scene-tracker';
+    const stock = agentFor(templateId);
+    const spec = getSpec(templateId, stock[0].id);
+    const old = buildAgentScripts(templateId, stock, THEME, {}, 'a1').scripts[0];
+    const expected = buildReplaceString(spec, THEME_BY_SLUG.get('marshmallow'), {});
+
+    assert.equal(classifyScript({ script: old, spec, expected }), STATUS.OUTDATED);
 });
