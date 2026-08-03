@@ -10,7 +10,14 @@ import { summarizeStatuses } from './drift.js';
 import { FAMILIES, THEMES, getTheme } from './themes/index.js';
 import { DENSITIES, OPEN_DEFAULTS, getSettings, resolveThemeSlug, updateSettings } from './settings.js';
 import { PREVIEW_KEYS, detectEncodedTags, mountPreview } from './preview.js';
-import { applyAll, applyToAgent, inspectAgent, revertAgent, themableAgents } from './apply.js';
+import {
+    applyAll,
+    applyToAgent,
+    inspectAgent,
+    refreshAgentMessages,
+    revertAgent,
+    themableAgents,
+} from './apply.js';
 import { getContext, loadHost } from './host.js';
 import {
     CUSTOM_THEME_LIMITS,
@@ -419,6 +426,28 @@ export function summarizeApplyResult(result) {
     };
 }
 
+/** Converts a no-write card refresh result into persistent, human-readable UI feedback. */
+export function summarizeRefreshResult(result) {
+    const repainted = Number(result?.repainted) || 0;
+    const failed = Number(result?.failed) || 0;
+    if (!result?.ok) {
+        if (repainted > 0) {
+            return {
+                tone: 'warning',
+                text: `Refreshed ${repainted} matching tracker ${repainted === 1 ? 'card' : 'cards'}; ${failed || 1} could not be refreshed.`,
+            };
+        }
+        return { tone: 'error', text: result?.reason ?? 'Could not refresh tracker cards.' };
+    }
+    if (!result.matched) {
+        return { tone: 'neutral', text: 'No matching tracker cards are loaded in this chat.' };
+    }
+    return {
+        tone: 'success',
+        text: `Refreshed ${repainted} matching tracker ${repainted === 1 ? 'card' : 'cards'}.`,
+    };
+}
+
 /** Worst-first aggregation shared by duplicate-agent rows and tests. */
 export function summarizeTemplateReports(reports) {
     return summarizeStatuses((reports ?? []).map(report => report.status));
@@ -549,6 +578,14 @@ function applyTheme(slug) {
     });
 }
 
+function refreshTrackerCards(agents) {
+    return runOperation('Refreshing tracker cards', async () => {
+        const result = await refreshAgentMessages(agents);
+        setResult(summarizeRefreshResult(result), { notify: true });
+        return result;
+    });
+}
+
 function renderOverview(settings, host, agents, reports) {
     const content = view.sections.overview.content;
     content.textContent = '';
@@ -594,6 +631,16 @@ function renderOverview(settings, host, agents, reports) {
         themeSelect,
         'Applied to compatible trackers unless a tracker override says otherwise.',
     ));
+
+    const refreshButton = button('Refresh all tracker cards', () => refreshTrackerCards(agents), {
+        disabled: !host.ok || !agents.length,
+        focusKey: 'refresh-all-cards',
+        ariaLabel: 'Refresh matching tracker cards in the current chat',
+    });
+    if (!host.ok || !agents.length) {
+        refreshButton.dataset.ratStaticDisabled = 'true';
+    }
+    content.append(el('div', { class: 'rat-action-row' }, [refreshButton]));
 
     view.resultHost = el('div', {
         class: 'rat-result',
@@ -1063,6 +1110,14 @@ function renderScope(settings, host, agents) {
             : agentList;
 
         const actions = el('div', { class: 'rat-action-row' });
+        actions.append(button(
+            'Refresh cards',
+            () => refreshTrackerCards(templateAgents),
+            {
+                focusKey: `refresh-${templateId}`,
+                ariaLabel: `Refresh matching ${label} tracker cards in the current chat`,
+            },
+        ));
         const hasForeign = reports.some(report => report.status === 'foreign');
         if (hasForeign && effective !== STOCK_THEME) {
             actions.append(button(

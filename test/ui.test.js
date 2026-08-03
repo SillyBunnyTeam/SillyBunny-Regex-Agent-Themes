@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
     drawerIconClass,
     summarizeApplyResult,
+    summarizeRefreshResult,
     summarizeTemplateReports,
 } from '../src/ui.js';
 
@@ -43,5 +44,16 @@ test('empty successful apply feedback is explicit', () => {
     assert.deepEqual(summarizeApplyResult({ ok: true }), {
         tone: 'success',
         text: 'No installed trackers needed changes.',
+    });
+});
+
+test('refresh feedback distinguishes matching and absent tracker cards', () => {
+    assert.deepEqual(summarizeRefreshResult({ ok: true, matched: 2, repainted: 2, failed: 0 }), {
+        tone: 'success',
+        text: 'Refreshed 2 matching tracker cards.',
+    });
+    assert.deepEqual(summarizeRefreshResult({ ok: true, matched: 0, repainted: 0, failed: 0 }), {
+        tone: 'neutral',
+        text: 'No matching tracker cards are loaded in this chat.',
     });
 });

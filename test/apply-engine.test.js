@@ -6,6 +6,7 @@ import {
     applyToAgent,
     inspectAgent,
     reconcile,
+    refreshAgentMessages,
     revertAgent,
     themableAgents,
 } from '../src/apply.js';
@@ -44,10 +45,12 @@ function sceneAgent(id = 'agent1') {
     return templateAgent('tpl-scene-tracker', id);
 }
 
-function installContext() {
+function installContext({ chat = [], updateMessageBlock = async () => {} } = {}) {
     const context = {
         extensionSettings: { [SETTINGS_KEY]: {} },
         saveSettingsDebounced() {},
+        chat,
+        updateMessageBlock,
     };
     globalThis.SillyTavern = { getContext: () => context };
     return context;
@@ -168,6 +171,28 @@ test('agent writes are serialized across simultaneous calls', async () => {
 
     assert.ok(results.every(result => result.ok));
     assert.equal(fake.maxActive, 1);
+});
+
+test('manual refresh re-renders matching tracker cards without saving agents', async () => {
+    const agent = sceneAgent();
+    const updated = [];
+    installContext({
+        chat: [
+            { mes: 'match', extra: { inChatAgents: { regexScriptRefs: [{ agentId: agent.id, scriptId: agent.regexScripts[0].id }] } } },
+            { mes: 'other agent', extra: { inChatAgents: { regexScriptRefs: [{ agentId: 'other', scriptId: agent.regexScripts[0].id }] } } },
+            { is_user: true, extra: { inChatAgents: { regexScriptRefs: [{ agentId: agent.id, scriptId: agent.regexScripts[0].id }] } } },
+        ],
+        updateMessageBlock: async index => { updated.push(index); },
+    });
+    const fake = installHost(agent);
+
+    const result = await refreshAgentMessages([fake.host.store.getAgentById(agent.id)]);
+
+    assert.deepEqual(updated, [0]);
+    assert.equal(result.ok, true);
+    assert.equal(result.matched, 1);
+    assert.equal(result.repainted, 1);
+    assert.equal(fake.saves, 0);
 });
 
 test('known templates remain visible when every expected script is missing', () => {

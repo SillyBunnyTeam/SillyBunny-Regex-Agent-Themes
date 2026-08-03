@@ -7,6 +7,10 @@ a validated custom theme.
 Theme changes repaint compatible tracker cards already visible in the current chat. Agent scripts
 are updated, but chat messages and chat metadata are not rewritten.
 
+If a card needs another redraw, use **Refresh all tracker cards** in Overview or **Refresh cards**
+for one tracker under Tracker overrides. These actions only re-render matching cards in the current
+chat; they do not save agents or rewrite chat data.
+
 ## Requirements
 
 - SillyBunny 1.7.0 or newer.
@@ -36,13 +40,14 @@ ln -s "$PWD" /path/to/SillyBunny/data/default-user/extensions/SillyBunny-Regex-A
 The settings panel follows SillyBunny's native controls and has five sections:
 
 - **Overview** shows dependency status, installed compatible agents, overrides, drift, and the
-  default theme. Changing the default applies it to compatible agents unless an override exists.
+  default theme. Changing the default applies it to compatible agents unless an override exists;
+  it also offers a refresh action for all current-chat tracker cards.
 - **Browse themes** filters by name, family, and color mode. It includes Original SillyBunny style,
   one interactive preview, and lightweight comparison thumbnails.
 - **Options** controls density, initial panel state, adaptive colors, meters, bold styling, glyphs,
   and automatic repair. Visual option changes show an explicit action before installed cards change.
-- **Tracker overrides** assigns a theme to one template and shows every installed duplicate agent
-  with its own state.
+- **Tracker overrides** assigns a theme to one template, refreshes that template's current-chat
+  cards on demand, and shows every installed duplicate agent with its own state.
 - **Maintenance** re-applies themes, imports or exports custom themes, and contains the separate
   restore area.
 

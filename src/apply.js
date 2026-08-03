@@ -68,6 +68,15 @@ export function themableAgents(agents) {
     return agents.filter(agent => THEMABLE_TEMPLATE_IDS.includes(agent.sourceTemplateId ?? ''));
 }
 
+/** Re-renders current-chat messages for the supplied live agents without writing agent data. */
+export async function refreshAgentMessages(agents) {
+    const changes = (agents ?? []).map(agent => ({
+        agentId: agent?.id,
+        scriptIds: (agent?.regexScripts ?? []).map(script => script?.id).filter(Boolean),
+    }));
+    return repaintMessagesForAgents(changes);
+}
+
 function agentVersion(agent) {
     return Number(agent?.version) || 0;
 }
