@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
     drawerIconClass,
+    shouldRestoreFocus,
     summarizeApplyResult,
     summarizeRefreshResult,
     summarizeTemplateReports,
@@ -14,6 +15,12 @@ test('drawer icons opt out of host keyboard interaction', () => {
         assert.ok(classes.includes('inline-drawer-icon'));
         assert.ok(classes.includes('not_focusable'));
     }
+});
+
+test('replacement selects are not refocused after their picker closes', () => {
+    assert.equal(shouldRestoreFocus({ skipRestore: true }), false);
+    assert.equal(shouldRestoreFocus({ skipRestore: false }), true);
+    assert.equal(shouldRestoreFocus(null), false);
 });
 
 test('duplicate-agent status uses the worst report rather than the first report', () => {

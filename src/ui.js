@@ -98,6 +98,7 @@ let renderGeneration = 0;
 let thumbnailObserver = null;
 const thumbnailJobs = new Map();
 const drawerStateObservers = new Set();
+const changedSelects = new WeakSet();
 
 function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
@@ -178,6 +179,7 @@ function select(id, options, value, onChange, { focusKey } = {}) {
     }
     node.value = value;
     node.addEventListener('change', () => {
+        changedSelects.add(node);
         Promise.resolve(onChange(node.value)).catch((error) => {
             setResult({ tone: 'error', text: error?.message ?? String(error) });
         });
@@ -209,6 +211,7 @@ function groupedSelect(id, groups, value, onChange, { focusKey } = {}) {
     }
     node.value = value;
     node.addEventListener('change', () => {
+        changedSelects.add(node);
         Promise.resolve(onChange(node.value)).catch((error) => {
             setResult({ tone: 'error', text: error?.message ?? String(error) });
         });
@@ -239,13 +242,18 @@ function captureFocus() {
     return {
         id: active.id || '',
         key: active.dataset?.focusKey || '',
+        skipRestore: changedSelects.delete(active),
         start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
         end: typeof active.selectionEnd === 'number' ? active.selectionEnd : null,
     };
 }
 
+export function shouldRestoreFocus(snapshot) {
+    return Boolean(snapshot && !snapshot.skipRestore);
+}
+
 function restoreFocus(snapshot) {
-    if (!snapshot || !view) {
+    if (!shouldRestoreFocus(snapshot) || !view) {
         return;
     }
     let target = snapshot.id ? document.getElementById(snapshot.id) : null;
@@ -260,6 +268,53 @@ function restoreFocus(snapshot) {
     if (snapshot.start !== null && typeof target.setSelectionRange === 'function') {
         target.setSelectionRange(snapshot.start, snapshot.end ?? snapshot.start);
     }
+}
+
+function captureScroll() {
+    if (!view) {
+        return [];
+    }
+    const snapshots = [];
+    const seen = new Set();
+    let current = view.container.contains(document.activeElement)
+        ? document.activeElement
+        : view.container;
+    while (current) {
+        if ((current.scrollHeight > current.clientHeight || current.scrollWidth > current.clientWidth)
+            && !seen.has(current)) {
+            snapshots.push({
+                node: current,
+                top: current.scrollTop,
+                left: current.scrollLeft,
+            });
+            seen.add(current);
+        }
+        current = current.parentElement;
+    }
+    const root = document.scrollingElement;
+    if (root && !seen.has(root)) {
+        snapshots.push({ node: root, top: root.scrollTop, left: root.scrollLeft });
+    }
+    return snapshots;
+}
+
+function restoreScroll(snapshots) {
+    for (const snapshot of snapshots ?? []) {
+        if (!snapshot.node?.isConnected) {
+            continue;
+        }
+        snapshot.node.scrollTop = snapshot.top;
+        snapshot.node.scrollLeft = snapshot.left;
+    }
+}
+
+function captureInteraction() {
+    return { focus: captureFocus(), scroll: captureScroll() };
+}
+
+function restoreInteraction(snapshot) {
+    restoreScroll(snapshot?.scroll);
+    restoreFocus(snapshot?.focus);
 }
 
 export function drawerIconClass(open) {
@@ -489,7 +544,10 @@ async function runOperation(label, operation) {
     if (uiState.busy) {
         return null;
     }
-    const focus = captureFocus();
+    const interaction = captureInteraction();
+    clearTimeout(refreshHandle);
+    refreshHandle = null;
+    renderGeneration++;
     uiState.busy = true;
     setResult({ tone: 'progress', text: `${label}...` });
     updateBusyState();
@@ -500,7 +558,7 @@ async function runOperation(label, operation) {
         return null;
     } finally {
         uiState.busy = false;
-        await renderView({ focus });
+        await renderView({ interaction });
     }
 }
 
@@ -656,10 +714,10 @@ function rerenderBrowse() {
     if (!view) {
         return;
     }
-    const focus = captureFocus();
+    const interaction = captureInteraction();
     renderBrowse(getSettings());
     updateBusyState();
-    queueMicrotask(() => restoreFocus(focus));
+    queueMicrotask(() => restoreInteraction(interaction));
 }
 
 function renderBrowse(settings) {
@@ -1363,7 +1421,7 @@ function renderMaintenance(settings, host, agents) {
     ]));
 }
 
-async function renderView({ focus = captureFocus() } = {}) {
+async function renderView({ interaction = captureInteraction() } = {}) {
     if (!view) {
         return;
     }
@@ -1382,10 +1440,13 @@ async function renderView({ focus = captureFocus() } = {}) {
     renderScope(settings, host, agents);
     renderMaintenance(settings, host, agents);
     updateBusyState();
-    queueMicrotask(() => restoreFocus(focus));
+    queueMicrotask(() => restoreInteraction(interaction));
 }
 
 function refresh() {
+    if (uiState.busy) {
+        return;
+    }
     clearTimeout(refreshHandle);
     refreshHandle = setTimeout(() => {
         void renderView();
@@ -1438,7 +1499,7 @@ export function mountSettings() {
         return () => {};
     }
     view = createView(host);
-    void renderView({ focus: null });
+    void renderView({ interaction: null });
     return refresh;
 }
 
