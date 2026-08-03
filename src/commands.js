@@ -34,11 +34,11 @@ export function registerCommands(onChange = () => {}) {
 
     parser.addCommandObject(SlashCommand.fromProps({
         name: 'rat-theme',
-        helpString: 'Show or set the global tracker theme, then apply it.',
+        helpString: 'Show or set the global tracker theme.',
         returns: 'the active theme slug',
         unnamedArgumentList: [
             SlashCommandArgument.fromProps({
-                description: 'theme slug, or "stock" to restore the bundled look',
+                description: 'theme slug, or "stock"',
                 typeList: [ARGUMENT_TYPE.STRING],
                 isRequired: false,
                 enumList: themeSlugs(),
@@ -61,20 +61,20 @@ export function registerCommands(onChange = () => {}) {
 
     parser.addCommandObject(SlashCommand.fromProps({
         name: 'rat-theme-tracker',
-        helpString: 'Override the theme for a single tracker, or clear the override.',
-        returns: 'the override that is now in force',
+        helpString: 'Set or clear one tracker\'s theme.',
+        returns: 'the theme now set for that tracker',
         namedArgumentList: SlashCommandNamedArgument
             ? [
                 SlashCommandNamedArgument.fromProps({
                     name: 'tracker',
-                    description: 'which bundled tracker to override',
+                    description: 'which tracker',
                     typeList: [ARGUMENT_TYPE.STRING],
                     isRequired: true,
                     enumList: THEMABLE_TEMPLATE_IDS,
                 }),
                 SlashCommandNamedArgument.fromProps({
                     name: 'theme',
-                    description: 'theme slug, or empty to fall back to the global theme',
+                    description: 'theme slug, or empty to use the global theme',
                     typeList: [ARGUMENT_TYPE.STRING],
                     isRequired: false,
                     enumList: themeSlugs(),
@@ -103,8 +103,8 @@ export function registerCommands(onChange = () => {}) {
 
     parser.addCommandObject(SlashCommand.fromProps({
         name: 'rat-apply',
-        helpString: 'Re-apply the current theme to every bundled tracker agent.',
-        returns: 'how many agents were updated',
+        helpString: 'Re-apply the current theme to every tracker.',
+        returns: 'how many trackers changed',
         callback: async () => {
             const result = await applyAll();
             onChange();
@@ -114,8 +114,8 @@ export function registerCommands(onChange = () => {}) {
 
     parser.addCommandObject(SlashCommand.fromProps({
         name: 'rat-revert',
-        helpString: 'Restore the bundled tracker markup everywhere.',
-        returns: 'how many agents were reverted',
+        helpString: 'Put every tracker back to stock.',
+        returns: 'how many trackers were reverted',
         callback: async () => {
             updateSettings({ theme: STOCK_THEME, overrides: {} });
             const result = await applyAll();
@@ -126,8 +126,8 @@ export function registerCommands(onChange = () => {}) {
 
     parser.addCommandObject(SlashCommand.fromProps({
         name: 'rat-status',
-        helpString: 'Report which tracker agents are themed, stale, or edited by hand.',
-        returns: 'a per-tracker status list',
+        helpString: "List each tracker's theme and state.",
+        returns: 'one line per tracker',
         callback: async () => {
             const host = await loadHost();
             if (!host.ok) {

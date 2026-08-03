@@ -1,6 +1,6 @@
 /**
  * Turns a stock script list into a themed one. This is the single place that decides what
- * gets rewritten, what is left alone, and what extra scripts get appended — shared by the
+ * gets rewritten, what is left alone, and what extra scripts get appended. Shared by the
  * apply engine and the tests so they can never disagree.
  */
 

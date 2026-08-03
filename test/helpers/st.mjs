@@ -2,8 +2,8 @@
  * Loads the real in-chat-agents regex engine out of a SillyBunny checkout, so tests render
  * against the same code the browser runs rather than a reimplementation.
  *
- * `public/scripts/utils.js` cannot be imported in Node — it uses root-absolute specifiers
- * like '/scripts/i18n.js' — so it is mocked with the two functions the engine actually
+ * `public/scripts/utils.js` cannot be imported in Node, because it uses root-absolute
+ * specifiers like '/scripts/i18n.js', so it is mocked with the two functions the engine actually
  * needs. This requires `--experimental-test-module-mocks`.
  */
 

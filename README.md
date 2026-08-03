@@ -1,66 +1,52 @@
 # SillyBunny Regex Agent Themes
 
-Swappable HTML themes for SillyBunny's bundled In-Chat Agent trackers and companion panels.
+Changes how SillyBunny's bundled trackers look. 45 themes to pick from.
 
-SillyBunny ships around twenty trackers that turn marker blocks the model emits — things like
-`[SCENE|Rooftop garden|Dusk|Overcast]` — into styled cards at display time. They all share one
-hardcoded look: a dark purple chip over a dark gradient body, 11px monospace. There is no
-setting for it, and because the palette is hardcoded dark, the cards look wrong on light
-SillyBunny themes.
+Scene, time, items, events, status, secrets, reputation, achievements, the relationship meter,
+NPC profiles, CYOA choices, the direction menu, the chatroom, the phone inbox and the terminal
+panels all render as the same dark purple card. This lets you swap that, globally or per tracker.
 
-This extension makes that look swappable. Pick one of 45 themes, apply it globally or per
-tracker, and preview any of them against real sample data before committing.
-
-Switching themes also re-skins tracker output **already in your chat history**, because
-SillyBunny resolves a message's regex scripts from the live agent rather than from a copy
-stored on the message. Nothing in your chat files is rewritten.
+Changing a theme also updates trackers already in your chat. Your chat files are not touched.
 
 ## Requirements
 
-- SillyBunny with the bundled **In-Chat Agents** extension enabled
-- At least one bundled tracker or companion agent installed
+SillyBunny with the In-Chat Agents extension enabled, and at least one tracker agent installed.
 
-Client-only — there is no server plugin, so no `enableServerPlugins` and no second symlink.
+No server plugin, so nothing to add to `config.yaml`.
 
-## Installation
+## Install
 
-Install from the extensions panel using this repository's URL:
+Paste this into the extension installer:
 
 ```
 https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes
 ```
 
-Then open **Extensions → Regex Agent Themes**.
+Then open Extensions, and expand "Regex Agent Themes".
 
-For development, symlink the checkout into your user extensions directory instead:
+To work on it instead, symlink the checkout:
 
 ```bash
 ln -s "$PWD" /path/to/SillyBunny/data/default-user/extensions/SillyBunny-Regex-Agent-Themes
 ```
 
-A dangling symlink in that directory makes `/api/extensions/discover` return 500, which
-silently disables *every* third-party extension — so if extensions stop loading after you
-move this checkout, check the link first.
+If that symlink ever breaks, every third party extension stops loading, not just this one. Worth
+checking first if your extensions disappear after moving things around.
 
-## Usage
+## Using it
 
-**Global theme.** Pick one from the dropdown at the top of the drawer. It applies to every
-tracker immediately.
+Pick a theme from the dropdown at the top. It applies everywhere immediately.
 
-**Per tracker.** The table at the bottom of the drawer lets each tracker use a different
-theme, or stay on the stock look. Blank means "follow the global theme".
+The gallery below shows every theme with sample data in it. The Preview dropdown switches which
+card you are looking at, so you can check how a theme handles NPC profiles or the chatroom before
+committing to it.
 
-**Preview gallery.** The gallery renders each theme against real sample marker blocks, run
-through SillyBunny's own message formatter — so what you see is what chat will show. The
-**Preview** dropdown switches which shape you are looking at: tracker panel, NPC profile,
-choice menu, relationship meter, inline chip, terminal panel, chatroom stream, or transcript
-row.
+The table at the bottom sets a theme per tracker. Leave a row blank to use the global theme.
 
-**Revert.** "Revert all" restores the bundled markup everywhere and removes everything this
-extension added. Disabling the extension does *not* revert — applied themes live in your
-agent files, so silently un-theming on disable would be a destructive surprise.
+"Revert all" puts everything back to stock. Disabling the extension does not revert, because the
+themes get saved into your agent files.
 
-## The 45 themes
+## Themes
 
 | Family | Themes |
 | --- | --- |
@@ -74,98 +60,66 @@ agent files, so silently un-theming on disable would be a destructive surprise.
 | Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth |
 | Adaptive | Adaptive Native, Adaptive Accent, Adaptive Ink |
 
-The three **Adaptive** themes take their palette from your active SillyBunny theme instead of
-hardcoding one, so trackers blend into whatever UI theme you run — including light themes.
+Most themes bring their own colours. The three Adaptive ones use your active SillyBunny theme's
+colours instead, so trackers match the rest of your UI. Those are also the ones to use on a light
+theme, which the stock trackers handle badly.
 
 ## Settings
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Density | normal | Scales padding and type across every theme (compact / normal / roomy). |
-| Panels | theme | Whether cards start open, closed, or as the stock look intended. |
-| Follow host theme colours | off | Repaints any theme's surfaces and text onto your active SillyBunny theme while keeping its accents, geometry and type. |
-| Relationship meter bars | off | Turns the relationship tracker's `7/10` values into real progress bars. Adds one extra regex script per agent; non-numeric values stay as plain text. |
-| Restyle bold text | off | Also themes the shared bold-markdown helper. Off by default because it affects all prose in the message, not just tracker output. |
-| Plain glyphs | off | Drops decorative glyphs for a plainer, more screen-reader-friendly look. |
+| Density | normal | Scales padding and text size in every theme. |
+| Panels | theme | Whether cards start open or closed. |
+| Use SillyBunny theme colours | off | Keeps a theme's shapes and accents but takes surfaces and text from your active theme. |
+| Relationship meter bars | off | Turns the relationship tracker's `7/10` values into progress bars. Values that are not numbers stay as text. |
+| Restyle bold text | off | Also themes bold text. Off by default because it affects all your prose, not just trackers. |
+| Plain glyphs | off | Drops decorative characters. |
 | Re-apply after template updates | on | See below. |
 
-## Slash commands
+## Commands
 
 | Command | What it does |
 | --- | --- |
-| `/rat-theme [slug]` | Show or set the global theme, then apply it. |
-| `/rat-theme-tracker tracker=… theme=…` | Override one tracker, or clear the override. |
-| `/rat-apply` | Re-apply the current theme everywhere. |
-| `/rat-revert` | Restore the bundled markup everywhere. |
-| `/rat-status` | Report which trackers are themed, stale, or edited by hand. |
+| `/rat-theme [slug]` | Show or set the global theme. |
+| `/rat-theme-tracker tracker=… theme=…` | Set or clear one tracker's theme. |
+| `/rat-apply` | Re-apply the current theme. |
+| `/rat-revert` | Put every tracker back to stock. |
+| `/rat-status` | List each tracker's theme and state. |
 
 ## Template updates
 
-In-Chat Agents' version pill and its "Update All" button rebuild an agent from its bundled
-template, which discards the agent's regex scripts — and therefore your theme. Two things
-guard against that:
+The In-Chat Agents update buttons rebuild an agent from its template, which wipes the theme.
+Themed agents are marked so those buttons skip them. If it happens anyway, the theme comes back
+the next time SillyBunny starts.
 
-- Themed agents are marked so those buttons stop offering the destructive update.
-- If it happens anyway, the next time SillyBunny starts this extension notices the markup is
-  back to stock and quietly restores your theme.
+That only works when the tracker's HTML still matches stock. If you have edited a tracker's HTML
+yourself, the extension leaves it alone and marks the row "edited by hand". Use Force if you do
+want it overwritten.
 
-That recovery is deliberately narrow. It only fires when the markup is byte-identical to
-something recognisably stock. If you edit a tracker's HTML yourself in the agent editor, the
-extension leaves it alone and shows it as "edited by hand" in the per-tracker table, with a
-**Force** button if you do want to overwrite it.
+## Problems
 
-## Troubleshooting
+**Nothing changed.** Check that In-Chat Agents is enabled and tracker agents are installed. If
+the panel says it cannot load In-Chat Agents, previews still work but applying will not.
 
-**Nothing changed after applying a theme.** Check that the In-Chat Agents extension is
-enabled and that the tracker agents are actually installed. If the drawer shows "Could not
-load In-Chat Agents", themes can still be previewed but not applied.
+**Trackers show raw HTML as text.** Turn off "Show tags in chat as plain text" in User Settings.
+It breaks the stock trackers too.
 
-**Trackers show raw HTML like `<details ...>` as text.** The "Show tags in chat as plain
-text" user setting is on. It breaks the stock trackers too. The drawer warns about this when
-it detects it.
-
-**A tracker is stuck on the old look.** Look at its row in the per-tracker table. "edited by
-hand" means the extension found markup it did not write and refused to overwrite it — use
-**Force**. "pattern changed upstream" means SillyBunny changed that tracker's matching
-pattern, so theming it could mis-render; the fix is a new release of this extension.
-
-**A theme looks wrong in one specific tracker.** Use the Preview dropdown to inspect that
-shape in that theme, then set a per-tracker override for it.
+**One tracker will not update.** Look at its row in the table. "edited by hand" means the
+extension found HTML it did not write. "pattern changed upstream" means SillyBunny changed that
+tracker and this extension needs an update.
 
 ## Development
 
 ```bash
-npm test          # full suite, including rendering through the real SillyBunny regex engine
-npm run test:pure # the DOM-free and checkout-free subset
-npm run generate:stock [path-to-SillyBunny]   # refresh the stock baseline after an upstream sync
+npm test
+npm run test:pure
+npm run generate:stock [path-to-SillyBunny]
 ```
 
-The test suite renders all 45 themes against all 38 markup scripts and checks the results
-against the things SillyBunny's render pipeline will silently mangle: stray `$1`-style
-sequences (eaten by the regex interpolator), `{{macros}}` (expanded by `substituteParams`),
-double quotes inside style attributes, unbalanced tags, and `<style>` selectors that would
-stop matching after the sanitizer rewrites them. It also tripwires the upstream behaviour the
-extension depends on, so an upstream sync that changes it fails a test instead of producing a
-silent visual bug.
-
-`npm test` needs `--experimental-test-module-mocks` (already in the script) and a SillyBunny
-checkout; set `RAT_ST_ROOT` if it is not at `/home/platinum/SillyBunny`. Tests that need it
-skip cleanly when it is absent.
-
-## How it works
-
-Each theme is a set of design tokens — surfaces, an accent ramp, geometry, type, glyphs — and
-each of SillyBunny's 38 markup-bearing regex scripts is described by a spec saying which of
-nine markup archetypes renders it and how its capture groups map onto that archetype's slots.
-Tokens plus spec produce the HTML, so 45 themes cover every tracker without anyone
-hand-writing 1,710 strings.
-
-Applying a theme rewrites the `replaceString` of the agent's regex scripts and never their
-matching patterns, so the text the model is asked to emit does not change. Generated fragments
-carry complete inline styles, which means they keep working if this extension is disabled or
-uninstalled; the bundled stylesheet only adds what inline styles cannot express, such as
-disclosure rotation and empty-row collapse.
+`npm test` renders every theme through SillyBunny's own regex engine, so it needs a checkout. Set
+`RAT_ST_ROOT` if yours is not at `/home/platinum/SillyBunny`. Those tests skip if it is missing.
+`npm run test:pure` is the subset that needs neither.
 
 ## License
 
-AGPL-3.0, matching SillyBunny.
+AGPL-3.0.

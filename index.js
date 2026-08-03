@@ -1,5 +1,5 @@
 /**
- * Entry point. Wiring only — every decision lives in src/.
+ * Entry point. Wiring only. Every decision lives in src/.
  *
  * `deactivate` deliberately does not revert. Applied themes live in the user's agent JSON,
  * not in this extension, so silently un-theming on disable would be a destructive surprise.
@@ -47,13 +47,13 @@ async function reconcileOnce() {
 
     if (result.repaired > 0) {
         globalThis.toastr?.info?.(
-            `Regex Agent Themes: restored your theme on ${result.repaired} tracker(s) after a template update.`,
+            `Regex Agent Themes: put your theme back on ${result.repaired} tracker(s) after a template update.`,
         );
     }
     if (result.needsAttention.length > 0) {
         const names = result.needsAttention.map(item => item.agentName).join(', ');
         globalThis.toastr?.warning?.(
-            `Regex Agent Themes: left ${result.needsAttention.length} tracker(s) alone because they were edited outside the extension (${names}).`,
+            `Regex Agent Themes: skipped ${result.needsAttention.length} tracker(s) that were edited outside the extension (${names}).`,
         );
     }
     refresh();

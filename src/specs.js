@@ -3,7 +3,7 @@
  * groups map onto that archetype's slots.
  *
  * `findRegex` is never touched by a theme, so `groups` here must match the real capture
- * count of the shipped pattern — test/specs.test.js asserts that against src/stock.js.
+ * count of the shipped pattern. test/specs.test.js asserts that against src/stock.js.
  *
  * Slot shapes:
  *   head[]      {g}|{text}   plus optional icon, label, glue, arrow
@@ -33,7 +33,7 @@ export const ALLOWED_MACROS = Object.freeze(['{{user}}']);
 
 /**
  * Scripts whose `findRegex` faces model output. Group numbering is shared with the
- * prompt-side extract patterns, so it is frozen — themes only touch `replaceString`.
+ * prompt-side extract patterns, so it is frozen. Themes only touch `replaceString`.
  * The CLEANUP archetype is the sole exception: its pattern matches our own generated
  * markup and has no capture groups, so it must be regenerated alongside the renderer.
  */

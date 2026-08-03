@@ -9,7 +9,7 @@
  *  2. Styling hooks are `data-rat-*` attributes, never class names. A DOMPurify hook
  *     (public/scripts/chats.js:1916) rewrites every class in message HTML to
  *     `custom-<name>`, so a `.rat-*` selector in style.css would be dead. Classes are
- *     still emitted for users who want to write their own CSS — against `.custom-rat-*`.
+ *     still emitted for users who want to write their own CSS, against `.custom-rat-*`.
  */
 
 import { ENGINE_VERSION } from '../constants.js';

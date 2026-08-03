@@ -4,7 +4,7 @@
  * This is the safety layer around the one thing that will definitely happen in normal use:
  * In-Chat Agents' version pill and "Update All" button rebuild an agent from its template
  * (in-chat-agents/index.js:1288), discarding `regexScripts` entirely. The recovery rule is
- * deliberately narrow — re-apply only when the current text is byte-identical to something
+ * deliberately narrow: re-apply only when the current text is byte-identical to something
  * we recognise as stock, never when it might be a hand edit.
  *
  * Pure functions only, so the whole table is unit-testable without a DOM.
@@ -55,7 +55,7 @@ export function classifyScript({ script, spec, expected, ledgerEntry }) {
         return STATUS.STOCK;
     }
 
-    // Any stock string from any template also counts as stock — templates share markup.
+    // Any stock string from any template also counts as stock, since templates share markup.
     if (STOCK_REPLACE_STRINGS.has(current)) {
         return STATUS.STOCK;
     }

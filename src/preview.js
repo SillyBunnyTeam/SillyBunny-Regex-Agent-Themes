@@ -6,7 +6,7 @@
  * renames every class to `custom-*`) and decodeStyleTags (which prefixes and rewrites
  * `<style>` selectors). A preview built any other way would not show what chat shows.
  *
- * Previews are injected into a host carrying the `mes_text` class for the same reason — the
+ * Previews are injected into a host carrying the `mes_text` class for the same reason: the
  * message-content rules in style.css and the `.mes_text ` prefix baked into decoded style
  * blocks both depend on it.
  */

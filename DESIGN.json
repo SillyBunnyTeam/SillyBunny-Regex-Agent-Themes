@@ -400,7 +400,7 @@
             "name": "Paper Minimal",
             "family": "print",
             "mode": "light",
-            "blurb": "Off-white with grey hairlines. Hierarchy from weight and space alone.",
+            "blurb": "Off-white with grey hairlines. Nothing but weight and spacing.",
             "frame": null,
             "scan": false
         },
@@ -427,7 +427,7 @@
             "name": "Editorial Hairline",
             "family": "print",
             "mode": "light",
-            "blurb": "No boxes at all. Rules and spacing carry the whole hierarchy.",
+            "blurb": "No boxes. Just rules and spacing.",
             "frame": null,
             "scan": false
         },
@@ -553,7 +553,7 @@
             "name": "Adaptive Native",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Borrows your active theme entirely, so trackers stop looking like guests.",
+            "blurb": "Uses your active SillyBunny theme, so trackers match the rest of your UI.",
             "frame": null,
             "scan": false
         },
@@ -562,7 +562,7 @@
             "name": "Adaptive Accent",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Host neutrals with a graded ramp generated from your accent colour alone.",
+            "blurb": "Your theme colours, with everything keyed off your accent colour.",
             "frame": null,
             "scan": false
         },
@@ -571,7 +571,7 @@
             "name": "Adaptive Ink",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Editorial geometry — rules and whitespace — in whatever palette you run.",
+            "blurb": "Rules and whitespace instead of boxes, in your theme colours.",
             "frame": null,
             "scan": false
         }
@@ -582,24 +582,24 @@
         "classesAreRenamedTo": "custom-<name>"
     },
     "narrative": {
-        "northStar": "The Swatch Book: the picker is native and silent, the themes are opinionated and complete.",
+        "overview": "The settings panel is a tool and has no look of its own. The themes are the product and are allowed to be loud.",
         "rules": [
-            "Inline styles are the contract; the stylesheet only adds what they cannot express.",
+            "Inline styles are the contract. The stylesheet only adds what they cannot do.",
             "Style hooks are data-rat-* attributes, never class names.",
             "Never emit {{ or $ followed by a digit.",
             "One line per fragment, except the terminal archetype.",
-            "Decorative glyphs are aria-hidden; meaning always exists as text.",
-            "Nothing may force horizontal scroll at 360px."
+            "Decorative characters are aria-hidden. Meaning always exists as text too.",
+            "Nothing forces sideways scrolling at 360px."
         ],
         "dos": [
-            "Show the real component, in the theme, with real data, before the user commits.",
-            "Keep each theme's decision visible across all nine archetypes.",
-            "State the consequence of a destructive action in the button's own row."
+            "Show the card, in the theme, with real data, before anyone commits.",
+            "Keep a theme's decision visible in all nine shapes.",
+            "Put the consequence of a destructive action in the same row as the button."
         ],
         "donts": [
-            "Ship two themes that differ only in hue.",
-            "Let ornament reduce the contrast of tracker content.",
-            "Overwrite markup the extension did not write without an explicit action.",
+            "Ship two themes that only differ in hue.",
+            "Let decoration cut the contrast of tracker text.",
+            "Overwrite HTML the extension did not write without an explicit action.",
             "Revert on disable."
         ]
     }

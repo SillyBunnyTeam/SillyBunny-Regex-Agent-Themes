@@ -52,7 +52,7 @@ test('the class-renaming DOMPurify hook still exists', { skip }, () => {
     assert.match(
         chats,
         /return 'custom-' \+ v;/,
-        'the class rename hook changed — re-check the styling strategy in style.css',
+        'the class rename hook changed, re-check the styling strategy in style.css',
     );
 });
 
@@ -87,7 +87,7 @@ test('the destructive template-update path still behaves as assumed', { skip }, 
     const index = read('public/scripts/extensions/in-chat-agents/index.js');
     assert.ok(
         index.includes('function buildUpdatedAgentFromTemplate'),
-        'buildUpdatedAgentFromTemplate is gone — re-check the drift recovery design',
+        'buildUpdatedAgentFromTemplate is gone, re-check the drift recovery design',
     );
     assert.ok(
         index.includes('shouldSkipBundledTemplateMigrations'),
@@ -130,11 +130,11 @@ test('the shipped baseline still matches the fork', { skip }, () => {
         assert.ok(live, `${entry.scriptName} is no longer in regex-bundles.json`);
         assert.equal(
             live.findRegex, entry.findRegex,
-            `${entry.scriptName}: pattern changed upstream — run npm run generate:stock and re-check the spec`,
+            `${entry.scriptName}: pattern changed upstream, run npm run generate:stock and re-check the spec`,
         );
         assert.equal(
             live.replaceString ?? '', entry.replaceString,
-            `${entry.scriptName}: stock markup changed upstream — run npm run generate:stock`,
+            `${entry.scriptName}: stock markup changed upstream, run npm run generate:stock`,
         );
     }
 });

@@ -3,7 +3,7 @@
  *
  * Everything else in this extension goes through `SillyTavern.getContext()`, which is the
  * fork's supported API. The agent store is not on it, so these three modules have to be
- * imported by path — and that coupling is confined here on purpose.
+ * imported by path, and that coupling is kept here on purpose.
  *
  * Four rules make that survivable:
  *  1. Absolute URL specifiers, so moving a file inside this extension cannot break them.
@@ -57,7 +57,7 @@ export async function loadHost() {
 
 /**
  * The snapshot refresher lives in a much larger module, so it loads separately. If it is
- * unavailable, applying a theme still works — the user just has to switch chats to see
+ * unavailable, applying a theme still works, the user just has to switch chats to see
  * already-rendered messages update.
  */
 export async function loadRefresher() {
@@ -94,7 +94,7 @@ export async function waitForAgents({ attempts = 20, delayMs = 250 } = {}) {
     }
 
     // An empty list is a legitimate state (a user may have deleted every agent), so this
-    // is not an error — callers just find nothing to theme.
+    // is not an error, callers just find nothing to theme.
     return host;
 }
 

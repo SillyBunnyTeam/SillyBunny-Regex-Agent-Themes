@@ -6,71 +6,57 @@ product
 
 ## Users
 
-Regex Agent Themes is for SillyBunny users who already run the bundled In-Chat Agent trackers
-and want them to look like part of their setup rather than one fixed dark purple style. Two
-groups matter most: users on a light or strongly-branded SillyBunny theme, for whom the stock
-tracker palette is actively wrong; and users who care about the look of their roleplay
-transcripts and want the cards to match the tone of what they are playing.
+People already running SillyBunny's bundled trackers who want them to look different. Mainly two
+cases: someone on a light or heavily customised SillyBunny theme, where the stock dark purple
+cards look out of place, and someone who cares how their roleplay transcripts read and wants the
+cards to match the tone of what they are playing.
 
-A new user needs to change how their trackers look in under a minute, without learning what a
-regex script is. An experienced user needs per-tracker control, a way to keep their own hand
-edits, and confidence that a template update will not quietly undo their work.
+A new user should be able to change how their trackers look in under a minute without knowing
+what a regex script is. An experienced user needs per-tracker control, and needs their own edits
+to survive.
 
 ## Product Purpose
 
-Make the visual style of SillyBunny's bundled trackers and companion panels a setting instead
-of a hardcoded fact, and do it without changing what the model is asked to produce.
+Make the look of the bundled trackers a setting instead of something hardcoded, without changing
+what the model is asked to write.
 
-Success means a user can browse themes, see accurately what each one will look like, apply one
-globally or to a single tracker, and revert to the bundled look at any time with nothing left
-behind. Their existing chat history re-skins along with new messages. Their own edits to
-tracker markup survive.
+It works if someone can browse the themes, see what each one actually looks like, apply one, and
+go back to stock later with nothing left behind. Existing chat history updates too. Their own
+edits to tracker HTML stay.
 
-Explicitly out of scope: changing tracker prompts, adding trackers, or altering what the model
-emits. This extension only changes how existing output is drawn.
+Not in scope: changing tracker prompts, adding trackers, or changing what the model emits.
 
 ## Brand Personality
 
-Direct and visual. The product's job is to show, not describe — the gallery does the
-explaining. Copy stays short, names the consequence, and avoids design vocabulary the user did
-not ask for. When something is risky or irreversible it says so plainly, once.
+Plain and visual. The gallery does the explaining, so the writing stays short and says what
+things do. When something is destructive or hard to undo, say so once and move on.
 
 ## Anti-references
 
-- Theme names and descriptions that are marketing rather than description. A user should be
-  able to guess what "Newsprint" looks like.
-- A gallery of colour swatches that does not show the actual component. Previews must be the
-  real generated markup, not an approximation.
-- Silent destructive behaviour: overwriting a user's hand-edited markup, or reverting on
-  disable.
-- Settings that require understanding regex scripts, capture groups, or the render pipeline.
-- Forty-five near-identical dark themes. Every theme in the pack should be recognisably a
-  different decision, not a hue rotation.
-- Decorative flourishes that hurt legibility of the tracker's actual content.
+- Theme names and descriptions that sell instead of describe. Someone should be able to guess what
+  "Newsprint" looks like.
+- Colour swatches standing in for a preview. Show the actual card.
+- Overwriting a user's own edits, or reverting when the extension is disabled.
+- Settings that need you to understand regex scripts or capture groups.
+- Forty-five dark themes with the hue shifted. Each one should be a different decision.
+- Decoration that makes the tracker's own text harder to read.
 
 ## Design Principles
 
-- **Show the real thing.** Previews render the same string chat renders, through the same
-  formatter. A preview that lies is worse than no preview.
-- **Every theme is a whole decision.** Colour, geometry, type and ornament move together. A
-  theme that only changes hue does not earn a slot.
-- **The content outranks the frame.** Tracker text is what the user is reading. Ornament may
-  frame it and must never compete with it.
-- **Never overwrite what you did not write.** Recognisably-stock markup can be replaced
-  freely; anything else needs explicit confirmation.
-- **Degrade to plain, never to broken.** Fragments carry their own styles so uninstalling the
-  extension leaves readable cards, not wreckage.
-- **One setting, visible consequence.** Each option states what it changes and takes effect in
-  the preview immediately.
+- Show the real card, in the real theme, with real data.
+- Colour, shape, type and ornament move together. A hue swap is not a theme.
+- The tracker's text is what people are reading. Decoration frames it and never competes with it.
+- Never overwrite HTML the extension did not write without being told to.
+- Uninstalling should leave plain readable cards, not broken ones.
+- Every setting takes effect in the preview straight away.
 
 ## Accessibility & Inclusion
 
-Target WCAG 2.2 AA for the settings panel: semantic controls, full keyboard operation, visible
-focus, programmatic labels, and usable layout at narrow widths.
+WCAG 2.2 AA for the settings panel: real controls, full keyboard use, visible focus, labels that
+screen readers can reach, and a layout that still works narrow.
 
-For generated tracker markup: keep body text contrast at AA against its own surface in every
-theme, never encode meaning in colour alone (labels stay as text), mark purely decorative
-glyphs `aria-hidden`, offer a "plain glyphs" option for users who find decorative characters
-noisy in a screen reader, honour `prefers-reduced-motion`, and keep cards from forcing
-horizontal scroll at 360px. Themes whose signature effect is low contrast — glassmorphism,
-low-contrast slate — must still meet the body-text floor.
+For the generated tracker cards: body text meets AA against its own background in every theme,
+state is never colour-only (labels are text), decorative characters are `aria-hidden`, there is a
+plain glyphs option, motion respects `prefers-reduced-motion`, and nothing forces sideways
+scrolling at 360px. Themes built on low contrast, like the glass and slate ones, still have to
+clear the body text floor.

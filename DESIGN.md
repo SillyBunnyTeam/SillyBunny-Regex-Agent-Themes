@@ -1,6 +1,6 @@
 ---
 name: Regex Agent Themes
-description: A theme pack for SillyBunny's in-chat trackers, plus a native-feeling picker for it.
+description: Design notes for the theme pack and its settings panel.
 typography:
   body:
     fontFamily: "inherit"
@@ -22,124 +22,107 @@ spacing:
   lg: "16px"
 ---
 
-# Design System: Regex Agent Themes
+# Design: Regex Agent Themes
 
-## Overview
-
-**Creative North Star: "The Swatch Book"**
-
-Two different design problems live in this project and they must not be confused.
+There are two separate design jobs here and they pull in opposite directions.
 
 The **settings panel** is a tool. It inherits the active SillyBunny theme, uses the host's own
-controls, and stays out of the way. It has no visual identity of its own, because anything it
-asserted would compete with the 45 identities it is there to display.
+controls, and has no look of its own. Anything it asserted visually would fight the 45 looks it
+exists to show.
 
-The **themes** are the product. Each one is a complete visual position — palette, geometry,
-typography and ornament moving together — and it is allowed to be loud, quiet, ugly-on-purpose,
-or period-accurate. What it is not allowed to be is illegible, or a hue rotation of another
-theme.
-
-**Key characteristics:**
-
-- The panel is native; the themes are opinionated
-- Previews are the real rendered component, never an approximation
-- Every theme is one decision applied consistently across nine markup shapes
-- Content legibility outranks ornament in every theme
+The **themes** are the product. Each one is allowed to be loud, quiet, ugly on purpose, or period
+accurate. What it cannot be is hard to read, or another theme with the hue moved.
 
 ## Colours
 
-### The settings panel
+### Settings panel
 
-The host theme owns the palette. The panel adds colour only for state:
+The host theme owns the palette. The panel only adds colour for state:
 
-- **Host accent** (`--SmartThemeQuoteColor`) marks the applied theme card and keyboard focus.
-- **Warning** (`--warning`, falling back to amber) marks drift that needs a decision:
-  "edited by hand" and "needs re-apply".
-- **Error** (`--fullred`) marks the one unrecoverable state, "pattern changed upstream".
+- Host accent (`--SmartThemeQuoteColor`) for the applied theme card and keyboard focus.
+- Warning (`--warning`, falling back to amber) for drift that needs a decision: "edited by hand"
+  and "needs re-apply".
+- Error (`--fullred`) for the one state you cannot fix from here, "pattern changed upstream".
 
-### The themes
+### Themes
 
-Each theme declares a palette in four parts, and the renderers only ever read these:
+A theme declares its palette in four parts and the renderers read nothing else:
 
-- **Surfaces** — a header gradient pair and a body gradient pair, plus a row wash, an
-  alternate row wash, an inset, and a chip background.
-- **Ink** — head, body, label, muted, strong, warm, cool.
-- **Lines** — a header border colour, a body border colour, a width, a style, and the width
-  of the accent rule on rows.
-- **An accent ramp of exactly seven.** Trackers index into it, so a short ramp would make
-  different trackers collide.
+- **Surfaces**: a header gradient pair, a body gradient pair, a row wash, an alternate row wash,
+  an inset, a chip background.
+- **Ink**: head, body, label, muted, strong, warm, cool.
+- **Lines**: header border colour, body border colour, width, style, and the width of the accent
+  rule on rows.
+- **Seven accents.** Trackers index into the ramp, so a shorter one makes different trackers
+  collide.
 
-Colour values are literal. `color-mix()` and `var(--SmartTheme*)` appear only in the three
-adaptive themes, where deriving from the host is the entire point — and there every `var()`
-carries a literal fallback so a host theme missing a variable still renders.
+Colours are literal values. `color-mix()` and `var(--SmartTheme*)` only appear in the three
+adaptive themes, where reading the host is the point, and every `var()` there has a literal
+fallback.
 
-Contrast floor: body text must reach WCAG AA against its own surface in every theme, including
-the ones whose signature effect is low contrast.
+Body text has to clear WCAG AA against its own background. That includes the themes whose whole
+idea is low contrast.
 
-## Typography
+## Type
 
-Themes choose a display family for headers and a reading family for bodies, from system font
-stacks only — no `@font-face`, no CDN, because the app runs locally and a missing font must
-degrade to a sane fallback rather than a download that never arrives.
+Themes pick a display family for headers and a reading family for bodies, from system font stacks
+only. No `@font-face`, no CDN. The app runs locally and a missing font should fall back, not hang.
 
-The type scale is six sizes (head, body, label, value, chip, plus line height) and is scaled as
-a group by the density setting. Themes may re-case a label; they may never re-word one, because
-those strings are SillyBunny's product copy.
+The scale is head, body, label, value, chip and line height, scaled as a group by the density
+setting. A theme may re-case a label. It may not re-word one, because those strings are
+SillyBunny's own copy.
 
-## Structure
+## Shapes
 
-Every generated fragment is one of nine archetypes, and the archetype — not the theme — decides
-the shape:
+Nine archetypes, and the archetype decides the shape, not the theme:
 
 | Archetype | Shape |
 | --- | --- |
-| Panel | header chip, one or two body rows |
-| Profile | header chip, a stack of labelled sections |
-| Slots | header chip, a fixed number of list rows |
-| Statcard | header chip, a responsive stat grid, a pill, a note |
-| Chip | an inline pill that flows inside prose |
-| Terminal | a framed window with a title bar and a pre-wrap body |
-| Stream | an open/row/close triple bracketing message rows |
-| Transcript | a speaker pill above a message block |
+| Panel | header chip, one or two rows |
+| Profile | header chip, stack of labelled sections |
+| Slots | header chip, fixed number of list rows |
+| Statcard | header chip, stat grid, pill, note |
+| Chip | inline pill that flows inside prose |
+| Terminal | framed window, title bar, pre-wrap body |
+| Stream | open/row/close triple around message rows |
+| Transcript | speaker pill above a message block |
 | Bold | the shared bold-markdown helper |
 
-A theme customises an archetype through tokens; when it needs structure tokens cannot express
-it uses `frame` (corner brackets, rivets, ruler ticks, halftone, bevel), `scan` (a scanline or
-grid layer), `ornament` (raw HTML at eight named anchors), or `extra` (a verbatim declaration
-appendix per part). Escalate only as far as needed — most themes are tokens alone.
+Themes customise those through tokens. When tokens are not enough there are four escape hatches,
+and you use the smallest one that works: `frame` (corner brackets, rivets, ruler ticks, halftone,
+bevel), `scan` (a scanline or grid layer), `ornament` (raw HTML at eight named anchors), `extra`
+(a verbatim declaration appendix per part). Most themes never leave tokens.
 
 ## Motion
 
-Almost none. The only transition is the disclosure chevron rotating on open, at 180ms, and it
-is disabled under `prefers-reduced-motion`. Tracker cards appear mid-conversation and animation
-there reads as noise.
+Almost none. The disclosure chevron rotates on open, 180ms, off under `prefers-reduced-motion`.
+Tracker cards turn up mid-conversation and animation there reads as noise.
 
 ## Rules
 
-- **Inline styles are the contract.** Every fragment carries its complete computed style, so
-  uninstalling the extension leaves readable cards. The stylesheet only adds what inline styles
-  cannot express.
-- **Style hooks are `data-rat-*` attributes, never class names.** A DOMPurify hook rewrites
-  every class in message HTML to `custom-<name>`; a `.rat-row` rule would be dead code.
-- **Never emit `{{`, and never emit `$` followed by a digit.** Both are consumed before the
-  string reaches the DOM — the first by macro expansion, the second by the regex interpolator.
-- **One line per fragment.** A blank line invites the markdown pass to wrap fragments in `<p>`.
-  Only the terminal archetype spans lines, and it confines them to a pre-wrap region.
-- **Decorative glyphs are `aria-hidden`.** Meaning always exists as text as well.
-- **Nothing may force horizontal scroll at 360px.** Grids use `auto-fit` with a minimum, grid
-  children get `min-width: 0`, and values get `overflow-wrap: anywhere`.
+- Inline styles are the contract. Every fragment carries its full style, so uninstalling leaves
+  readable cards. The stylesheet only adds what inline styles cannot do.
+- Style hooks are `data-rat-*` attributes, never class names. SillyBunny rewrites every class in
+  message HTML to `custom-<name>`, so a `.rat-row` rule would never match.
+- Never emit `{{`, and never emit `$` followed by a digit. Both get eaten before the HTML reaches
+  the page.
+- One line per fragment. A blank line invites the markdown pass to wrap things in `<p>`. Only the
+  terminal archetype spans lines, and only inside its pre-wrap body.
+- Decorative characters are `aria-hidden`. Meaning always exists as text too.
+- Nothing forces sideways scrolling at 360px. Grids use `auto-fit` with a minimum, grid children
+  get `min-width: 0`, values get `overflow-wrap: anywhere`.
 
 ## Do
 
-- Show the component, in the theme, with real data, before the user commits
-- Keep each theme's decision visible in all nine archetypes
-- State the consequence of a destructive action in the button's own row
-- Let a theme be quiet if quiet is the point
+- Show the card, in the theme, with real data, before anyone commits.
+- Keep a theme's decision visible in all nine shapes.
+- Put the consequence of a destructive action in the same row as the button.
+- Let a quiet theme be quiet.
 
 ## Don't
 
-- Ship two themes that differ only in hue
-- Let ornament reduce the contrast of tracker content
-- Overwrite markup the extension did not write, without an explicit action
-- Revert on disable
-- Depend on the stylesheet for anything that would look broken without it
+- Ship two themes that only differ in hue.
+- Let decoration cut the contrast of tracker text.
+- Overwrite HTML the extension did not write without an explicit action.
+- Revert on disable.
+- Rely on the stylesheet for anything that looks broken without it.

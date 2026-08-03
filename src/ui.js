@@ -51,12 +51,12 @@ const TEMPLATE_LABELS = Object.freeze({
 });
 
 const STATUS_LABELS = Object.freeze({
-    pristine: 'up to date',
+    pristine: 'themed',
     stock: 'not themed',
     outdated: 'needs re-apply',
     foreign: 'edited by hand',
     missing: 'script missing',
-    'upstream-changed': 'pattern changed upstream',
+    'upstream-changed': 'changed upstream',
 });
 
 let previewArchetype = ARCHETYPES.PANEL;
@@ -111,11 +111,11 @@ function themeOptions(settings, { includeInherit = false } = {}) {
     options.push({ value: STOCK_THEME, label: 'Stock (leave unthemed)' });
     for (const family of FAMILIES) {
         for (const theme of THEMES.filter(item => item.family === family.id)) {
-            options.push({ value: theme.slug, label: `${family.label} — ${theme.name}` });
+            options.push({ value: theme.slug, label: `${family.label}: ${theme.name}` });
         }
     }
     for (const theme of Object.values(settings.customThemes)) {
-        options.push({ value: theme.slug, label: `Custom — ${theme.name ?? theme.slug}` });
+        options.push({ value: theme.slug, label: `Custom: ${theme.name ?? theme.slug}` });
     }
     return options;
 }
@@ -177,7 +177,7 @@ function reportApply(result) {
         parts.push(`${result.reverted} reverted`);
     }
     if (result.blocked?.length) {
-        parts.push(`${result.blocked.length} skipped (edited by hand)`);
+        parts.push(`${result.blocked.length} skipped, edited by hand`);
     }
     if (result.failed?.length) {
         parts.push(`${result.failed.length} failed`);
@@ -193,7 +193,7 @@ async function buildScopeTable(settings, refresh) {
     if (!host.ok) {
         wrapper.append(el('div', {
             class: 'rat-warning',
-            text: `${host.reason}. Themes can still be previewed, but not applied.`,
+            text: `${host.reason}. You can still preview themes, but not apply them.`,
         }));
         return wrapper;
     }
@@ -211,7 +211,7 @@ async function buildScopeTable(settings, refresh) {
     if (!agents.length) {
         wrapper.append(el('div', {
             class: 'rat-note',
-            text: 'No bundled tracker agents are installed, so there is nothing to theme yet.',
+            text: 'No tracker agents installed yet.',
         }));
         return wrapper;
     }
@@ -263,7 +263,7 @@ async function buildScopeTable(settings, refresh) {
             for (const agent of templateAgents) {
                 await applyToAgent(agent, { force: true });
             }
-            toast('success', 'Re-applied over the local edits.');
+            toast('success', 'Applied over your edits.');
             refresh();
         });
 
@@ -272,7 +272,7 @@ async function buildScopeTable(settings, refresh) {
             for (const agent of templateAgents) {
                 await revertAgent(agent);
             }
-            toast('success', 'Restored the bundled markup.');
+            toast('success', 'Back to stock.');
             refresh();
         });
 
@@ -322,7 +322,7 @@ function buildOptions(settings, refresh) {
         },
     )));
 
-    wrapper.append(optionRow('Follow host theme colours', checkbox(
+    wrapper.append(optionRow('Use SillyBunny theme colours', checkbox(
         'rat_adaptive', options.adaptiveNeutrals,
         value => {
             updateSettings({ options: { adaptiveNeutrals: value } });
@@ -452,15 +452,15 @@ async function renderContent(content) {
 
     content.append(el('div', {
         class: 'rat-note',
-        text: 'Applies to the bundled In-Chat Agent trackers and companion panels. '
-            + 'Changing a theme also re-skins tracker output already in your chat history.',
+        text: 'Changes how the bundled trackers and companion panels look. '
+            + 'Also updates trackers already in your chat.',
     }));
 
     if (detectEncodedTags()) {
         content.append(el('div', {
             class: 'rat-warning',
-            text: 'Your "Show tags in chat as plain text" setting is on, so tracker HTML will not '
-                + 'render — this affects the stock look too. Turn it off in User Settings.',
+            text: '"Show tags in chat as plain text" is on, so tracker HTML shows up as text. '
+                + 'Turn it off in User Settings. It breaks the stock trackers too.',
         }));
     }
 

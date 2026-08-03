@@ -11,7 +11,7 @@ import { STOCK, STOCK_BY_KEY } from '../src/stock.js';
 import { SAMPLES } from '../src/samples.js';
 
 test('every shipped script has exactly one spec', () => {
-    assert.equal(STOCK.length, 42, 'baseline size changed — regenerate src/stock.js');
+    assert.equal(STOCK.length, 42, 'baseline size changed, regenerate src/stock.js');
     assert.equal(SPECS.length, STOCK.length);
 
     for (const entry of STOCK) {

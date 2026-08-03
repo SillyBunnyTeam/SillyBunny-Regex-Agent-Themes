@@ -155,7 +155,7 @@ export const CUTE_FLOWERY = [
             bodyFamily: 'Georgia, "Iowan Old Style", serif',
             headSize: '12px', labelSize: '10px', labelCase: 'uppercase', headTracking: '0.04em',
         },
-        glyph: { section: '❋', sectionAlt: '✽', bullet: '·', sep: '—', chevron: '▾' },
+        glyph: { section: '❋', sectionAlt: '✽', bullet: '·', sep: '·', chevron: '▾' },
     },
     {
         slug: 'sakura-drift',
@@ -205,7 +205,7 @@ export const CUTE_FLOWERY = [
             headSize: '10px', labelSize: '9px', headCase: 'uppercase',
             headTracking: '0.12em', labelCase: 'uppercase',
         },
-        glyph: { section: '✿', sectionAlt: '❀', bullet: '–', sep: '|', chevron: '▾' },
+        glyph: { section: '✿', sectionAlt: '❀', bullet: '-', sep: '|', chevron: '▾' },
         css: '[data-rat-part="row"],[data-rat-part="section"]{border-bottom:1px solid #d3d9c9}',
     },
     {

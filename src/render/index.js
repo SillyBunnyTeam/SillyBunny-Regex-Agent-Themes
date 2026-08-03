@@ -127,7 +127,7 @@ export function buildMeterScript(agentId, theme, options = {}) {
 
 /**
  * The chained script that removes rendered slots whose captures were all empty. Used for
- * the direction menu and parallel tracker, which have no such script in stock — the CYOA
+ * the direction menu and parallel tracker, which have no such script in stock. The CYOA
  * agent instead has one shipped with a fixed id, handled by the CLEANUP spec.
  */
 export function buildExtraCleanupScript(agentId, targetSpec, theme, options = {}) {

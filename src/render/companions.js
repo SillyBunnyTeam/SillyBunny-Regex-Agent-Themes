@@ -4,8 +4,8 @@
  * The terminal archetype is the one place that ships an inline `<style>` block, because
  * stock does and because its panel needs rules inline styles cannot express. Note the
  * class-name pairing that makes it work: markup uses `rat-tw…` and the `<style>` block
- * also uses `.rat-tw…`. Both are rewritten to `custom-rat-tw…` — the markup by the
- * DOMPurify hook (chats.js:1916) and the selector by decodeStyleTags (chats.js:592) — so
+ * also uses `.rat-tw…`. Both get rewritten to `custom-rat-tw…`, the markup by the
+ * DOMPurify hook (chats.js:1916) and the selector by decodeStyleTags (chats.js:592), so
  * they still match. Prefixing either side by hand would break the pair.
  */
 

@@ -145,7 +145,7 @@ export const RETRO_PRINT = [
         name: 'Paper Minimal',
         family: 'print',
         mode: 'light',
-        blurb: 'Off-white with grey hairlines. Hierarchy from weight and space alone.',
+        blurb: 'Off-white with grey hairlines. Nothing but weight and spacing.',
         surface: {
             headFrom: '#fbfbf9', headTo: '#f4f4f1',
             bodyFrom: '#ffffff', bodyTo: '#fdfdfc',
@@ -164,7 +164,7 @@ export const RETRO_PRINT = [
             family: '"Inter", "Helvetica Neue", system-ui, sans-serif',
             bodyFamily: 'inherit', headSize: '12px', labelCase: 'uppercase', labelSize: '9px',
         },
-        glyph: { section: '', sectionAlt: '', bullet: '·', sep: '—', chevron: '▾' },
+        glyph: { section: '', sectionAlt: '', bullet: '·', sep: '·', chevron: '▾' },
     },
     {
         slug: 'newsprint',
@@ -228,7 +228,7 @@ export const RETRO_PRINT = [
         name: 'Editorial Hairline',
         family: 'print',
         mode: 'light',
-        blurb: 'No boxes at all. Rules and spacing carry the whole hierarchy.',
+        blurb: 'No boxes. Just rules and spacing.',
         surface: {
             headFrom: '#ffffff', headTo: '#ffffff',
             bodyFrom: '#ffffff', bodyTo: '#ffffff',
