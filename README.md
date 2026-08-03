@@ -39,11 +39,13 @@ Pick a theme from the dropdown at the top, grouped by family. It applies everywh
 
 Everything else sits in three collapsed sections so the panel stays short:
 
-- **Preview** shows the current theme with sample data in it. Its own dropdown switches which card
-  you are looking at, so you can check how a theme handles NPC profiles or the chatroom. Picking a
-  theme opens this section for you.
+- **Themes** is the gallery. Every theme, each showing a real card with sample data in it, and an
+  Apply button. The Preview shape dropdown at the top switches which card they all show, so you can
+  compare how they handle NPC profiles or the chatroom.
 - **Options** is the settings below.
 - **Per-tracker** sets a theme for one tracker at a time. Leave a row blank to use the global theme.
+
+The gallery only builds itself when you open it, so the panel costs nothing while collapsed.
 
 "Revert all" puts everything back to stock. Disabling the extension does not revert, because the
 themes get saved into your agent files.

@@ -158,12 +158,23 @@
 }
 
 #rat_drawer .rat-section > .inline-drawer-header {
-    padding: 6px 0;
     font-size: 0.95em;
 }
 
+/*
+ * Line body content up with the header text above it. The host gives
+ * .inline-drawer-header a 14px left padding, so anything less leaves the content sitting
+ * further left than its own heading.
+ */
+#rat_drawer > .inline-drawer > .inline-drawer-content,
 #rat_drawer .rat-section > .inline-drawer-content {
-    padding-bottom: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+#rat_drawer .rat-section > .inline-drawer-content {
+    padding-top: 4px;
+    padding-bottom: 12px;
 }
 
 #rat_drawer .rat-toolbar {
@@ -174,11 +185,35 @@
     margin-bottom: 10px;
 }
 
-#rat_drawer .rat-toolbar label {
+#rat_drawer .rat-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.9em;
+    min-width: 150px;
+    flex: 1 1 150px;
+}
+
+#rat_drawer .rat-field > span {
+    opacity: 0.8;
+}
+
+#rat_drawer .rat-check {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     font-size: 0.9em;
+    flex: 1 1 auto;
+}
+
+/* Keep short button labels from breaking mid-word in a narrow panel. */
+#rat_drawer .menu_button {
+    white-space: nowrap;
+}
+
+#rat_drawer .rat-applied {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 #rat_drawer .rat-note {
@@ -196,12 +231,32 @@
     font-size: 0.9em;
 }
 
-#rat_drawer .rat-preview-head {
+#rat_drawer .rat-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px;
+    margin: 10px 0 0;
+}
+
+#rat_drawer .rat-card {
+    border: 1px solid rgba(127, 127, 127, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+#rat_drawer .rat-card[data-active='true'] {
+    outline: 2px solid var(--SmartThemeQuoteColor, #bd93f9);
+}
+
+#rat_drawer .rat-card-head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 6px;
-    margin: 8px 0 4px;
 }
 
 #rat_drawer .rat-card-name {
@@ -262,4 +317,10 @@
 
 #rat_drawer select {
     width: 100%;
+}
+
+@media (max-width: 600px) {
+    #rat_drawer .rat-gallery {
+        grid-template-columns: 1fr;
+    }
 }

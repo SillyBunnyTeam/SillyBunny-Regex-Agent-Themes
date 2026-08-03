@@ -85,8 +85,14 @@ function toast(type, message) {
     globalThis.toastr?.[type]?.(message);
 }
 
+/** Checkbox first, then its label, which is the conventional order for a toggle. */
 function optionRow(label, control) {
-    return el('label', {}, [control, document.createTextNode(` ${label}`)]);
+    return el('label', { class: 'rat-check' }, [control, el('span', { text: label })]);
+}
+
+/** Label above its control, so a narrow panel does not squeeze the two side by side. */
+function fieldRow(label, control) {
+    return el('label', { class: 'rat-field' }, [el('span', { text: label }), control]);
 }
 
 function select(id, options, value, onChange) {
@@ -123,10 +129,22 @@ function groupedSelect(id, groups, value, onChange) {
     return node;
 }
 
-function section(key, title) {
-    const open = sectionOpen[key];
+function section(key, title, build) {
     const content = el('div', { class: 'inline-drawer-content' });
-    if (!open) {
+    let built = false;
+
+    const ensureBuilt = () => {
+        if (built) {
+            return;
+        }
+        built = true;
+        build(content);
+    };
+
+    const open = sectionOpen[key];
+    if (open) {
+        ensureBuilt();
+    } else {
         content.style.display = 'none';
     }
 
@@ -144,11 +162,15 @@ function section(key, title) {
         content,
     ]);
 
+    // Fires before the host's slideToggle, so a lazily built section opens already filled.
     drawer.addEventListener('inline-drawer-toggle', () => {
         sectionOpen[key] = !sectionOpen[key];
+        if (sectionOpen[key]) {
+            ensureBuilt();
+        }
     });
 
-    return { drawer, content };
+    return drawer;
 }
 
 function checkbox(id, checked, onChange) {
@@ -180,27 +202,41 @@ function themeGroups(settings, { includeInherit = false } = {}) {
     return groups;
 }
 
-function buildPreview(settings) {
-    const wrapper = el('div', { id: 'rat_preview_wrap' });
-    const theme = getTheme(settings.theme, settings.customThemes);
+function buildGallery(settings, refresh) {
+    const gallery = el('div', { class: 'rat-gallery', id: 'rat_gallery' });
+    const custom = Object.values(settings.customThemes);
 
-    if (!theme) {
-        wrapper.append(el('div', {
-            class: 'rat-note',
-            text: 'Trackers are on the stock look. Pick a theme above to see it here.',
-        }));
-        return wrapper;
+    for (const theme of [...THEMES, ...custom]) {
+        const active = settings.theme === theme.slug;
+        const card = el('div', { class: 'rat-card', 'data-active': String(active) });
+
+        card.append(el('div', { class: 'rat-card-head' }, [
+            el('span', { class: 'rat-card-name', text: theme.name ?? theme.slug }),
+            el('span', { class: 'rat-card-mode', text: theme.mode ?? '' }),
+        ]));
+
+        const preview = el('div', { class: 'rat-preview' });
+        card.append(preview);
+        mountPreview(preview, previewArchetype, theme, settings.options);
+
+        const button = el('div', {
+            class: active ? 'menu_button rat-applied' : 'menu_button',
+            text: active ? 'Applied' : 'Apply',
+        });
+        button.addEventListener('click', async () => {
+            if (active) {
+                return;
+            }
+            updateSettings({ theme: theme.slug });
+            reportApply(await applyAll());
+            refresh();
+        });
+        card.append(button);
+
+        gallery.append(card);
     }
 
-    wrapper.append(el('div', { class: 'rat-preview-head' }, [
-        el('span', { class: 'rat-card-name', text: theme.name }),
-        el('span', { class: 'rat-card-mode', text: theme.mode }),
-    ]));
-
-    const preview = el('div', { class: 'rat-preview' });
-    wrapper.append(preview);
-    mountPreview(preview, previewArchetype, theme, settings.options);
-    return wrapper;
+    return gallery;
 }
 
 function reportApply(result) {
@@ -341,7 +377,7 @@ function buildOptions(settings, refresh) {
     const options = settings.options;
     const wrapper = el('div', { class: 'rat-toolbar' });
 
-    wrapper.append(optionRow('Density', select(
+    wrapper.append(fieldRow('Density', select(
         'rat_density',
         DENSITIES.map(value => ({ value, label: value })),
         options.density,
@@ -351,7 +387,7 @@ function buildOptions(settings, refresh) {
         },
     )));
 
-    wrapper.append(optionRow('Panels', select(
+    wrapper.append(fieldRow('Panels', select(
         'rat_open_defaults',
         OPEN_DEFAULTS.map(value => ({ value, label: value.replace('-', ' ') })),
         options.openDefaults,
@@ -404,7 +440,7 @@ function buildOptions(settings, refresh) {
 function buildToolbar(settings, refresh) {
     const toolbar = el('div', { class: 'rat-toolbar' });
 
-    toolbar.append(optionRow('Preview', select(
+    toolbar.append(fieldRow('Preview shape', select(
         'rat_preview_archetype',
         Object.keys(PREVIEW_KEYS).map(value => ({ value, label: ARCHETYPE_LABELS[value] ?? value })),
         previewArchetype,
@@ -493,26 +529,33 @@ async function renderContent(content) {
         }));
     }
 
-    content.append(groupedSelect('rat_theme', themeGroups(settings), settings.theme, async value => {
-        updateSettings({ theme: value });
-        // Open the preview on a theme change so the result is visible without a second click.
-        sectionOpen.preview = true;
-        reportApply(await applyAll());
-        refresh(content);
+    content.append(fieldRow('Theme', groupedSelect(
+        'rat_theme', themeGroups(settings), settings.theme,
+        async value => {
+            updateSettings({ theme: value });
+            reportApply(await applyAll());
+            refresh(content);
+        },
+    )));
+
+    const again = () => refresh(content);
+
+    content.append(section('preview', 'Themes', (host) => {
+        host.append(buildToolbar(settings, again));
+        host.append(buildGallery(settings, again));
     }));
 
-    const preview = section('preview', 'Preview');
-    preview.content.append(buildToolbar(settings, () => refresh(content)));
-    preview.content.append(buildPreview(settings));
-    content.append(preview.drawer);
+    content.append(section('options', 'Options', (host) => {
+        host.append(buildOptions(settings, again));
+    }));
 
-    const options = section('options', 'Options');
-    options.content.append(buildOptions(settings, () => refresh(content)));
-    content.append(options.drawer);
-
-    const scope = section('scope', 'Per-tracker');
-    scope.content.append(await buildScopeTable(settings, () => refresh(content)));
-    content.append(scope.drawer);
+    content.append(section('scope', 'Per-tracker', (host) => {
+        host.append(el('div', { class: 'rat-note', text: 'Loading…' }));
+        buildScopeTable(settings, again).then((table) => {
+            host.textContent = '';
+            host.append(table);
+        });
+    }));
 }
 
 let refreshHandle = null;
