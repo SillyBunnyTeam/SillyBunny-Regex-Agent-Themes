@@ -423,8 +423,8 @@ export function pairSlot(slotSpec, tokens, accentIndex, index) {
 export function pill(text, tokens, accent) {
     return `<span${part('pill')}${decl({
         display: 'inline-block',
-        padding: '3px 8px',
-        'margin-top': '4px',
+        padding: tokens.space.pillPad,
+        'margin-top': tokens.space.pillMarginTop,
         'border-radius': tokens.radius.pill,
         border: borderValue(tokens, alpha(accent, 0.26)),
         background: surfaceFill(tokens, alpha(accent, 0.18)),
@@ -482,8 +482,8 @@ export function chip(spec, tokens, { tag = 'span' } = {}) {
 
     const style = withExtra(decl({
         display: 'inline-block',
-        padding: '4px 9px',
-        margin: '2px 4px 2px 0',
+        padding: tokens.space.chipPad,
+        margin: tokens.space.chipMargin,
         background: layeredBackground(tokens, [
             `linear-gradient(90deg,${tokens.surface.chip},${alpha(accent, 0.1)})`,
         ], { canvas: true }),

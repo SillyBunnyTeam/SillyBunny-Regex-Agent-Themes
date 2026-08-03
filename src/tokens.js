@@ -86,6 +86,10 @@ export const BASE_TOKENS = Object.freeze({
         slotPadX: '9px',
         gap: '9px',
         rowGap: '5px',
+        pillPad: '3px 8px',
+        pillMarginTop: '4px',
+        chipPad: '4px 9px',
+        chipMargin: '2px 4px 2px 0',
     },
 
     type: {

@@ -30,7 +30,10 @@ const RICH_THEME = {
     shadow: { head: '0 6px 18px rgba(20,40,60,0.24)', body: 'none' },
     accents: ['#345678', '#287080', '#846228', '#8a4f20', '#31704a', '#4d6090', '#7b4778'],
     radius: { head: '10px', body: '10px', row: '7px', slot: '6px', pill: '999px' },
-    space: { bodyPad: '4px 10px 12px', gap: '8px', rowGap: '4px' },
+    space: {
+        bodyPad: '4px 10px 12px', gap: '8px', rowGap: '4px', pillPad: '3px 9px',
+        pillMarginTop: '5px', chipPad: '5px 10px', chipMargin: '2px 4px 2px 0',
+    },
     type: {
         family: '"Inter", system-ui, sans-serif', bodyFamily: 'inherit', headSize: '12px',
         bodySize: '12px', lineHeight: '1.5', headWeight: '700', headCase: 'uppercase',
@@ -55,6 +58,7 @@ test('partial and rich custom themes are canonicalized without unsafe escape hat
     assert.equal(rich.theme.family, 'custom');
     assert.equal(rich.theme.accents.length, 7);
     assert.equal(rich.theme.space.bodyPad, '4px 10px 12px');
+    assert.equal(rich.theme.space.chipPad, '5px 10px');
     assert.equal(Object.hasOwn(rich.theme, 'css'), false);
 });
 

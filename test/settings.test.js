@@ -49,6 +49,18 @@ test('ledger backups and owned script ids survive a settings round trip', () => 
     assert.deepEqual(entry.added, ['rat:meter:agent1']);
 });
 
+test('density survives settings updates and invalid values fall back to normal', () => {
+    const context = installContext({ options: { density: 'compact', meters: true } });
+    assert.equal(getSettings().options.density, 'compact');
+
+    updateSettings({ options: { density: 'roomy' } });
+    assert.equal(context.extensionSettings[SETTINGS_KEY].options.density, 'roomy');
+    assert.equal(getSettings().options.meters, true);
+
+    context.extensionSettings[SETTINGS_KEY].options.density = 'extra-roomy';
+    assert.equal(getSettings().options.density, 'normal');
+});
+
 test('malformed ledger backup values are rejected rather than coerced', () => {
     installContext({
         ledger: {

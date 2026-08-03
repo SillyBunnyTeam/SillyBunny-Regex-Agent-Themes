@@ -51,7 +51,8 @@ const GROUPS = Object.freeze({
     space: {
         outer: 'length1', headPadY: 'length1', headPadX: 'length1', bodyPad: 'length4',
         rowPadY: 'length1', rowPadX: 'length1', slotPadY: 'length1', slotPadX: 'length1',
-        gap: 'length1', rowGap: 'length1',
+        gap: 'length1', rowGap: 'length1', pillPad: 'length4', pillMarginTop: 'length1',
+        chipPad: 'length4', chipMargin: 'length4',
     },
     type: {
         family: 'font', bodyFamily: 'font', headSize: 'size', bodySize: 'size',

@@ -833,7 +833,7 @@ function updateOption(patch, { dirty = true } = {}) {
         uiState.optionsDirty = true;
         setResult({
             tone: 'warning',
-            text: 'Options changed. Apply option changes to update installed cards.',
+            text: 'Options changed. Preview a non-original theme, then apply option changes to update installed cards.',
         });
     }
     refresh();
@@ -904,13 +904,13 @@ function renderOptions(settings) {
             class: 'rat-callout rat-option-action',
             'data-tone': 'warning',
         }, [
-            el('span', { text: 'Previews use the new options. Installed cards still use the previous values.' }),
+            el('span', { text: 'Previews use the new options only for a selected non-original theme. Original SillyBunny style stays unchanged; installed cards keep their previous values until you apply these changes.' }),
             button('Apply option changes', applyOptionChanges, { focusKey: 'apply-options' }),
         ]));
     } else {
         content.append(el('p', {
             class: 'rat-note',
-            text: 'Option changes are previewed here before you apply them to installed cards.',
+            text: 'Options preview on selected non-original themes before you apply them to installed cards.',
         }));
     }
 }

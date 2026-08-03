@@ -53,6 +53,21 @@ test('every markup script is themed and every id is preserved', () => {
     }
 });
 
+test('density changes themed chip and panel geometry', () => {
+    const densities = ['compact', 'normal', 'roomy'];
+    const chip = SPECS.find(spec => spec.key === 'npc-ref');
+    const panel = SPECS.find(spec => spec.archetype === ARCHETYPES.PANEL);
+    assert.ok(chip, 'missing inline chip spec');
+    assert.ok(panel, 'missing panel spec');
+
+    const chips = densities.map(density => buildReplaceString(chip, THEME, { density }));
+    assert.equal(new Set(chips).size, densities.length, 'chip geometry did not change by density');
+    assert.match(chips[1], /padding:4px 9px;margin:2px 4px 2px 0/);
+
+    const panels = densities.map(density => buildReplaceString(panel, THEME, { density }));
+    assert.equal(new Set(panels).size, densities.length, 'panel geometry did not change by density');
+});
+
 test('frozen prompt-side scripts keep their pattern and stay empty', () => {
     const frozen = ['Trim Choices', 'Trim Directions'];
     for (const templateId of ['tpl-cyoa-choices', 'tpl-direction-menu']) {

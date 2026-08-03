@@ -185,7 +185,7 @@ function streamShell(spec, tokens) {
         : (spec.meta ? `$${spec.meta.g}` : '');
     const badge = spec.badge
         ? `<span${decl({
-            'font-size': tokens.type.labelSize, 'font-weight': '700', padding: '3px 8px',
+            'font-size': tokens.type.labelSize, 'font-weight': '700', padding: tokens.space.pillPad,
             'border-radius': tokens.radius.pill,
             background: surfaceFill(tokens, alpha(accent, 0.22)), color: tokens.on.strong,
         })}>${spec.badge}</span>`
@@ -274,7 +274,7 @@ function streamRow(spec, tokens, options) {
         overflow: 'hidden',
         'text-overflow': 'ellipsis',
         'white-space': 'nowrap',
-        padding: '4px 9px',
+        padding: tokens.space.chipPad,
         'border-radius': tokens.radius.pill,
         background: dynamicBackground(tokens, [nameBackground]),
         border: nameBorder,
@@ -325,7 +325,7 @@ export function renderTranscript(spec, tokens) {
         + `<b${part('stream-name')}${decl({
             display: 'inline-block', 'max-width': '180px', overflow: 'hidden',
             'text-overflow': 'ellipsis', 'white-space': 'nowrap',
-            padding: '3px 8px', 'border-radius': tokens.radius.pill,
+            padding: tokens.space.pillPad, 'border-radius': tokens.radius.pill,
             background: nameBackground,
             border: `1px solid ${alpha(accent, 0.32)}`,
             color: tokens.on.safety,
