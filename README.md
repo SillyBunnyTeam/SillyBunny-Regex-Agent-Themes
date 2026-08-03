@@ -1,7 +1,7 @@
 # SillyBunny Regex Agent Themes
 
 Changes the presentation of SillyBunny's bundled tracker and companion panels without changing
-their prompts or model output. Choose from 48 themes, use the original SillyBunny style, or import
+their prompts or model output. Choose from 78 themes, use the original SillyBunny style, or import
 a validated custom theme.
 
 Theme changes repaint compatible tracker cards already visible in the current chat. Agent scripts
@@ -71,15 +71,15 @@ failure, and continues a batch without claiming success for the failed agent.
 
 | Family | Themes |
 | --- | --- |
-| Cute & Soft | Marshmallow, Strawberry Milk, Bubble Tea, Plushie Felt, Sticker Book |
-| Flowery & Botanical | Wildflower Press, Sakura Drift, Herbarium, Rose Gold Bloom, Cottagecore Linen |
-| Cyber & Tech | Neon Grid, Chrome HUD, Glitchwave, Circuitry, Datastream |
-| Terminal & Retro Computing | Phosphor Green, Terminal Amber, Game Boy DMG, Teletext, Chrome 98 |
-| Retro-Futurist & Neon | Vaporwave Sunset, Synthwave Drive, Arcade Cabinet, Miami Deco, Candy Gloss |
-| Print & Editorial | Paper Minimal, Newsprint, Ink & Vellum, Editorial Hairline, Blueprint, Nordic Frost |
-| Fantasy & Arcane | Grimoire, Dungeon Slate, Elven Gilt, Eldritch Deep, Steampunk Brass, Celestial Chart |
-| Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth |
-| Animated | Aurora Drift, Signal Pulse, Moonlit Garden |
+| Cute & Soft | Marshmallow, Strawberry Milk, Bubble Tea, Plushie Felt, Sticker Book, Sunny Bento, Midnight Kawaii |
+| Flowery & Botanical | Wildflower Press, Sakura Drift, Herbarium, Rose Gold Bloom, Cottagecore Linen, Pressed Lavender, Greenhouse Grid, Night Orchid |
+| Cyber & Tech | Neon Grid, Chrome HUD, Glitchwave, Circuitry, Datastream, Biometric Lab, Hazard Console |
+| Terminal & Retro Computing | Phosphor Green, Terminal Amber, Game Boy DMG, Teletext, Chrome 98, DOS Cobalt, Paper Tape, VFD Cyan |
+| Retro-Futurist & Neon | Vaporwave Sunset, Synthwave Drive, Arcade Cabinet, Miami Deco, Candy Gloss, Atomic Diner, Cassette Future, Raygun Poster |
+| Print & Editorial | Paper Minimal, Newsprint, Ink & Vellum, Editorial Hairline, Blueprint, Nordic Frost, Bauhaus Poster, Photocopy Zine |
+| Fantasy & Arcane | Grimoire, Dungeon Slate, Elven Gilt, Eldritch Deep, Steampunk Brass, Celestial Chart, Frost Rune, Sunlit Mosaic |
+| Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth, Riso Print, Soft Clay, Construction Paper |
+| Animated | Aurora Drift, Signal Pulse, Moonlit Garden, Firefly Glow, Ocean Breath, Prism Haze, Lantern Warmth, Plasma Ring, Comet Trail, Tidepool Shimmer, Candlelit Page, Storm Charge, Dawn Glow |
 | Adaptive | Adaptive Native, Adaptive Accent, Adaptive Ink |
 
 Adaptive themes use allowlisted SillyBunny theme variables. Generated text colors and local safety

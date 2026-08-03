@@ -19,7 +19,7 @@ import css from '@adobe/css-tools';
 
 import { ARCHETYPES, SPECS } from '../src/specs.js';
 import { getStock } from '../src/stock.js';
-import { THEMES, THEME_BY_SLUG } from '../src/themes/index.js';
+import { FAMILIES, THEMES, THEME_BY_SLUG } from '../src/themes/index.js';
 import { MULTILINE_ARCHETYPES, buildReplaceString } from '../src/render/index.js';
 import { resolveTheme } from '../src/tokens.js';
 import { frameDecoration } from '../src/render/parts.js';
@@ -60,7 +60,9 @@ test('the matrix is complete', () => {
 test('animated themes have safe render markers and decorative reduced-motion CSS', () => {
     const animated = THEMES.filter(theme => theme.family === 'animated');
     assert.deepEqual(animated.map(theme => theme.slug), [
-        'aurora-drift', 'signal-pulse', 'moonlit-garden',
+        'aurora-drift', 'signal-pulse', 'moonlit-garden', 'firefly-glow', 'ocean-breath',
+        'prism-haze', 'lantern-warmth', 'plasma-ring', 'comet-trail', 'tidepool-shimmer',
+        'candlelit-page', 'storm-charge', 'dawn-glow',
     ]);
 
     for (const theme of THEMES) {
@@ -87,6 +89,25 @@ test('animated themes have safe render markers and decorative reduced-motion CSS
         }
     });
 
+    const stylesheet = css.parse(STYLESHEET);
+    const keyframeRules = stylesheet.stylesheet.rules.filter(rule => rule.type === 'keyframes');
+    const cssMotionIds = keyframeRules.map(rule => rule.name.replace(/^rat-/, ''));
+    const selectorMotionIds = [...STYLESHEET.matchAll(/\[data-rat-motion='([^']+)'\]\[data-rat-part='root'\]/g)]
+        .map(match => match[1]);
+    const registryMotionIds = animated.map(theme => theme.motion);
+    assert.deepEqual([...cssMotionIds].sort(), [...registryMotionIds].sort());
+    assert.deepEqual([...selectorMotionIds].sort(), [...registryMotionIds].sort());
+
+    for (const rule of keyframeRules) {
+        for (const keyframe of rule.keyframes) {
+            assert.ok(keyframe.declarations.length > 0, `${rule.name}: empty keyframe`);
+            assert.ok(
+                keyframe.declarations.every(declaration => declaration.property === 'box-shadow'),
+                `${rule.name}: motion must only modify box-shadow`,
+            );
+        }
+    }
+
     for (const theme of animated) {
         assert.match(STYLESHEET, new RegExp(`@keyframes rat-${theme.motion}\\b`));
         assert.match(STYLESHEET, new RegExp(
@@ -96,6 +117,31 @@ test('animated themes have safe render markers and decorative reduced-motion CSS
     assert.match(
         STYLESHEET,
         /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.mes_text \[data-rat-motion\]\[data-rat-part='root'\] \{[\s\S]*?animation: none !important;/,
+    );
+});
+
+test('registry family and mode distribution matches the expanded catalog', () => {
+    assert.deepEqual(
+        Object.fromEntries(FAMILIES.map(({ id }) => [id, THEMES.filter(theme => theme.family === id).length])),
+        {
+            cute: 7,
+            flowery: 8,
+            cyber: 7,
+            terminal: 8,
+            retro: 8,
+            print: 8,
+            fantasy: 8,
+            bold: 8,
+            animated: 13,
+            adaptive: 3,
+        },
+    );
+    assert.deepEqual(
+        THEMES.reduce((counts, theme) => {
+            counts[theme.mode] = (counts[theme.mode] ?? 0) + 1;
+            return counts;
+        }, {}),
+        { light: 37, dark: 38, adaptive: 3 },
     );
 });
 

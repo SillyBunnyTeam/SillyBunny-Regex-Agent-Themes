@@ -27,7 +27,7 @@ spacing:
 There are two separate design jobs here and they pull in opposite directions.
 
 The **settings panel** is a tool. It inherits the active SillyBunny theme, uses the host's own
-controls, and has no look of its own. Anything it asserted visually would fight the 48 looks it
+controls, and has no look of its own. Anything it asserted visually would fight the 78 looks it
 exists to show.
 
 The **themes** are the product. Each one is allowed to be loud, quiet, ugly on purpose, or period
@@ -75,7 +75,7 @@ label. It may not re-word one, because those strings are SillyBunny's own copy.
 
 ## Shapes
 
-Eight shipped archetypes, and the archetype decides the shape, not the theme:
+Nine shipped archetypes, and the archetype decides the shape, not the theme:
 
 | Archetype | Shape |
 | --- | --- |
@@ -84,6 +84,7 @@ Eight shipped archetypes, and the archetype decides the shape, not the theme:
 | Slots | header chip, fixed number of list rows |
 | Statcard | header chip, stat grid, pill, note |
 | Chip | inline pill that flows inside prose |
+| Terminal | compact terminal-style key/value readout |
 | Stream | open/row/close triple around message rows |
 | Transcript | speaker pill above a message block |
 | Bold | the shared bold-markdown helper |
@@ -116,7 +117,7 @@ every theme animation, and cards remain complete and readable when the optional 
 ## Do
 
 - Show the card, in the theme, with real data, before anyone commits.
-- Keep a theme's decision visible in all eight shapes.
+- Keep a theme's decision visible in all nine shapes.
 - Put the consequence of a destructive action in the same row as the button.
 - Let a quiet theme be quiet.
 

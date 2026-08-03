@@ -76,7 +76,9 @@
                 "strawberry-milk",
                 "bubble-tea",
                 "plushie-felt",
-                "sticker-book"
+                "sticker-book",
+                "sunny-bento",
+                "midnight-kawaii"
             ]
         },
         {
@@ -87,7 +89,10 @@
                 "sakura-drift",
                 "herbarium",
                 "rose-gold-bloom",
-                "cottagecore-linen"
+                "cottagecore-linen",
+                "pressed-lavender",
+                "greenhouse-grid",
+                "night-orchid"
             ]
         },
         {
@@ -98,7 +103,9 @@
                 "chrome-hud",
                 "glitchwave",
                 "circuitry",
-                "datastream"
+                "datastream",
+                "biometric-lab",
+                "hazard-console"
             ]
         },
         {
@@ -109,7 +116,10 @@
                 "terminal-amber",
                 "gameboy-dmg",
                 "teletext",
-                "chrome-98"
+                "chrome-98",
+                "dos-cobalt",
+                "paper-tape",
+                "vfd-cyan"
             ]
         },
         {
@@ -120,7 +130,10 @@
                 "synthwave-drive",
                 "arcade-cabinet",
                 "miami-deco",
-                "candy-gloss"
+                "candy-gloss",
+                "atomic-diner",
+                "cassette-future",
+                "raygun-poster"
             ]
         },
         {
@@ -132,7 +145,9 @@
                 "ink-vellum",
                 "editorial-hairline",
                 "blueprint",
-                "nordic-frost"
+                "nordic-frost",
+                "bauhaus-poster",
+                "photocopy-zine"
             ]
         },
         {
@@ -144,7 +159,9 @@
                 "elven-gilt",
                 "eldritch-deep",
                 "steampunk-brass",
-                "celestial-chart"
+                "celestial-chart",
+                "frost-rune",
+                "sunlit-mosaic"
             ]
         },
         {
@@ -155,7 +172,29 @@
                 "comic-panel",
                 "monochrome-slate",
                 "glass-frost",
-                "ember-hearth"
+                "ember-hearth",
+                "riso-print",
+                "soft-clay",
+                "construction-paper"
+            ]
+        },
+        {
+            "id": "animated",
+            "label": "Animated",
+            "themes": [
+                "aurora-drift",
+                "signal-pulse",
+                "moonlit-garden",
+                "firefly-glow",
+                "ocean-breath",
+                "prism-haze",
+                "lantern-warmth",
+                "plasma-ring",
+                "comet-trail",
+                "tidepool-shimmer",
+                "candlelit-page",
+                "storm-charge",
+                "dawn-glow"
             ]
         },
         {
@@ -210,6 +249,22 @@
             "scan": false
         },
         {
+            "slug": "sunny-bento",
+            "name": "Sunny Bento",
+            "family": "cute",
+            "mode": "light",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "midnight-kawaii",
+            "name": "Midnight Kawaii",
+            "family": "cute",
+            "mode": "dark",
+            "frame": null,
+            "scan": false
+        },
+        {
             "slug": "wildflower-press",
             "name": "Wildflower Press",
             "family": "flowery",
@@ -246,6 +301,30 @@
             "name": "Cottagecore Linen",
             "family": "flowery",
             "mode": "light",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "pressed-lavender",
+            "name": "Pressed Lavender",
+            "family": "flowery",
+            "mode": "light",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "greenhouse-grid",
+            "name": "Greenhouse Grid",
+            "family": "flowery",
+            "mode": "light",
+            "frame": "ticks",
+            "scan": false
+        },
+        {
+            "slug": "night-orchid",
+            "name": "Night Orchid",
+            "family": "flowery",
+            "mode": "dark",
             "frame": null,
             "scan": false
         },
@@ -290,6 +369,22 @@
             "scan": false
         },
         {
+            "slug": "biometric-lab",
+            "name": "Biometric Lab",
+            "family": "cyber",
+            "mode": "light",
+            "frame": "ticks",
+            "scan": false
+        },
+        {
+            "slug": "hazard-console",
+            "name": "Hazard Console",
+            "family": "cyber",
+            "mode": "dark",
+            "frame": "rivets",
+            "scan": false
+        },
+        {
             "slug": "phosphor-green",
             "name": "Phosphor Green",
             "family": "terminal",
@@ -330,6 +425,30 @@
             "scan": false
         },
         {
+            "slug": "dos-cobalt",
+            "name": "DOS Cobalt",
+            "family": "terminal",
+            "mode": "dark",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "paper-tape",
+            "name": "Paper Tape",
+            "family": "terminal",
+            "mode": "light",
+            "frame": "diecut",
+            "scan": false
+        },
+        {
+            "slug": "vfd-cyan",
+            "name": "VFD Cyan",
+            "family": "terminal",
+            "mode": "dark",
+            "frame": null,
+            "scan": true
+        },
+        {
             "slug": "vaporwave-sunset",
             "name": "Vaporwave Sunset",
             "family": "retro",
@@ -367,6 +486,30 @@
             "family": "retro",
             "mode": "light",
             "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "atomic-diner",
+            "name": "Atomic Diner",
+            "family": "retro",
+            "mode": "light",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "cassette-future",
+            "name": "Cassette Future",
+            "family": "retro",
+            "mode": "dark",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "raygun-poster",
+            "name": "Raygun Poster",
+            "family": "retro",
+            "mode": "light",
+            "frame": "brackets",
             "scan": false
         },
         {
@@ -418,6 +561,22 @@
             "scan": false
         },
         {
+            "slug": "bauhaus-poster",
+            "name": "Bauhaus Poster",
+            "family": "print",
+            "mode": "light",
+            "frame": "ticks",
+            "scan": false
+        },
+        {
+            "slug": "photocopy-zine",
+            "name": "Photocopy Zine",
+            "family": "print",
+            "mode": "light",
+            "frame": "halftone",
+            "scan": false
+        },
+        {
             "slug": "grimoire",
             "name": "Grimoire",
             "family": "fantasy",
@@ -466,6 +625,22 @@
             "scan": false
         },
         {
+            "slug": "frost-rune",
+            "name": "Frost Rune",
+            "family": "fantasy",
+            "mode": "dark",
+            "frame": "brackets",
+            "scan": false
+        },
+        {
+            "slug": "sunlit-mosaic",
+            "name": "Sunlit Mosaic",
+            "family": "fantasy",
+            "mode": "light",
+            "frame": "diecut",
+            "scan": false
+        },
+        {
             "slug": "neo-brutalist",
             "name": "Neo-Brutalist",
             "family": "bold",
@@ -506,6 +681,147 @@
             "scan": false
         },
         {
+            "slug": "riso-print",
+            "name": "Riso Print",
+            "family": "bold",
+            "mode": "light",
+            "frame": "halftone",
+            "scan": false
+        },
+        {
+            "slug": "soft-clay",
+            "name": "Soft Clay",
+            "family": "bold",
+            "mode": "light",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "construction-paper",
+            "name": "Construction Paper",
+            "family": "bold",
+            "mode": "dark",
+            "frame": "diecut",
+            "scan": false
+        },
+        {
+            "slug": "aurora-drift",
+            "name": "Aurora Drift",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "aurora-drift"
+        },
+        {
+            "slug": "signal-pulse",
+            "name": "Signal Pulse",
+            "family": "animated",
+            "mode": "dark",
+            "frame": "brackets",
+            "scan": true,
+            "motion": "signal-pulse"
+        },
+        {
+            "slug": "moonlit-garden",
+            "name": "Moonlit Garden",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "moonlit-garden"
+        },
+        {
+            "slug": "firefly-glow",
+            "name": "Firefly Glow",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "firefly-glow"
+        },
+        {
+            "slug": "ocean-breath",
+            "name": "Ocean Breath",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "ocean-breath"
+        },
+        {
+            "slug": "prism-haze",
+            "name": "Prism Haze",
+            "family": "animated",
+            "mode": "light",
+            "frame": null,
+            "scan": false,
+            "motion": "prism-haze"
+        },
+        {
+            "slug": "lantern-warmth",
+            "name": "Lantern Warmth",
+            "family": "animated",
+            "mode": "light",
+            "frame": null,
+            "scan": false,
+            "motion": "lantern-warmth"
+        },
+        {
+            "slug": "plasma-ring",
+            "name": "Plasma Ring",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "plasma-ring"
+        },
+        {
+            "slug": "comet-trail",
+            "name": "Comet Trail",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "comet-trail"
+        },
+        {
+            "slug": "tidepool-shimmer",
+            "name": "Tidepool Shimmer",
+            "family": "animated",
+            "mode": "light",
+            "frame": null,
+            "scan": false,
+            "motion": "tidepool-shimmer"
+        },
+        {
+            "slug": "candlelit-page",
+            "name": "Candlelit Page",
+            "family": "animated",
+            "mode": "light",
+            "frame": null,
+            "scan": false,
+            "motion": "candlelit-page"
+        },
+        {
+            "slug": "storm-charge",
+            "name": "Storm Charge",
+            "family": "animated",
+            "mode": "dark",
+            "frame": null,
+            "scan": false,
+            "motion": "storm-charge"
+        },
+        {
+            "slug": "dawn-glow",
+            "name": "Dawn Glow",
+            "family": "animated",
+            "mode": "light",
+            "frame": null,
+            "scan": false,
+            "motion": "dawn-glow"
+        },
+        {
             "slug": "adaptive-native",
             "name": "Adaptive Native",
             "family": "adaptive",
@@ -533,6 +849,7 @@
     "styleHooks": {
         "primary": "data-rat-part",
         "root": "data-rat",
+        "motion": "data-rat-motion",
         "classesAreRenamedTo": "custom-<name>"
     },
     "narrative": {
