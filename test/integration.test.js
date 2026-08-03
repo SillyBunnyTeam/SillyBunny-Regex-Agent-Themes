@@ -202,20 +202,6 @@ test('monochrome themes opt out of the per-speaker hue', { skip }, async () => {
     assert.ok(!out.includes('oklch('), 'hue leaked into a monochrome theme');
 });
 
-test('terminal panels emit style selectors that survive the sanitizer rewrite', { skip }, async () => {
-    const engine = await loadRegexEngine(mock);
-    const out = renderTemplate(engine, 'tpl-level-up-companion', 'phosphor-green', SAMPLES['level-up'].full);
-
-    assert.ok(out.startsWith('<style>'), 'style block missing');
-    assert.match(out, /class="[^"]*\brat-tw\b[^"]*"/, 'root class missing');
-    assert.ok(out.includes('.rat-tw-levelup-phosphor-green'), 'terminal scope missing');
-    // decodeStyleTags rewrites `.rat-tw` to `.custom-rat-tw`, and the DOMPurify hook
-    // rewrites class="rat-tw" the same way, so the pair must be unprefixed on both sides.
-    assert.ok(!out.includes('.custom-rat-tw'), 'selector was pre-prefixed and will not match');
-    assert.ok(out.includes('New perk: Steady Hand'), 'panel body lost');
-    assert.ok(out.includes('You@st:~$'), 'user macro not substituted');
-});
-
 test('every theme renders every template without leaking placeholders', { skip }, async () => {
     const engine = await loadRegexEngine(mock);
     const templates = [...new Set(SPECS

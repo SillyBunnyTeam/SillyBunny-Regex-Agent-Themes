@@ -42,8 +42,11 @@ export function rootAttrs(spec, tokens, extraClasses = []) {
         'rat', `rat-${spec.archetype}`, `rat-k-${spec.key}`, `rat-tm-${tokens.slug}`,
         ...extraClasses,
     ];
+    const motion = typeof tokens.motion === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(tokens.motion)
+        ? ` data-rat-motion="${tokens.motion}"`
+        : '';
     return ` data-rat="${tokens.slug}@${ENGINE_VERSION}" data-rat-arch="${spec.archetype}"`
-        + ` data-rat-key="${spec.key}" class="${classes.join(' ')}"`;
+        + ` data-rat-key="${spec.key}"${motion} class="${classes.join(' ')}"`;
 }
 
 export function part(name) {

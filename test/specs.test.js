@@ -11,7 +11,7 @@ import { STOCK, STOCK_BY_KEY } from '../src/stock.js';
 import { SAMPLES } from '../src/samples.js';
 
 test('every shipped script has exactly one spec', () => {
-    assert.equal(STOCK.length, 42, 'baseline size changed, regenerate src/stock.js');
+    assert.equal(STOCK.length, 35, 'baseline size changed, regenerate src/stock.js');
     assert.equal(SPECS.length, STOCK.length);
 
     for (const entry of STOCK) {
@@ -68,7 +68,7 @@ test('every referenced capture group exists in its pattern', () => {
 
 test('the empty-replaceString utilities are marked pass-through', () => {
     const empties = STOCK.filter(entry => entry.replaceString === '');
-    assert.equal(empties.length, 4);
+    assert.equal(empties.length, 3);
 
     for (const entry of empties) {
         const spec = SPEC_BY_KEY.get(specKey(entry.templateId, entry.scriptId));

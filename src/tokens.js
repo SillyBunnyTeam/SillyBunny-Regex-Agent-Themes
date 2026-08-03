@@ -120,6 +120,8 @@ export const BASE_TOKENS = Object.freeze({
     frame: null,
     /** Extra background layer, e.g. scanlines or a grid. */
     scan: null,
+    /** Safe bundled motion identifier for optional stylesheet effects. */
+    motion: null,
     /** Terminal archetype palette. Derived from the tokens above when absent. */
     term: null,
     /** Raw HTML injected at named anchors. Escape hatch for ornament-heavy themes. */

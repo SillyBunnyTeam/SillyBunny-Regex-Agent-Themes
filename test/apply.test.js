@@ -55,7 +55,7 @@ test('every markup script is themed and every id is preserved', () => {
 
 test('frozen prompt-side scripts keep their pattern and stay empty', () => {
     const frozen = ['Trim Choices', 'Trim Directions'];
-    for (const templateId of ['tpl-cyoa-choices', 'tpl-direction-menu', 'tpl-cyoa-choices-skill-checks']) {
+    for (const templateId of ['tpl-cyoa-choices', 'tpl-direction-menu']) {
         const stock = agentFor(templateId);
         const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
 

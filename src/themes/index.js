@@ -7,6 +7,7 @@ import { CUTE_FLOWERY } from './cute-flowery.js';
 import { TECH_TERMINAL } from './tech-terminal.js';
 import { RETRO_PRINT } from './retro-print.js';
 import { FANTASY_BOLD } from './fantasy-bold.js';
+import { ANIMATED } from './animated.js';
 import { ADAPTIVE } from './adaptive.js';
 
 export const THEMES = Object.freeze([
@@ -14,6 +15,7 @@ export const THEMES = Object.freeze([
     ...TECH_TERMINAL,
     ...RETRO_PRINT,
     ...FANTASY_BOLD,
+    ...ANIMATED,
     ...ADAPTIVE,
 ]);
 
@@ -26,6 +28,7 @@ export const FAMILIES = Object.freeze([
     { id: 'print', label: 'Print & Editorial' },
     { id: 'fantasy', label: 'Fantasy & Arcane' },
     { id: 'bold', label: 'Bold & Material' },
+    { id: 'animated', label: 'Animated' },
     { id: 'adaptive', label: 'Adaptive' },
 ]);
 

@@ -70,15 +70,6 @@ export const SAMPLES = Object.freeze({
     'npc-rel': {
         full: '[NPC:REL|Mira Vance|Now willing to be seen with you in public]',
     },
-    'level-up': {
-        full: '[LEVEL_UP]\nLEVEL 4 -> 5\nForgery      +2\nPersuasion   +1\nNew perk: Steady Hand\n[/LEVEL_UP]',
-    },
-    'user-stats': {
-        full: '[USER_STATS]\nHP        18/20\nStamina   12/16\nForgery   4\nStanding  Cautiously friendly\n[/USER_STATS]',
-    },
-    'skill-choices': {
-        full: '[CHOICES]\n1. Forge the seal. [Forgery 4 vs DC 3]\n2. Bribe the clerk. [Persuasion 2 vs DC 4]\n3. Walk away.\n[/CHOICES]',
-    },
     chatroom: {
         full: 'CHATROOM_STYLE|dockside\nCHATROOM|ezra|foreman|28|Night shift is short two hands.\nCHATROOM|mira|archivist|312|>implying the guild will notice\nCHATROOM|clerk|new|190|I can cover the ledger until dawn.\nCHATROOM_END',
     },

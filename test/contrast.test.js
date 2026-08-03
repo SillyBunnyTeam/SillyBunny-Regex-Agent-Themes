@@ -30,7 +30,7 @@ function remSize(value) {
 }
 
 test('every semantic foreground passes its contrast gate across all themes and densities', () => {
-    assert.equal(THEMES.length, 45);
+    assert.equal(THEMES.length, 48);
     for (const theme of THEMES) {
         for (const options of OPTION_SETS) {
             const tokens = resolveTheme(theme, options);

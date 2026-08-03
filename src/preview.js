@@ -25,7 +25,6 @@ export const PREVIEW_KEYS = Object.freeze({
     [ARCHETYPES.SLOTS]: 'choices',
     [ARCHETYPES.STATCARD]: 'relationship',
     [ARCHETYPES.CHIP]: 'npc-ref',
-    [ARCHETYPES.TERMINAL]: 'level-up',
     [ARCHETYPES.STREAM]: 'chatroom',
     [ARCHETYPES.TRANSCRIPT]: 'chat-only',
 });

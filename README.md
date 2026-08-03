@@ -1,7 +1,7 @@
 # SillyBunny Regex Agent Themes
 
 Changes the presentation of SillyBunny's bundled tracker and companion panels without changing
-their prompts or model output. Choose from 45 themes, use the original SillyBunny style, or import
+their prompts or model output. Choose from 48 themes, use the original SillyBunny style, or import
 a validated custom theme.
 
 Theme changes repaint compatible tracker cards already visible in the current chat. Agent scripts
@@ -74,11 +74,15 @@ failure, and continues a batch without claiming success for the failed agent.
 | Print & Editorial | Paper Minimal, Newsprint, Ink & Vellum, Editorial Hairline, Blueprint, Nordic Frost |
 | Fantasy & Arcane | Grimoire, Dungeon Slate, Elven Gilt, Eldritch Deep, Steampunk Brass, Celestial Chart |
 | Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth |
+| Animated | Aurora Drift, Signal Pulse, Moonlit Garden |
 | Adaptive | Adaptive Native, Adaptive Accent, Adaptive Ink |
 
 Adaptive themes use allowlisted SillyBunny theme variables. Generated text colors and local safety
 surfaces are derived to preserve readable contrast. Compact density reduces spacing without
 shrinking text below the extension's readability floor.
+
+Animated themes add low-amplitude decorative ambience only. They never move content or layout and
+automatically stop when the operating system requests reduced motion.
 
 ## Options
 

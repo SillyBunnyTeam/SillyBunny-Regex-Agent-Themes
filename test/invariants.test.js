@@ -31,6 +31,7 @@ const OPTION_SETS = [
     { density: 'roomy', adaptiveNeutrals: true, openDefaults: 'all-open' },
 ];
 const STYLESHEET = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+const MOTION_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function eachGenerated(callback) {
     for (const theme of THEMES) {
@@ -52,8 +53,50 @@ test('the matrix is complete', () => {
     });
     const markupSpecs = SPECS.filter(spec => spec.archetype !== ARCHETYPES.PASSTHROUGH
         && spec.archetype !== ARCHETYPES.CLEANUP).length;
-    assert.equal(markupSpecs, 38);
+    assert.equal(markupSpecs, 32);
     assert.equal(generated, THEMES.length * markupSpecs * OPTION_SETS.length);
+});
+
+test('animated themes have safe render markers and decorative reduced-motion CSS', () => {
+    const animated = THEMES.filter(theme => theme.family === 'animated');
+    assert.deepEqual(animated.map(theme => theme.slug), [
+        'aurora-drift', 'signal-pulse', 'moonlit-garden',
+    ]);
+
+    for (const theme of THEMES) {
+        if (theme.family === 'animated') {
+            assert.equal(theme.motion, theme.slug, `${theme.slug}: motion marker differs from slug`);
+            assert.match(theme.motion, MOTION_ID, `${theme.slug}: unsafe motion marker`);
+        } else {
+            assert.equal(theme.motion ?? null, null, `${theme.slug}: static theme has motion`);
+        }
+    }
+
+    eachGenerated((output, spec, theme) => {
+        if (!output.includes('data-rat=')) {
+            assert.ok(!output.includes('data-rat-motion='), `${theme.slug}/${spec.key}: orphaned motion marker`);
+            return;
+        }
+        if (theme.motion) {
+            assert.ok(
+                output.includes(`data-rat-motion="${theme.motion}"`),
+                `${theme.slug}/${spec.key}: missing motion marker`,
+            );
+        } else {
+            assert.ok(!output.includes('data-rat-motion='), `${theme.slug}/${spec.key}: unexpected motion marker`);
+        }
+    });
+
+    for (const theme of animated) {
+        assert.match(STYLESHEET, new RegExp(`@keyframes rat-${theme.motion}\\b`));
+        assert.match(STYLESHEET, new RegExp(
+            `\\.mes_text \\[data-rat-motion='${theme.motion}'\\]\\[data-rat-part='root'\\]:not\\(\\[data-rat-arch='bold'\\]\\)`,
+        ));
+    }
+    assert.match(
+        STYLESHEET,
+        /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.mes_text \[data-rat-motion\]\[data-rat-part='root'\] \{[\s\S]*?animation: none !important;/,
+    );
 });
 
 test('no generated string contains an unintended group placeholder', () => {
@@ -105,7 +148,7 @@ test('opening tags never contain duplicate attributes', () => {
     });
 });
 
-test('only the terminal archetype spans multiple lines', () => {
+test('only supported multiline archetypes span multiple lines', () => {
     eachGenerated((output, spec, theme) => {
         if (MULTILINE_ARCHETYPES.includes(spec.archetype)) {
             return;
@@ -273,13 +316,11 @@ test('plain glyph mode removes decoration while preserving meaningful text', () 
         restyleBold: true,
     }).replace(/<style>[\s\S]*?<\/style>/g, '');
 
-    for (const key of ['scene', 'relationship', 'npc-upgrade', 'npc-rel', 'level-up']) {
+    for (const key of ['scene', 'relationship', 'npc-upgrade', 'npc-rel']) {
         const output = render(key);
         for (const glyph of ['📍', '🕐', '💞', '❤', '◆', '⬆️', '⚡', '✦', '❦', '❧']) {
             assert.ok(!output.includes(glyph), `${key}: retained ${glyph}`);
         }
-        assert.ok(!output.includes('rat-tw-dot'), `${key}: retained terminal dots`);
-        assert.ok(!output.includes('rat-tw-cursor'), `${key}: retained terminal cursor`);
     }
     assert.match(render('npc-upgrade'), />to<|aria-label="to"/);
 });
@@ -294,20 +335,6 @@ test('lists, stats, streams, and transcripts emit semantic structures', () => {
     const streamRow = SPECS.find(spec => spec.key === 'chatroom' && spec.role === 'row');
     assert.match(buildReplaceString(streamRow, theme, {}), /^<article\b/);
     assert.match(render('chat-only'), /^<article\b/);
-});
-
-test('terminal scopes remain disjoint across themes', () => {
-    const spec = SPECS.find(item => item.archetype === ARCHETYPES.TERMINAL);
-    const firstTheme = THEME_BY_SLUG.get('phosphor-green');
-    const secondTheme = THEME_BY_SLUG.get('candy-gloss');
-    const first = buildReplaceString(spec, firstTheme, {});
-    const second = buildReplaceString(spec, secondTheme, {});
-    const firstScope = `rat-tw-${spec.ns}-${firstTheme.slug}`;
-    const secondScope = `rat-tw-${spec.ns}-${secondTheme.slug}`;
-    assert.ok(first.includes(firstScope));
-    assert.ok(second.includes(secondScope));
-    assert.ok(!first.includes(secondScope));
-    assert.ok(!second.includes(firstScope));
 });
 
 test('bold-off is byte-identical to stock and styled bold keeps semantic ownership', () => {

@@ -243,38 +243,6 @@ const SPEC_LIST = [
         rows: [{ g: 6, label: 'Change', pre: true }],
     },
 
-    // -------------------------------------------------------- companions: terminal
-    {
-        templateId: 'tpl-level-up-companion',
-        scriptId: '44e5eba0-bf45-4b2a-81d1-6f39e0db4157',
-        scriptName: 'Replace Level Up',
-        key: 'level-up', archetype: ARCHETYPES.TERMINAL, groups: 1, accent: 3,
-        family: 'companion', ns: 'levelup',
-        title: 'LEVEL_UP.exe', summary: 'LEVEL UP REPORT',
-        prompt: 'run LEVEL_UP.report', badge: '[ LEVEL UP CONFIRMED ]',
-        body: { g: 1 }, open: true,
-    },
-    {
-        templateId: 'tpl-user-based-stats-generator',
-        scriptId: '08ba9895-ef4e-4f95-943c-09f67cfc3efa',
-        scriptName: 'Replace User Stats',
-        key: 'user-stats', archetype: ARCHETYPES.TERMINAL, groups: 1, accent: 1,
-        family: 'companion', ns: 'stats',
-        title: 'USER_STATS.exe', summary: 'FULL STAT BLOCK',
-        prompt: 'cat USER_STATS.log', badge: null,
-        body: { g: 1 }, open: true,
-    },
-    {
-        templateId: 'tpl-cyoa-choices-skill-checks',
-        scriptId: '07b32b4e-0752-4422-a078-8641c4962063',
-        scriptName: 'Render Fallout CYOA Choices',
-        key: 'skill-choices', archetype: ARCHETYPES.TERMINAL, groups: 1, accent: 4,
-        family: 'companion', ns: 'choices',
-        title: 'CHOICES.exe', summary: null, status: 'awaiting input',
-        prompt: 'select_next_action', badge: null,
-        body: { g: 1 }, open: true,
-    },
-
     // ---------------------------------------------------------- companions: stream
     {
         templateId: 'tpl-chatroom-companion',
@@ -381,26 +349,6 @@ const SPEC_LIST = [
         speaker: { g: 1 }, body: { g: 2 },
     },
 
-    // ------------------------------------------------------------ companions: bold
-    {
-        templateId: 'tpl-cyoa-choices-skill-checks',
-        scriptId: '3a1f4833-6528-4eb9-9fe2-6f99d1e5996f',
-        scriptName: 'Replace Bold Markdown',
-        key: 'bold', archetype: ARCHETYPES.BOLD, groups: 1, accent: 4, family: 'companion',
-    },
-    {
-        templateId: 'tpl-level-up-companion',
-        scriptId: '18f145d7-8a0b-4e7e-a17b-ff24eaaba21c',
-        scriptName: 'Replace Bold Markdown',
-        key: 'bold', archetype: ARCHETYPES.BOLD, groups: 1, accent: 3, family: 'companion',
-    },
-    {
-        templateId: 'tpl-user-based-stats-generator',
-        scriptId: '3b9014b0-d55d-4d7c-adf4-ccaab81c778f',
-        scriptName: 'Replace Bold Markdown',
-        key: 'bold', archetype: ARCHETYPES.BOLD, groups: 1, accent: 1, family: 'companion',
-    },
-
     // --------------------------------------------------------------- cleanup
     // Its findRegex matches our own generated empty-slot markup, not model output, so it
     // must be regenerated whenever the slots renderer changes or empty rows reappear.
@@ -425,13 +373,6 @@ const SPEC_LIST = [
         scriptId: 'e1877fab-669e-467e-9495-43dd90a77295',
         scriptName: 'Trim Directions',
         key: 'directions', archetype: ARCHETYPES.PASSTHROUGH, groups: 4,
-    },
-    {
-        templateId: 'tpl-cyoa-choices-skill-checks',
-        scriptId: '43535115-b766-4e19-8f94-d1cb440048f4',
-        scriptName: 'Trim Choices',
-        key: 'skill-choices', archetype: ARCHETYPES.PASSTHROUGH, groups: 0,
-        family: 'companion',
     },
 ];
 
@@ -478,7 +419,6 @@ export const PREVIEWABLE_ARCHETYPES = Object.freeze([
     ARCHETYPES.SLOTS,
     ARCHETYPES.STATCARD,
     ARCHETYPES.CHIP,
-    ARCHETYPES.TERMINAL,
     ARCHETYPES.STREAM,
     ARCHETYPES.TRANSCRIPT,
 ]);

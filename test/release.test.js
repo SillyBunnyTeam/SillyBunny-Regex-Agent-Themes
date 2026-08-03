@@ -25,6 +25,6 @@ test('release metadata stays synchronized and declares its runtime contract', ()
 });
 
 test('published theme count matches the registry', () => {
-    assert.equal(THEMES.length, 45);
-    assert.match(readme, /45 themes/u);
+    assert.equal(THEMES.length, 48);
+    assert.match(readme, /48 themes/u);
 });

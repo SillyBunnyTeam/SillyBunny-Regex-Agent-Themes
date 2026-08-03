@@ -19,10 +19,7 @@ const templates = join(fork, 'public/scripts/extensions/in-chat-agents/templates
 const COMPANION_FILES = [
     'chat-only-companion.json',
     'chatroom-companion.json',
-    'cyoa-choices-skill-checks.json',
-    'level-up-companion.json',
     'message-inbox-companion.json',
-    'user-based-stats-generator.json',
 ];
 
 /** Mirrors public/scripts/utils.js regexFromString so group counts match runtime behaviour. */

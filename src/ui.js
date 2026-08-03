@@ -24,7 +24,6 @@ const ARCHETYPE_LABELS = Object.freeze({
     [ARCHETYPES.SLOTS]: 'Choice menu',
     [ARCHETYPES.STATCARD]: 'Relationship meter',
     [ARCHETYPES.CHIP]: 'Inline chip',
-    [ARCHETYPES.TERMINAL]: 'Terminal panel',
     [ARCHETYPES.STREAM]: 'Chatroom stream',
     [ARCHETYPES.TRANSCRIPT]: 'Transcript row',
 });
@@ -47,9 +46,6 @@ const TEMPLATE_LABELS = Object.freeze({
     'tpl-chatroom-companion': 'Chatroom',
     'tpl-message-inbox-companion': 'Message inbox',
     'tpl-chat-only-companion': 'Chat-only transcript',
-    'tpl-level-up-companion': 'Level up',
-    'tpl-user-based-stats-generator': 'User stats',
-    'tpl-cyoa-choices-skill-checks': 'CYOA skill checks',
 });
 
 const STATUS_LABELS = Object.freeze({

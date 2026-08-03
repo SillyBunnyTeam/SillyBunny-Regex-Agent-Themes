@@ -74,7 +74,7 @@ test('validated custom themes render across every markup archetype', () => {
         assert.ok(!output.replaceAll('{{user}}', '').includes('{{'), spec.key);
         generated++;
     }
-    assert.equal(generated, 38);
+    assert.equal(generated, 32);
 });
 
 test('adaptive themes accept only the documented host colors with literal fallbacks', () => {
