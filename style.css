@@ -1,0 +1,273 @@
+/*
+ * Two separate concerns live in this file.
+ *
+ * 1. Message-content polish. Every generated fragment already carries complete inline
+ *    styles, so this layer only adds what an inline style cannot express: disclosure
+ *    rotation, hover, empty-row collapse, reduced motion, narrow-container refinement.
+ *    Removing this file must be cosmetic only.
+ *
+ *    Selectors here MUST use `[data-rat-part]` attributes, never `.rat-*` classes.
+ *    A DOMPurify hook (SillyBunny public/scripts/chats.js:1916) rewrites every class in
+ *    message HTML to `custom-<name>`, so `.rat-row` would never match. Users writing their
+ *    own CSS should target `.custom-rat-row` instead.
+ *
+ * 2. The extension's own settings panel, which is normal DOM and uses `rat-` classes
+ *    freely.
+ */
+
+/* ------------------------------------------------------------------ message content */
+
+.mes_text details[data-rat] > summary {
+    /* Chrome and Safari still render the default marker without this. */
+    list-style: none;
+}
+
+.mes_text details[data-rat] > summary::-webkit-details-marker {
+    display: none;
+}
+
+.mes_text [data-rat] [data-rat-part='chevron'] {
+    transition: transform 0.18s ease;
+}
+
+.mes_text details[data-rat][open] > summary [data-rat-part='chevron'] {
+    transform: rotate(180deg);
+}
+
+.mes_text [data-rat] > summary:hover,
+.mes_text [data-rat] [data-rat-part='header']:hover {
+    filter: brightness(1.07);
+}
+
+.mes_text [data-rat] > summary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/*
+ * Unmatched captures interpolate to an empty string, so a slot the model did not fill
+ * renders as a childless element. The generated cleanup regex removes most of them from
+ * the string itself; this is the belt-and-braces pass for anything it misses.
+ */
+.mes_text [data-rat] [data-rat-part='slot']:empty,
+.mes_text [data-rat] [data-rat-part='row']:empty,
+.mes_text [data-rat] [data-rat-part='section']:empty {
+    display: none;
+}
+
+.mes_text [data-rat] [data-rat-part='pair']:not(:has([data-rat-part='pair-label']:not(:empty))) {
+    display: none;
+}
+
+.mes_text [data-rat] [data-rat-part='row']:not(:has([data-rat-part='row-value']:not(:empty))) {
+    display: none;
+}
+
+.mes_text [data-rat] [data-rat-part='section']:not(:has([data-rat-part='section-value']:not(:empty))) {
+    display: none;
+}
+
+/*
+ * The colon after a key/value label lives here rather than in the markup, so an unmatched
+ * label cannot leave the bare `<b>:</b>` the stock parallel tracker shows.
+ */
+.mes_text [data-rat] [data-rat-part='pair-label']:not(:empty)::after {
+    content: ':';
+    opacity: 0.7;
+}
+
+.mes_text [data-rat] [data-rat-part='meterbar'] {
+    /* A zero-width fill still needs to be visible as an empty track. */
+    min-width: 2px;
+}
+
+/* Wide archetypes must never push the message body into horizontal scroll. */
+.mes_text [data-rat] [data-rat-part='grid'] {
+    min-width: 0;
+}
+
+.mes_text [data-rat] [data-rat-part='stat'],
+.mes_text [data-rat] [data-rat-part='stat-value'] {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@container (max-width: 380px) {
+    .mes_text [data-rat] [data-rat-part='grid'] {
+        grid-template-columns: 1fr;
+    }
+
+    .mes_text [data-rat] [data-rat-part='header'] {
+        line-height: 1.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mes_text [data-rat] [data-rat-part='chevron'],
+    .mes_text [data-rat] [data-rat-part='header'] {
+        transition: none;
+    }
+}
+
+/* --------------------------------------------------------------- per-theme additions */
+
+/* Herbarium: labels are ruled rather than filled. */
+[data-rat^='herbarium@'] [data-rat-part='row'],
+[data-rat^='herbarium@'] [data-rat-part='section'] {
+    border-bottom: 1px solid #d3d9c9;
+}
+
+/* Newsprint: small-caps kickers sit above a rule. */
+[data-rat^='newsprint@'] [data-rat-part='row-label'],
+[data-rat^='newsprint@'] [data-rat-part='section-label'] {
+    border-bottom: 1px solid #141414;
+    padding-bottom: 2px;
+}
+
+/* Elven Gilt: a tapered filigree divider between sections. */
+[data-rat^='elven-gilt@'] [data-rat-part='section'] + [data-rat-part='section']::before {
+    content: '';
+    display: block;
+    height: 1px;
+    margin: -4px 12% 8px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent);
+}
+
+/* Comic Panel: chips get a speech-bubble tail. */
+[data-rat^='comic-panel@'][data-rat-arch='chip']::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: -6px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-top-color: #1a1a1a;
+}
+
+/* ------------------------------------------------------------------ settings panel */
+
+#rat_drawer .rat-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#rat_drawer .rat-toolbar label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+}
+
+#rat_drawer .rat-note {
+    opacity: 0.75;
+    font-size: 0.88em;
+    margin: 6px 0 10px;
+}
+
+#rat_drawer .rat-warning {
+    border-left: 3px solid var(--warning, #d9a13a);
+    padding: 7px 10px;
+    margin: 8px 0;
+    background: rgba(217, 161, 58, 0.1);
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+#rat_drawer .rat-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin: 10px 0;
+}
+
+#rat_drawer .rat-card {
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.14));
+    border-radius: 8px;
+    padding: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+#rat_drawer .rat-card[data-active='true'] {
+    outline: 2px solid var(--SmartThemeQuoteColor, #bd93f9);
+}
+
+#rat_drawer .rat-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+}
+
+#rat_drawer .rat-card-name {
+    font-weight: 600;
+}
+
+#rat_drawer .rat-card-mode {
+    font-size: 0.75em;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+#rat_drawer .rat-card-blurb {
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+/*
+ * The preview host carries `mes_text` so message-content rules and the `.mes_text ` prefix
+ * that decodeStyleTags bakes into decoded <style> blocks both apply. Without it a preview
+ * would not match what chat renders.
+ */
+#rat_drawer .rat-preview {
+    border-radius: 6px;
+    padding: 6px;
+    overflow: hidden;
+    background: rgba(127, 127, 127, 0.08);
+    container-type: inline-size;
+}
+
+#rat_drawer .rat-preview > * {
+    max-width: 100%;
+}
+
+#rat_drawer .rat-scope-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+}
+
+#rat_drawer .rat-scope-table th,
+#rat_drawer .rat-scope-table td {
+    text-align: left;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(127, 127, 127, 0.22);
+    vertical-align: middle;
+}
+
+#rat_drawer .rat-status {
+    font-size: 0.8em;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+}
+
+#rat_drawer .rat-status[data-status='pristine'] { opacity: 0.7; }
+#rat_drawer .rat-status[data-status='stock'] { opacity: 0.7; }
+#rat_drawer .rat-status[data-status='outdated'] { color: var(--warning, #d9a13a); }
+#rat_drawer .rat-status[data-status='foreign'] { color: var(--warning, #d9a13a); }
+#rat_drawer .rat-status[data-status='upstream-changed'] { color: var(--fullred, #c0504d); }
+
+@media (max-width: 600px) {
+    #rat_drawer .rat-gallery {
+        grid-template-columns: 1fr;
+    }
+}

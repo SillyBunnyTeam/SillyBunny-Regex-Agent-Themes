@@ -1,0 +1,20 @@
+{
+    "name": "sillybunny-regex-agent-themes",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Swappable HTML themes for SillyBunny's bundled In-Chat Agent trackers and companion panels.",
+    "scripts": {
+        "test": "node --experimental-test-module-mocks --test test/*.test.js",
+        "test:pure": "node --test test/specs.test.js test/invariants.test.js test/apply.test.js",
+        "generate:stock": "node scripts/generate-stock.mjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes.git"
+    },
+    "license": "AGPL-3.0",
+    "engines": {
+        "node": ">=18"
+    }
+}

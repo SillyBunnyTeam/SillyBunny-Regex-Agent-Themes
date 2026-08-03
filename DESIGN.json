@@ -1,0 +1,606 @@
+{
+    "schemaVersion": 1,
+    "title": "Regex Agent Themes",
+    "extensions": {
+        "host": "SillyBunny",
+        "hostExtension": "in-chat-agents"
+    },
+    "tokenContract": {
+        "groups": [
+            "surface",
+            "ink",
+            "line",
+            "shadow",
+            "accents",
+            "radius",
+            "space",
+            "type",
+            "glyph"
+        ],
+        "accentRampLength": 7,
+        "escapeHatches": [
+            "frame",
+            "scan",
+            "ornament",
+            "extra",
+            "css"
+        ],
+        "literalColoursOnly": true,
+        "hostVariablesAllowedIn": [
+            "adaptive"
+        ]
+    },
+    "archetypes": [
+        {
+            "id": "panel",
+            "scripts": 9
+        },
+        {
+            "id": "profile",
+            "scripts": 4
+        },
+        {
+            "id": "chip",
+            "scripts": 2
+        },
+        {
+            "id": "slots",
+            "scripts": 3
+        },
+        {
+            "id": "statcard",
+            "scripts": 1
+        },
+        {
+            "id": "terminal",
+            "scripts": 3
+        },
+        {
+            "id": "stream",
+            "scripts": 12
+        },
+        {
+            "id": "transcript",
+            "scripts": 1
+        },
+        {
+            "id": "bold",
+            "scripts": 3
+        }
+    ],
+    "families": [
+        {
+            "id": "cute",
+            "label": "Cute & Soft",
+            "themes": [
+                "marshmallow",
+                "strawberry-milk",
+                "bubble-tea",
+                "plushie-felt",
+                "sticker-book"
+            ]
+        },
+        {
+            "id": "flowery",
+            "label": "Flowery & Botanical",
+            "themes": [
+                "wildflower-press",
+                "sakura-drift",
+                "herbarium",
+                "rose-gold-bloom",
+                "cottagecore-linen"
+            ]
+        },
+        {
+            "id": "cyber",
+            "label": "Cyber & Tech",
+            "themes": [
+                "neon-grid",
+                "chrome-hud",
+                "glitchwave",
+                "circuitry",
+                "datastream"
+            ]
+        },
+        {
+            "id": "terminal",
+            "label": "Terminal & Retro Computing",
+            "themes": [
+                "phosphor-green",
+                "terminal-amber",
+                "gameboy-dmg",
+                "teletext",
+                "chrome-98"
+            ]
+        },
+        {
+            "id": "retro",
+            "label": "Retro-Futurist & Neon",
+            "themes": [
+                "vaporwave-sunset",
+                "synthwave-drive",
+                "arcade-cabinet",
+                "miami-deco",
+                "candy-gloss"
+            ]
+        },
+        {
+            "id": "print",
+            "label": "Print & Editorial",
+            "themes": [
+                "paper-minimal",
+                "newsprint",
+                "ink-vellum",
+                "editorial-hairline",
+                "blueprint",
+                "nordic-frost"
+            ]
+        },
+        {
+            "id": "fantasy",
+            "label": "Fantasy & Arcane",
+            "themes": [
+                "grimoire",
+                "dungeon-slate",
+                "elven-gilt",
+                "eldritch-deep",
+                "steampunk-brass",
+                "celestial-chart"
+            ]
+        },
+        {
+            "id": "bold",
+            "label": "Bold & Material",
+            "themes": [
+                "neo-brutalist",
+                "comic-panel",
+                "monochrome-slate",
+                "glass-frost",
+                "ember-hearth"
+            ]
+        },
+        {
+            "id": "adaptive",
+            "label": "Adaptive",
+            "themes": [
+                "adaptive-native",
+                "adaptive-accent",
+                "adaptive-ink"
+            ]
+        }
+    ],
+    "themes": [
+        {
+            "slug": "marshmallow",
+            "name": "Marshmallow",
+            "family": "cute",
+            "mode": "light",
+            "blurb": "Pillowy cream and blush with no hard edges anywhere.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "strawberry-milk",
+            "name": "Strawberry Milk",
+            "family": "cute",
+            "mode": "light",
+            "blurb": "Stitched dashed borders on strawberry and cream.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "bubble-tea",
+            "name": "Bubble Tea",
+            "family": "cute",
+            "mode": "light",
+            "blurb": "Milk-tea beige with tapioca dots and full-pill rows.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "plushie-felt",
+            "name": "Plushie Felt",
+            "family": "cute",
+            "mode": "light",
+            "blurb": "Matte lilac and peach with a felted inset highlight.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "sticker-book",
+            "name": "Sticker Book",
+            "family": "cute",
+            "mode": "light",
+            "blurb": "Die-cut cards with a white outline and an offset drop shadow.",
+            "frame": "diecut",
+            "scan": false
+        },
+        {
+            "slug": "wildflower-press",
+            "name": "Wildflower Press",
+            "family": "flowery",
+            "mode": "light",
+            "blurb": "Pressed-specimen ivory with olive, rose and lavender.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "sakura-drift",
+            "name": "Sakura Drift",
+            "family": "flowery",
+            "mode": "light",
+            "blurb": "Pale pink wash, gold hairlines, tapered petal accents.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "herbarium",
+            "name": "Herbarium",
+            "family": "flowery",
+            "mode": "light",
+            "blurb": "Specimen-label typography: ruled underlines, no boxes.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "rose-gold-bloom",
+            "name": "Rose Gold Bloom",
+            "family": "flowery",
+            "mode": "light",
+            "blurb": "Blush surfaces with metallic rose gradient borders.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "cottagecore-linen",
+            "name": "Cottagecore Linen",
+            "family": "flowery",
+            "mode": "light",
+            "blurb": "Woven linen texture in sage and terracotta.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "neon-grid",
+            "name": "Neon Grid",
+            "family": "cyber",
+            "mode": "dark",
+            "blurb": "Corner brackets and a grid overlay in cyan and magenta.",
+            "frame": "brackets",
+            "scan": true
+        },
+        {
+            "slug": "chrome-hud",
+            "name": "Chrome HUD",
+            "family": "cyber",
+            "mode": "dark",
+            "blurb": "Instrument-readout navy with ruler ticks and clipped corners.",
+            "frame": "ticks",
+            "scan": false
+        },
+        {
+            "slug": "glitchwave",
+            "name": "Glitchwave",
+            "family": "cyber",
+            "mode": "dark",
+            "blurb": "Chromatic aberration and a deliberately misregistered header.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "circuitry",
+            "name": "Circuitry",
+            "family": "cyber",
+            "mode": "dark",
+            "blurb": "PCB green with gold traces and square solder pads.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "datastream",
+            "name": "Datastream",
+            "family": "cyber",
+            "mode": "dark",
+            "blurb": "Dense monochrome telemetry with a gutter rail.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "phosphor-green",
+            "name": "Phosphor Green",
+            "family": "terminal",
+            "mode": "dark",
+            "blurb": "Classic green CRT with scanlines and a soft bloom.",
+            "frame": null,
+            "scan": true
+        },
+        {
+            "slug": "terminal-amber",
+            "name": "Terminal Amber",
+            "family": "terminal",
+            "mode": "dark",
+            "blurb": "Amber CRT bloom with a block cursor and heavy scanlines.",
+            "frame": null,
+            "scan": true
+        },
+        {
+            "slug": "gameboy-dmg",
+            "name": "Game Boy DMG",
+            "family": "terminal",
+            "mode": "dark",
+            "blurb": "Strictly four olive-green LCD shades. No gradients, no blur.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "teletext",
+            "name": "Teletext",
+            "family": "terminal",
+            "mode": "dark",
+            "blurb": "Mode-7 colour bands on pure black.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "chrome-98",
+            "name": "Chrome 98",
+            "family": "terminal",
+            "mode": "light",
+            "blurb": "Beveled grey chrome with a title bar and a fake close box.",
+            "frame": "bevel",
+            "scan": false
+        },
+        {
+            "slug": "vaporwave-sunset",
+            "name": "Vaporwave Sunset",
+            "family": "retro",
+            "mode": "dark",
+            "blurb": "Pink to teal gradient with a horizon grid fading into the body.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "synthwave-drive",
+            "name": "Synthwave Drive",
+            "family": "retro",
+            "mode": "dark",
+            "blurb": "Indigo to magenta with a chrome-gradient header and a horizon rule.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "arcade-cabinet",
+            "name": "Arcade Cabinet",
+            "family": "retro",
+            "mode": "dark",
+            "blurb": "CRT bezel highlight over saturated primaries.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "miami-deco",
+            "name": "Miami Deco",
+            "family": "retro",
+            "mode": "light",
+            "blurb": "Deco triple-rules in teal, coral and sand.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "candy-gloss",
+            "name": "Candy Gloss",
+            "family": "retro",
+            "mode": "light",
+            "blurb": "High-shine candy gradients with a glossy highlight bar.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "paper-minimal",
+            "name": "Paper Minimal",
+            "family": "print",
+            "mode": "light",
+            "blurb": "Off-white with grey hairlines. Hierarchy from weight and space alone.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "newsprint",
+            "name": "Newsprint",
+            "family": "print",
+            "mode": "light",
+            "blurb": "Halftone cream with black rules and one red spot colour.",
+            "frame": "halftone",
+            "scan": false
+        },
+        {
+            "slug": "ink-vellum",
+            "name": "Ink & Vellum",
+            "family": "print",
+            "mode": "light",
+            "blurb": "Warm vellum and dense ink with double hairline rules.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "editorial-hairline",
+            "name": "Editorial Hairline",
+            "family": "print",
+            "mode": "light",
+            "blurb": "No boxes at all. Rules and spacing carry the whole hierarchy.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "blueprint",
+            "name": "Blueprint",
+            "family": "print",
+            "mode": "dark",
+            "blurb": "Technical drawing: cyan on navy, dashed guides, drafting grid.",
+            "frame": "ticks",
+            "scan": false
+        },
+        {
+            "slug": "nordic-frost",
+            "name": "Nordic Frost",
+            "family": "print",
+            "mode": "dark",
+            "blurb": "Low-contrast slate. The quietest theme in the pack.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "grimoire",
+            "name": "Grimoire",
+            "family": "fantasy",
+            "mode": "light",
+            "blurb": "Aged parchment, oxblood ink and gold-leaf rules.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "dungeon-slate",
+            "name": "Dungeon Slate",
+            "family": "fantasy",
+            "mode": "dark",
+            "blurb": "Chiselled stone with a torch-glow header.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "elven-gilt",
+            "name": "Elven Gilt",
+            "family": "fantasy",
+            "mode": "dark",
+            "blurb": "Forest green with tapered gold filigree dividers.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "eldritch-deep",
+            "name": "Eldritch Deep",
+            "family": "fantasy",
+            "mode": "dark",
+            "blurb": "Abyssal teal to violet with irregular corners and an iridescent edge.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "steampunk-brass",
+            "name": "Steampunk Brass",
+            "family": "fantasy",
+            "mode": "dark",
+            "blurb": "Brass and copper over leather, rivets at every corner.",
+            "frame": "rivets",
+            "scan": false
+        },
+        {
+            "slug": "celestial-chart",
+            "name": "Celestial Chart",
+            "family": "fantasy",
+            "mode": "dark",
+            "blurb": "Star-map navy and gold with constellation-dot separators.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "neo-brutalist",
+            "name": "Neo-Brutalist",
+            "family": "bold",
+            "mode": "light",
+            "blurb": "Flat brights, 3px black borders, hard offset shadow. No gradients.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "comic-panel",
+            "name": "Comic Panel",
+            "family": "bold",
+            "mode": "light",
+            "blurb": "Halftone dots, thick outlines, and a speech-bubble tail on chips.",
+            "frame": "halftone",
+            "scan": false
+        },
+        {
+            "slug": "monochrome-slate",
+            "name": "Monochrome Slate",
+            "family": "bold",
+            "mode": "dark",
+            "blurb": "Zero hue. Weight and rules do all the work.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "glass-frost",
+            "name": "Glass Frost",
+            "family": "bold",
+            "mode": "dark",
+            "blurb": "Translucent panes over a live blur, with a hairline rim.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "ember-hearth",
+            "name": "Ember Hearth",
+            "family": "bold",
+            "mode": "dark",
+            "blurb": "Warm charcoal with burnt orange and ochre. Nordic Frost, but warm.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "adaptive-native",
+            "name": "Adaptive Native",
+            "family": "adaptive",
+            "mode": "adaptive",
+            "blurb": "Borrows your active theme entirely, so trackers stop looking like guests.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "adaptive-accent",
+            "name": "Adaptive Accent",
+            "family": "adaptive",
+            "mode": "adaptive",
+            "blurb": "Host neutrals with a graded ramp generated from your accent colour alone.",
+            "frame": null,
+            "scan": false
+        },
+        {
+            "slug": "adaptive-ink",
+            "name": "Adaptive Ink",
+            "family": "adaptive",
+            "mode": "adaptive",
+            "blurb": "Editorial geometry — rules and whitespace — in whatever palette you run.",
+            "frame": null,
+            "scan": false
+        }
+    ],
+    "styleHooks": {
+        "primary": "data-rat-part",
+        "root": "data-rat",
+        "classesAreRenamedTo": "custom-<name>"
+    },
+    "narrative": {
+        "northStar": "The Swatch Book: the picker is native and silent, the themes are opinionated and complete.",
+        "rules": [
+            "Inline styles are the contract; the stylesheet only adds what they cannot express.",
+            "Style hooks are data-rat-* attributes, never class names.",
+            "Never emit {{ or $ followed by a digit.",
+            "One line per fragment, except the terminal archetype.",
+            "Decorative glyphs are aria-hidden; meaning always exists as text.",
+            "Nothing may force horizontal scroll at 360px."
+        ],
+        "dos": [
+            "Show the real component, in the theme, with real data, before the user commits.",
+            "Keep each theme's decision visible across all nine archetypes.",
+            "State the consequence of a destructive action in the button's own row."
+        ],
+        "donts": [
+            "Ship two themes that differ only in hue.",
+            "Let ornament reduce the contrast of tracker content.",
+            "Overwrite markup the extension did not write without an explicit action.",
+            "Revert on disable."
+        ]
+    }
+}

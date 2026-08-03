@@ -1,0 +1,193 @@
+/**
+ * The build/revert half of the apply engine, against a synthetic agent. The rules being
+ * checked here are the ones that protect the user's data:
+ *   - script ids never change, because message snapshot refs are keyed on them
+ *   - frozen prompt-side patterns are never touched
+ *   - revert restores the shipped bytes exactly and removes what we appended
+ */
+
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import { buildAgentScripts, isOwnedScript, revertAgentScripts } from '../src/build.js';
+import { STOCK } from '../src/stock.js';
+import { THEME_BY_SLUG } from '../src/themes/index.js';
+import { ARCHETYPES, SPECS, getSpec } from '../src/specs.js';
+import { STATUS, classifyScript, isAutoApplicable, summarizeStatuses } from '../src/drift.js';
+
+const THEME = THEME_BY_SLUG.get('neon-grid');
+
+function agentFor(templateId) {
+    return STOCK.filter(entry => entry.templateId === templateId).map(entry => ({
+        id: entry.scriptId,
+        scriptName: entry.scriptName,
+        findRegex: entry.findRegex,
+        replaceString: entry.replaceString,
+        trimStrings: [],
+        placement: entry.placement,
+        disabled: false,
+        markdownOnly: entry.markdownOnly,
+        promptOnly: entry.promptOnly,
+        runOnEdit: true,
+        substituteRegex: 0,
+        minDepth: entry.minDepth,
+        maxDepth: entry.maxDepth,
+    }));
+}
+
+test('every markup script is themed and every id is preserved', () => {
+    for (const templateId of [...new Set(STOCK.map(entry => entry.templateId))]) {
+        const stock = agentFor(templateId);
+        const { scripts, themed } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+
+        const originalIds = stock.map(script => script.id);
+        const keptIds = scripts.filter(script => !isOwnedScript(script)).map(script => script.id);
+        assert.deepEqual(keptIds, originalIds, `${templateId}: ids or order changed`);
+
+        const expected = stock.filter(script => {
+            const spec = getSpec(templateId, script.id);
+            return spec && spec.archetype !== ARCHETYPES.PASSTHROUGH;
+        }).length;
+        assert.equal(themed.length, expected, `${templateId}: themed ${themed.length}, expected ${expected}`);
+    }
+});
+
+test('frozen prompt-side scripts keep their pattern and stay empty', () => {
+    const frozen = ['Trim Choices', 'Trim Directions'];
+    for (const templateId of ['tpl-cyoa-choices', 'tpl-direction-menu', 'tpl-cyoa-choices-skill-checks']) {
+        const stock = agentFor(templateId);
+        const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+
+        for (const name of frozen) {
+            const before = stock.find(script => script.scriptName === name);
+            const after = scripts.find(script => script.scriptName === name);
+            if (!before) {
+                continue;
+            }
+            assert.equal(after.findRegex, before.findRegex, `${name}: pattern changed`);
+            assert.equal(after.replaceString, '', `${name}: gained a replacement`);
+        }
+    }
+});
+
+test('the CYOA cleanup pattern is regenerated to match the new markup', () => {
+    const stock = agentFor('tpl-cyoa-choices');
+    const { scripts } = buildAgentScripts('tpl-cyoa-choices', stock, THEME, {}, 'a1');
+
+    const before = stock.find(script => script.scriptName === 'Remove Empty Choice Rows');
+    const after = scripts.find(script => script.id === before.id);
+
+    assert.notEqual(after.findRegex, before.findRegex, 'cleanup pattern was left stale');
+    assert.equal(after.replaceString, '');
+    assert.ok(after.findRegex.includes('data-rat-part'), 'cleanup does not target our markup');
+
+    // It must match an empty generated slot and not a populated one.
+    const slots = SPECS.find(spec => spec.key === 'choices');
+    const markup = scripts.find(script => script.id === slots.scriptId).replaceString;
+    const emptied = markup.replace(/\$\d+/g, '');
+    const pattern = new RegExp(after.findRegex.slice(1, after.findRegex.lastIndexOf('/')), 'g');
+    assert.ok(pattern.test(emptied), 'cleanup does not match an empty slot');
+
+    const filled = markup.replace(/\$\d+/g, 'text');
+    assert.ok(!new RegExp(pattern.source).test(filled), 'cleanup would delete a populated slot');
+});
+
+test('cleanup scripts are appended for the menus that ship without one', () => {
+    for (const [templateId, expected] of [['tpl-direction-menu', 1], ['tpl-parallel-tracker', 1]]) {
+        const { added } = buildAgentScripts(templateId, agentFor(templateId), THEME, {}, 'a1');
+        assert.equal(added.length, expected, `${templateId}: appended ${added.length}`);
+        assert.ok(added.every(id => id.startsWith('rat:')), 'appended ids are not namespaced');
+    }
+});
+
+test('the meter script is only appended when meters are on', () => {
+    const off = buildAgentScripts('tpl-relationship-tracker', agentFor('tpl-relationship-tracker'), THEME, {}, 'a1');
+    assert.equal(off.added.length, 0);
+
+    const on = buildAgentScripts(
+        'tpl-relationship-tracker', agentFor('tpl-relationship-tracker'), THEME, { meters: true }, 'a1',
+    );
+    assert.equal(on.added.length, 1);
+    assert.equal(on.added[0], 'rat:meter:a1');
+    const meter = on.scripts.at(-1);
+    assert.ok(meter.findRegex.includes('data-rat-part="meter"'), meter.findRegex);
+    assert.ok(meter.replaceString.includes('calc(100% * $1 / $2)'), 'no calc-based bar width');
+    assert.equal(meter.markdownOnly, true, 'the meter script must be display-only');
+});
+
+test('re-applying does not stack appended scripts', () => {
+    const first = buildAgentScripts(
+        'tpl-relationship-tracker', agentFor('tpl-relationship-tracker'), THEME, { meters: true }, 'a1',
+    );
+    const second = buildAgentScripts('tpl-relationship-tracker', first.scripts, THEME, { meters: true }, 'a1');
+    assert.equal(second.scripts.length, first.scripts.length);
+    assert.equal(second.added.length, 1);
+});
+
+test('a pattern that no longer matches the baseline is left alone', () => {
+    const stock = agentFor('tpl-scene-tracker');
+    const tampered = stock.map(script => ({ ...script, findRegex: '/\\[SCENE\\|(.*)\\]/g' }));
+    const { themed, skipped } = buildAgentScripts('tpl-scene-tracker', tampered, THEME, {}, 'a1');
+
+    assert.equal(themed.length, 0, 'themed a script whose pattern drifted');
+    assert.equal(skipped.length, 1);
+    assert.match(skipped[0], /findRegex differs/);
+});
+
+test('revert restores the shipped bytes and drops appended scripts', () => {
+    const templateId = 'tpl-cyoa-choices';
+    const stock = agentFor(templateId);
+    const { scripts } = buildAgentScripts(templateId, stock, THEME, { meters: true }, 'a1');
+    const reverted = revertAgentScripts(templateId, scripts);
+
+    assert.equal(reverted.length, stock.length);
+    for (const [index, script] of reverted.entries()) {
+        assert.equal(script.id, stock[index].id);
+        assert.equal(script.replaceString, stock[index].replaceString, `${script.scriptName}: markup differs`);
+        assert.equal(script.findRegex, stock[index].findRegex, `${script.scriptName}: pattern differs`);
+    }
+    assert.equal(reverted.filter(isOwnedScript).length, 0);
+});
+
+test('revert prefers a captured hand edit over the shipped bytes', () => {
+    const templateId = 'tpl-scene-tracker';
+    const stock = agentFor(templateId);
+    const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+
+    const overrides = { [stock[0].id]: { replaceString: '<b>my own</b>' } };
+    const reverted = revertAgentScripts(templateId, scripts, overrides);
+    assert.equal(reverted[0].replaceString, '<b>my own</b>');
+});
+
+test('drift statuses roll up worst-first', () => {
+    assert.equal(summarizeStatuses([STATUS.PRISTINE, STATUS.FOREIGN]), STATUS.FOREIGN);
+    assert.equal(summarizeStatuses([STATUS.STOCK, STATUS.OUTDATED]), STATUS.OUTDATED);
+    assert.equal(summarizeStatuses([STATUS.UPSTREAM_CHANGED, STATUS.FOREIGN]), STATUS.UPSTREAM_CHANGED);
+    assert.equal(summarizeStatuses([]), STATUS.PRISTINE);
+});
+
+test('only stock and outdated are auto-applicable', () => {
+    assert.ok(isAutoApplicable(STATUS.STOCK));
+    assert.ok(isAutoApplicable(STATUS.OUTDATED));
+    assert.ok(!isAutoApplicable(STATUS.FOREIGN), 'hand edits must never be overwritten silently');
+    assert.ok(!isAutoApplicable(STATUS.UPSTREAM_CHANGED));
+    assert.ok(!isAutoApplicable(STATUS.MISSING));
+});
+
+test('a themed script reads as pristine and a clobbered one as stock', () => {
+    const templateId = 'tpl-scene-tracker';
+    const stock = agentFor(templateId);
+    const spec = getSpec(templateId, stock[0].id);
+    const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+    const themedScript = scripts[0];
+
+    assert.equal(
+        classifyScript({ script: themedScript, spec, expected: themedScript.replaceString }),
+        STATUS.PRISTINE,
+    );
+    // This is what a template update leaves behind.
+    assert.equal(
+        classifyScript({ script: stock[0], spec, expected: themedScript.replaceString }),
+        STATUS.STOCK,
+    );
+});

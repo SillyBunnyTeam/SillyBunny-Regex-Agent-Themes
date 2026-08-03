@@ -1,0 +1,18 @@
+{
+    "display_name": "Regex Agent Themes",
+    "author": "platberlitz",
+    "version": "1.0.0",
+    "description": "Swappable HTML themes for SillyBunny's bundled In-Chat Agent trackers and companion panels.",
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "license": "AGPL-3.0",
+    "homePage": "https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes",
+    "loading_order": 120,
+    "auto_update": true,
+    "hooks": {
+        "activate": "init",
+        "disable": "deactivate"
+    }
+}
