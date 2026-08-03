@@ -704,12 +704,7 @@ function renderBrowse(settings) {
         'aria-labelledby': 'rat_selected_theme_name',
     }, [
         el('div', { class: 'rat-preview-stage-head' }, [
-            el('div', {}, [
-                el('h4', { id: 'rat_selected_theme_name', text: selected.name }),
-                el('p', {
-                    text: `${selected.familyLabel}. ${String(selected.mode).replace(/^./, value => value.toUpperCase())} palette.`,
-                }),
-            ]),
+            el('div', {}, el('h4', { id: 'rat_selected_theme_name', text: selected.name })),
             selectedApply,
         ]),
         selectedPreview,
@@ -766,10 +761,6 @@ function renderBrowse(settings) {
         card.append(thumbnail);
         scheduleThumbnail(thumbnail, uiState.previewArchetype, entry.theme, settings.options);
 
-        card.append(el('p', {
-            class: 'rat-card-meta',
-            text: `${entry.familyLabel}. ${String(entry.mode).replace(/^./, value => value.toUpperCase())}.`,
-        }));
         const previewButton = button('Preview', () => {
             uiState.previewThemeSlug = entry.slug;
             rerenderBrowse();

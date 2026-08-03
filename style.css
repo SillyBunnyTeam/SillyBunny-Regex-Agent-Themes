@@ -212,8 +212,6 @@
 
 #rat_drawer .rat-help,
 #rat_drawer .rat-note,
-#rat_drawer .rat-card-meta,
-#rat_drawer .rat-preview-stage-head p,
 #rat_drawer .rat-scope-head p,
 #rat_drawer .rat-maintenance-group p,
 #rat_drawer .rat-danger-zone p {
@@ -348,7 +346,7 @@
 
 #rat_drawer .rat-card {
     display: grid;
-    grid-template-rows: auto minmax(100px, auto) auto auto;
+    grid-template-rows: auto minmax(100px, auto) auto;
     min-width: 0;
     gap: 7px;
     border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
@@ -573,6 +571,12 @@
     #rat_drawer .rat-maintenance-group > .menu_button,
     #rat_drawer .rat-danger-zone > .menu_button {
         width: 100%;
+    }
+
+    /* A full-width gallery card has room to show its complete tracker preview. */
+    #rat_drawer .rat-thumbnail {
+        max-height: none;
+        overflow: visible;
     }
 }
 
