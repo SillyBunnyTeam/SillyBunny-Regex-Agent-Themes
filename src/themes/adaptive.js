@@ -46,7 +46,6 @@ export const ADAPTIVE = [
         name: 'Adaptive Native',
         family: 'adaptive',
         mode: 'adaptive',
-        blurb: 'Uses your active SillyBunny theme, so trackers match the rest of your UI.',
         surface: hostSurfaces,
         ink: hostInk,
         line: {
@@ -65,7 +64,6 @@ export const ADAPTIVE = [
         name: 'Adaptive Accent',
         family: 'adaptive',
         mode: 'adaptive',
-        blurb: 'Your theme colours, with everything keyed off your accent colour.',
         surface: {
             ...hostSurfaces,
             headTo: mix(HOST.quote, HOST.tint, 34),
@@ -96,7 +94,6 @@ export const ADAPTIVE = [
         name: 'Adaptive Ink',
         family: 'adaptive',
         mode: 'adaptive',
-        blurb: 'Rules and whitespace instead of boxes, in your theme colours.',
         surface: {
             ...hostSurfaces,
             headFrom: 'transparent', headTo: 'transparent',

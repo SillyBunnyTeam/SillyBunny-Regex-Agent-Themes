@@ -9,7 +9,6 @@ export const CUTE_FLOWERY = [
         name: 'Marshmallow',
         family: 'cute',
         mode: 'light',
-        blurb: 'Pillowy cream and blush with no hard edges anywhere.',
         surface: {
             headFrom: '#fff2f8', headTo: '#ffd9e8',
             bodyFrom: '#fffdfe', bodyTo: '#fff5fa',
@@ -36,7 +35,6 @@ export const CUTE_FLOWERY = [
         name: 'Strawberry Milk',
         family: 'cute',
         mode: 'light',
-        blurb: 'Stitched dashed borders on strawberry and cream.',
         surface: {
             headFrom: '#ffe2ea', headTo: '#ffc2d4',
             bodyFrom: '#fffefe', bodyTo: '#fff7f9',
@@ -61,7 +59,6 @@ export const CUTE_FLOWERY = [
         name: 'Bubble Tea',
         family: 'cute',
         mode: 'light',
-        blurb: 'Milk-tea beige with tapioca dots and full-pill rows.',
         surface: {
             headFrom: '#e8d5c0', headTo: '#d3b295',
             bodyFrom: '#fdf8f3', bodyTo: '#f6ece1',
@@ -87,7 +84,6 @@ export const CUTE_FLOWERY = [
         name: 'Plushie Felt',
         family: 'cute',
         mode: 'light',
-        blurb: 'Matte lilac and peach with a felted inset highlight.',
         surface: {
             headFrom: '#e6def5', headTo: '#cfc0e8',
             bodyFrom: '#faf8fd', bodyTo: '#f1ecf8',
@@ -112,7 +108,6 @@ export const CUTE_FLOWERY = [
         name: 'Sticker Book',
         family: 'cute',
         mode: 'light',
-        blurb: 'Die-cut cards with a white outline and an offset drop shadow.',
         surface: {
             headFrom: '#fff6d9', headTo: '#ffe08a',
             bodyFrom: '#ffffff', bodyTo: '#fdfdfd',
@@ -136,7 +131,6 @@ export const CUTE_FLOWERY = [
         name: 'Wildflower Press',
         family: 'flowery',
         mode: 'light',
-        blurb: 'Pressed-specimen ivory with olive, rose and lavender.',
         surface: {
             headFrom: '#f6f1e4', headTo: '#e8e0cb',
             bodyFrom: '#fdfbf5', bodyTo: '#f7f3e8',
@@ -162,7 +156,6 @@ export const CUTE_FLOWERY = [
         name: 'Sakura Drift',
         family: 'flowery',
         mode: 'light',
-        blurb: 'Pale pink wash, gold hairlines, tapered petal accents.',
         surface: {
             headFrom: '#fdf0f3', headTo: '#f6dae2',
             bodyFrom: '#fffcfd', bodyTo: '#fdf5f7',
@@ -184,7 +177,6 @@ export const CUTE_FLOWERY = [
         name: 'Herbarium',
         family: 'flowery',
         mode: 'light',
-        blurb: 'Specimen-label typography: ruled underlines, no boxes.',
         surface: {
             headFrom: '#f3f1e6', headTo: '#e6e6d4',
             bodyFrom: '#fcfbf4', bodyTo: '#f8f7ee',
@@ -213,7 +205,6 @@ export const CUTE_FLOWERY = [
         name: 'Rose Gold Bloom',
         family: 'flowery',
         mode: 'light',
-        blurb: 'Blush surfaces with metallic rose gradient borders.',
         surface: {
             headFrom: '#fceff0', headTo: '#f0cfd2',
             bodyFrom: '#fffdfd', bodyTo: '#fdf4f4',
@@ -235,7 +226,6 @@ export const CUTE_FLOWERY = [
         name: 'Cottagecore Linen',
         family: 'flowery',
         mode: 'light',
-        blurb: 'Woven linen texture in sage and terracotta.',
         surface: {
             headFrom: '#f0e7d8', headTo: '#ddceb6',
             bodyFrom: '#fbf7ef', bodyTo: '#f4ede1',

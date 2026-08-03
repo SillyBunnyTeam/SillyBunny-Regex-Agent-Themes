@@ -10,7 +10,7 @@
 import { ENGINE_VERSION, STOCK_THEME } from './constants.js';
 import { buildAgentScripts, isOwnedScript, revertAgentScripts } from './build.js';
 import { STATUS, classifyScript, isAutoApplicable, summarizeStatuses } from './drift.js';
-import { buildReplaceString, DEFAULT_OPTIONS } from './render/index.js';
+import { buildCleanupFindRegex, buildReplaceString, DEFAULT_OPTIONS } from './render/index.js';
 import { getSpec } from './specs.js';
 import { getStock } from './stock.js';
 import { getTheme } from './themes/index.js';
@@ -49,16 +49,21 @@ export function inspectAgent(agent, settings = getSettings()) {
         if (!spec || spec.passthrough) {
             continue;
         }
-        const expected = theme
-            ? buildReplaceString(spec, theme, { ...DEFAULT_OPTIONS, ...settings.options })
-            : null;
+        const options = { ...DEFAULT_OPTIONS, ...settings.options };
+        const target = spec.regenerateFindRegex ? getSpec(templateId, spec.cleanupFor) : null;
+
         perScript.push({
             scriptId: script.id,
             scriptName: script.scriptName,
             status: classifyScript({
                 script,
                 spec,
-                expected,
+                expected: theme && !spec.regenerateFindRegex
+                    ? buildReplaceString(spec, theme, options)
+                    : null,
+                expectedFindRegex: theme && target
+                    ? buildCleanupFindRegex(target, theme, options)
+                    : null,
                 ledgerEntry: ledger?.scripts?.[script.id],
             }),
         });

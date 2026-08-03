@@ -35,11 +35,11 @@ checking first if your extensions disappear after moving things around.
 
 ## Using it
 
-Pick a theme from the dropdown at the top. It applies everywhere immediately.
+Pick a theme from the dropdown at the top, grouped by family. It applies everywhere immediately
+and the preview below shows what you just got.
 
-The gallery below shows every theme with sample data in it. The Preview dropdown switches which
-card you are looking at, so you can check how a theme handles NPC profiles or the chatroom before
-committing to it.
+The Preview dropdown switches which card the preview shows, so you can check how a theme handles
+NPC profiles or the chatroom before settling on it.
 
 The table at the bottom sets a theme per tracker. Leave a row blank to use the global theme.
 

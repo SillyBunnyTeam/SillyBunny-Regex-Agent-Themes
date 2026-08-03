@@ -14,6 +14,7 @@ import { STOCK } from '../src/stock.js';
 import { THEME_BY_SLUG } from '../src/themes/index.js';
 import { ARCHETYPES, SPECS, getSpec } from '../src/specs.js';
 import { STATUS, classifyScript, isAutoApplicable, summarizeStatuses } from '../src/drift.js';
+import { buildCleanupFindRegex, buildReplaceString } from '../src/render/index.js';
 
 const THEME = THEME_BY_SLUG.get('neon-grid');
 
@@ -189,5 +190,81 @@ test('a themed script reads as pristine and a clobbered one as stock', () => {
     assert.equal(
         classifyScript({ script: stock[0], spec, expected: themedScript.replaceString }),
         STATUS.STOCK,
+    );
+});
+
+test('a themed CYOA agent reports as themed, not as stock', () => {
+    // The cleanup script's replaceString is always empty, so comparing it against the
+    // baseline used to classify every themed CYOA agent as unthemed and drag the whole
+    // row's status down with it. Its pattern is the part that carries the theme.
+    const templateId = 'tpl-cyoa-choices';
+    const stock = agentFor(templateId);
+    const { scripts } = buildAgentScripts(templateId, stock, THEME, {}, 'a1');
+
+    const statuses = scripts.map((script) => {
+        const spec = getSpec(templateId, script.id);
+        if (!spec || spec.passthrough) {
+            return null;
+        }
+        const target = spec.regenerateFindRegex ? getSpec(templateId, spec.cleanupFor) : null;
+        return classifyScript({
+            script,
+            spec,
+            expected: spec.regenerateFindRegex ? null : buildReplaceString(spec, THEME, {}),
+            expectedFindRegex: target ? buildCleanupFindRegex(target, THEME, {}) : null,
+        });
+    }).filter(Boolean);
+
+    assert.deepEqual(statuses, [STATUS.PRISTINE, STATUS.PRISTINE]);
+    assert.equal(summarizeStatuses(statuses), STATUS.PRISTINE);
+});
+
+test('an unthemed CYOA agent still reports as stock', () => {
+    const templateId = 'tpl-cyoa-choices';
+    const stock = agentFor(templateId);
+
+    const statuses = stock.map((script) => {
+        const spec = getSpec(templateId, script.id);
+        if (!spec || spec.passthrough) {
+            return null;
+        }
+        const target = spec.regenerateFindRegex ? getSpec(templateId, spec.cleanupFor) : null;
+        return classifyScript({
+            script,
+            spec,
+            expected: spec.regenerateFindRegex ? null : buildReplaceString(spec, THEME, {}),
+            expectedFindRegex: target ? buildCleanupFindRegex(target, THEME, {}) : null,
+        });
+    }).filter(Boolean);
+
+    assert.deepEqual(statuses, [STATUS.STOCK, STATUS.STOCK]);
+    assert.equal(summarizeStatuses(statuses), STATUS.STOCK);
+});
+
+test('the cleanup pattern does not change between themes', () => {
+    // It wildcards the style attribute, so switching theme leaves it alone. That keeps a
+    // theme change from needlessly rewriting the script and churning its snapshot refs.
+    const target = SPECS.find(spec => spec.key === 'choices');
+    const patterns = ['neon-grid', 'marshmallow', 'grimoire', 'adaptive-ink']
+        .map(slug => buildCleanupFindRegex(target, THEME_BY_SLUG.get(slug), {}));
+
+    assert.equal(new Set(patterns).size, 1, 'cleanup pattern differs by theme');
+});
+
+test('a cleanup script carrying an unrecognised pattern reads as outdated', () => {
+    const templateId = 'tpl-cyoa-choices';
+    const spec = SPECS.find(item => item.templateId === templateId && item.regenerateFindRegex);
+    const target = getSpec(templateId, spec.cleanupFor);
+
+    // Only this extension ever writes that pattern, so anything unfamiliar is our own older
+    // output rather than a hand edit, and is safe to regenerate.
+    assert.equal(
+        classifyScript({
+            script: { id: spec.scriptId, findRegex: '/<div class="pura-choice"><\\/div>/g', replaceString: '' },
+            spec,
+            expected: null,
+            expectedFindRegex: buildCleanupFindRegex(target, THEME, {}),
+        }),
+        STATUS.OUTDATED,
     );
 });

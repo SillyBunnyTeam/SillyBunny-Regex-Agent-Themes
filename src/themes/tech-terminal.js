@@ -9,7 +9,6 @@ export const TECH_TERMINAL = [
         name: 'Neon Grid',
         family: 'cyber',
         mode: 'dark',
-        blurb: 'Corner brackets and a grid overlay in cyan and magenta.',
         surface: {
             headFrom: '#07070c', headTo: 'rgba(255,0,128,0.20)',
             bodyFrom: '#08080f', bodyTo: '#0c0c16',
@@ -38,7 +37,6 @@ export const TECH_TERMINAL = [
         name: 'Chrome HUD',
         family: 'cyber',
         mode: 'dark',
-        blurb: 'Instrument-readout navy with ruler ticks and clipped corners.',
         surface: {
             headFrom: '#071320', headTo: 'rgba(0,180,255,0.18)',
             bodyFrom: '#050e18', bodyTo: '#08151f',
@@ -67,7 +65,6 @@ export const TECH_TERMINAL = [
         name: 'Glitchwave',
         family: 'cyber',
         mode: 'dark',
-        blurb: 'Chromatic aberration and a deliberately misregistered header.',
         surface: {
             headFrom: '#0a0a0a', headTo: 'rgba(255,0,255,0.16)',
             bodyFrom: '#060606', bodyTo: '#0d0d0d',
@@ -95,7 +92,6 @@ export const TECH_TERMINAL = [
         name: 'Circuitry',
         family: 'cyber',
         mode: 'dark',
-        blurb: 'PCB green with gold traces and square solder pads.',
         surface: {
             headFrom: '#08281f', headTo: 'rgba(212,175,55,0.14)',
             bodyFrom: '#062019', bodyTo: '#08281f',
@@ -122,7 +118,6 @@ export const TECH_TERMINAL = [
         name: 'Datastream',
         family: 'cyber',
         mode: 'dark',
-        blurb: 'Dense monochrome telemetry with a gutter rail.',
         surface: {
             headFrom: '#141414', headTo: '#1e1e1e',
             bodyFrom: '#101010', bodyTo: '#161616',
@@ -152,7 +147,6 @@ export const TECH_TERMINAL = [
         name: 'Phosphor Green',
         family: 'terminal',
         mode: 'dark',
-        blurb: 'Classic green CRT with scanlines and a soft bloom.',
         surface: {
             headFrom: '#050807', headTo: 'rgba(115,255,155,0.12)',
             bodyFrom: '#050807', bodyTo: '#07100b',
@@ -180,7 +174,6 @@ export const TECH_TERMINAL = [
         name: 'Terminal Amber',
         family: 'terminal',
         mode: 'dark',
-        blurb: 'Amber CRT bloom with a block cursor and heavy scanlines.',
         surface: {
             headFrom: '#0a0600', headTo: 'rgba(255,176,0,0.14)',
             bodyFrom: '#080500', bodyTo: '#100a00',
@@ -208,7 +201,6 @@ export const TECH_TERMINAL = [
         name: 'Game Boy DMG',
         family: 'terminal',
         mode: 'dark',
-        blurb: 'Strictly four olive-green LCD shades. No gradients, no blur.',
         surface: {
             headFrom: '#306230', headTo: '#306230',
             bodyFrom: '#8bac0f', bodyTo: '#8bac0f',
@@ -237,7 +229,6 @@ export const TECH_TERMINAL = [
         name: 'Teletext',
         family: 'terminal',
         mode: 'dark',
-        blurb: 'Mode-7 colour bands on pure black.',
         surface: {
             headFrom: '#0000aa', headTo: '#0000aa',
             bodyFrom: '#000000', bodyTo: '#000000',
@@ -265,7 +256,6 @@ export const TECH_TERMINAL = [
         name: 'Chrome 98',
         family: 'terminal',
         mode: 'light',
-        blurb: 'Beveled grey chrome with a title bar and a fake close box.',
         surface: {
             headFrom: '#000080', headTo: '#1084d0',
             bodyFrom: '#c0c0c0', bodyTo: '#c0c0c0',

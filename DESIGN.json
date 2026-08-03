@@ -175,7 +175,6 @@
             "name": "Marshmallow",
             "family": "cute",
             "mode": "light",
-            "blurb": "Pillowy cream and blush with no hard edges anywhere.",
             "frame": null,
             "scan": false
         },
@@ -184,7 +183,6 @@
             "name": "Strawberry Milk",
             "family": "cute",
             "mode": "light",
-            "blurb": "Stitched dashed borders on strawberry and cream.",
             "frame": null,
             "scan": false
         },
@@ -193,7 +191,6 @@
             "name": "Bubble Tea",
             "family": "cute",
             "mode": "light",
-            "blurb": "Milk-tea beige with tapioca dots and full-pill rows.",
             "frame": null,
             "scan": false
         },
@@ -202,7 +199,6 @@
             "name": "Plushie Felt",
             "family": "cute",
             "mode": "light",
-            "blurb": "Matte lilac and peach with a felted inset highlight.",
             "frame": null,
             "scan": false
         },
@@ -211,7 +207,6 @@
             "name": "Sticker Book",
             "family": "cute",
             "mode": "light",
-            "blurb": "Die-cut cards with a white outline and an offset drop shadow.",
             "frame": "diecut",
             "scan": false
         },
@@ -220,7 +215,6 @@
             "name": "Wildflower Press",
             "family": "flowery",
             "mode": "light",
-            "blurb": "Pressed-specimen ivory with olive, rose and lavender.",
             "frame": null,
             "scan": false
         },
@@ -229,7 +223,6 @@
             "name": "Sakura Drift",
             "family": "flowery",
             "mode": "light",
-            "blurb": "Pale pink wash, gold hairlines, tapered petal accents.",
             "frame": null,
             "scan": false
         },
@@ -238,7 +231,6 @@
             "name": "Herbarium",
             "family": "flowery",
             "mode": "light",
-            "blurb": "Specimen-label typography: ruled underlines, no boxes.",
             "frame": null,
             "scan": false
         },
@@ -247,7 +239,6 @@
             "name": "Rose Gold Bloom",
             "family": "flowery",
             "mode": "light",
-            "blurb": "Blush surfaces with metallic rose gradient borders.",
             "frame": null,
             "scan": false
         },
@@ -256,7 +247,6 @@
             "name": "Cottagecore Linen",
             "family": "flowery",
             "mode": "light",
-            "blurb": "Woven linen texture in sage and terracotta.",
             "frame": null,
             "scan": false
         },
@@ -265,7 +255,6 @@
             "name": "Neon Grid",
             "family": "cyber",
             "mode": "dark",
-            "blurb": "Corner brackets and a grid overlay in cyan and magenta.",
             "frame": "brackets",
             "scan": true
         },
@@ -274,7 +263,6 @@
             "name": "Chrome HUD",
             "family": "cyber",
             "mode": "dark",
-            "blurb": "Instrument-readout navy with ruler ticks and clipped corners.",
             "frame": "ticks",
             "scan": false
         },
@@ -283,7 +271,6 @@
             "name": "Glitchwave",
             "family": "cyber",
             "mode": "dark",
-            "blurb": "Chromatic aberration and a deliberately misregistered header.",
             "frame": null,
             "scan": false
         },
@@ -292,7 +279,6 @@
             "name": "Circuitry",
             "family": "cyber",
             "mode": "dark",
-            "blurb": "PCB green with gold traces and square solder pads.",
             "frame": null,
             "scan": false
         },
@@ -301,7 +287,6 @@
             "name": "Datastream",
             "family": "cyber",
             "mode": "dark",
-            "blurb": "Dense monochrome telemetry with a gutter rail.",
             "frame": null,
             "scan": false
         },
@@ -310,7 +295,6 @@
             "name": "Phosphor Green",
             "family": "terminal",
             "mode": "dark",
-            "blurb": "Classic green CRT with scanlines and a soft bloom.",
             "frame": null,
             "scan": true
         },
@@ -319,7 +303,6 @@
             "name": "Terminal Amber",
             "family": "terminal",
             "mode": "dark",
-            "blurb": "Amber CRT bloom with a block cursor and heavy scanlines.",
             "frame": null,
             "scan": true
         },
@@ -328,7 +311,6 @@
             "name": "Game Boy DMG",
             "family": "terminal",
             "mode": "dark",
-            "blurb": "Strictly four olive-green LCD shades. No gradients, no blur.",
             "frame": null,
             "scan": false
         },
@@ -337,7 +319,6 @@
             "name": "Teletext",
             "family": "terminal",
             "mode": "dark",
-            "blurb": "Mode-7 colour bands on pure black.",
             "frame": null,
             "scan": false
         },
@@ -346,7 +327,6 @@
             "name": "Chrome 98",
             "family": "terminal",
             "mode": "light",
-            "blurb": "Beveled grey chrome with a title bar and a fake close box.",
             "frame": "bevel",
             "scan": false
         },
@@ -355,7 +335,6 @@
             "name": "Vaporwave Sunset",
             "family": "retro",
             "mode": "dark",
-            "blurb": "Pink to teal gradient with a horizon grid fading into the body.",
             "frame": null,
             "scan": false
         },
@@ -364,7 +343,6 @@
             "name": "Synthwave Drive",
             "family": "retro",
             "mode": "dark",
-            "blurb": "Indigo to magenta with a chrome-gradient header and a horizon rule.",
             "frame": null,
             "scan": false
         },
@@ -373,7 +351,6 @@
             "name": "Arcade Cabinet",
             "family": "retro",
             "mode": "dark",
-            "blurb": "CRT bezel highlight over saturated primaries.",
             "frame": null,
             "scan": false
         },
@@ -382,7 +359,6 @@
             "name": "Miami Deco",
             "family": "retro",
             "mode": "light",
-            "blurb": "Deco triple-rules in teal, coral and sand.",
             "frame": null,
             "scan": false
         },
@@ -391,7 +367,6 @@
             "name": "Candy Gloss",
             "family": "retro",
             "mode": "light",
-            "blurb": "High-shine candy gradients with a glossy highlight bar.",
             "frame": null,
             "scan": false
         },
@@ -400,7 +375,6 @@
             "name": "Paper Minimal",
             "family": "print",
             "mode": "light",
-            "blurb": "Off-white with grey hairlines. Nothing but weight and spacing.",
             "frame": null,
             "scan": false
         },
@@ -409,7 +383,6 @@
             "name": "Newsprint",
             "family": "print",
             "mode": "light",
-            "blurb": "Halftone cream with black rules and one red spot colour.",
             "frame": "halftone",
             "scan": false
         },
@@ -418,7 +391,6 @@
             "name": "Ink & Vellum",
             "family": "print",
             "mode": "light",
-            "blurb": "Warm vellum and dense ink with double hairline rules.",
             "frame": null,
             "scan": false
         },
@@ -427,7 +399,6 @@
             "name": "Editorial Hairline",
             "family": "print",
             "mode": "light",
-            "blurb": "No boxes. Just rules and spacing.",
             "frame": null,
             "scan": false
         },
@@ -436,7 +407,6 @@
             "name": "Blueprint",
             "family": "print",
             "mode": "dark",
-            "blurb": "Technical drawing: cyan on navy, dashed guides, drafting grid.",
             "frame": "ticks",
             "scan": false
         },
@@ -445,7 +415,6 @@
             "name": "Nordic Frost",
             "family": "print",
             "mode": "dark",
-            "blurb": "Low-contrast slate. The quietest theme in the pack.",
             "frame": null,
             "scan": false
         },
@@ -454,7 +423,6 @@
             "name": "Grimoire",
             "family": "fantasy",
             "mode": "light",
-            "blurb": "Aged parchment, oxblood ink and gold-leaf rules.",
             "frame": null,
             "scan": false
         },
@@ -463,7 +431,6 @@
             "name": "Dungeon Slate",
             "family": "fantasy",
             "mode": "dark",
-            "blurb": "Chiselled stone with a torch-glow header.",
             "frame": null,
             "scan": false
         },
@@ -472,7 +439,6 @@
             "name": "Elven Gilt",
             "family": "fantasy",
             "mode": "dark",
-            "blurb": "Forest green with tapered gold filigree dividers.",
             "frame": null,
             "scan": false
         },
@@ -481,7 +447,6 @@
             "name": "Eldritch Deep",
             "family": "fantasy",
             "mode": "dark",
-            "blurb": "Abyssal teal to violet with irregular corners and an iridescent edge.",
             "frame": null,
             "scan": false
         },
@@ -490,7 +455,6 @@
             "name": "Steampunk Brass",
             "family": "fantasy",
             "mode": "dark",
-            "blurb": "Brass and copper over leather, rivets at every corner.",
             "frame": "rivets",
             "scan": false
         },
@@ -499,7 +463,6 @@
             "name": "Celestial Chart",
             "family": "fantasy",
             "mode": "dark",
-            "blurb": "Star-map navy and gold with constellation-dot separators.",
             "frame": null,
             "scan": false
         },
@@ -508,7 +471,6 @@
             "name": "Neo-Brutalist",
             "family": "bold",
             "mode": "light",
-            "blurb": "Flat brights, 3px black borders, hard offset shadow. No gradients.",
             "frame": null,
             "scan": false
         },
@@ -517,7 +479,6 @@
             "name": "Comic Panel",
             "family": "bold",
             "mode": "light",
-            "blurb": "Halftone dots, thick outlines, and a speech-bubble tail on chips.",
             "frame": "halftone",
             "scan": false
         },
@@ -526,7 +487,6 @@
             "name": "Monochrome Slate",
             "family": "bold",
             "mode": "dark",
-            "blurb": "Zero hue. Weight and rules do all the work.",
             "frame": null,
             "scan": false
         },
@@ -535,7 +495,6 @@
             "name": "Glass Frost",
             "family": "bold",
             "mode": "dark",
-            "blurb": "Translucent panes over a live blur, with a hairline rim.",
             "frame": null,
             "scan": false
         },
@@ -544,7 +503,6 @@
             "name": "Ember Hearth",
             "family": "bold",
             "mode": "dark",
-            "blurb": "Warm charcoal with burnt orange and ochre. Nordic Frost, but warm.",
             "frame": null,
             "scan": false
         },
@@ -553,7 +511,6 @@
             "name": "Adaptive Native",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Uses your active SillyBunny theme, so trackers match the rest of your UI.",
             "frame": null,
             "scan": false
         },
@@ -562,7 +519,6 @@
             "name": "Adaptive Accent",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Your theme colours, with everything keyed off your accent colour.",
             "frame": null,
             "scan": false
         },
@@ -571,7 +527,6 @@
             "name": "Adaptive Ink",
             "family": "adaptive",
             "mode": "adaptive",
-            "blurb": "Rules and whitespace instead of boxes, in your theme colours.",
             "frame": null,
             "scan": false
         }

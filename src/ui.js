@@ -10,7 +10,7 @@
 
 import { DRAWER_ID, MODULE_NAME, STOCK_THEME } from './constants.js';
 import { ARCHETYPES, THEMABLE_TEMPLATE_IDS } from './specs.js';
-import { FAMILIES, THEMES } from './themes/index.js';
+import { FAMILIES, THEMES, getTheme } from './themes/index.js';
 import { DENSITIES, OPEN_DEFAULTS, getSettings, resolveThemeSlug, updateSettings } from './settings.js';
 import { PREVIEW_KEYS, detectEncodedTags, mountPreview } from './preview.js';
 import { applyAll, applyToAgent, inspectAgent, revertAgent, themableAgents } from './apply.js';
@@ -60,7 +60,6 @@ const STATUS_LABELS = Object.freeze({
 });
 
 let previewArchetype = ARCHETYPES.PANEL;
-let familyFilter = 'all';
 
 function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
@@ -99,6 +98,30 @@ function select(id, options, value, onChange) {
     return node;
 }
 
+/** Same as select(), but with <optgroup> headings so 45 themes stay scannable. */
+function groupedSelect(id, groups, value, onChange) {
+    const node = el('select', { id, class: 'text_pole' });
+    for (const group of groups) {
+        if (!group.options.length) {
+            continue;
+        }
+        if (!group.label) {
+            for (const option of group.options) {
+                node.append(el('option', { value: option.value, text: option.label }));
+            }
+            continue;
+        }
+        const optgroup = el('optgroup', { label: group.label });
+        for (const option of group.options) {
+            optgroup.append(el('option', { value: option.value, text: option.label }));
+        }
+        node.append(optgroup);
+    }
+    node.value = value;
+    node.addEventListener('change', () => onChange(node.value));
+    return node;
+}
+
 function checkbox(id, checked, onChange) {
     const node = el('input', { id, type: 'checkbox' });
     node.checked = checked;
@@ -106,62 +129,49 @@ function checkbox(id, checked, onChange) {
     return node;
 }
 
-function themeOptions(settings, { includeInherit = false } = {}) {
-    const options = includeInherit ? [{ value: '', label: 'Use global theme' }] : [];
-    options.push({ value: STOCK_THEME, label: 'Stock (leave unthemed)' });
+function themeGroups(settings, { includeInherit = false } = {}) {
+    const first = includeInherit
+        ? [{ value: '', label: 'Use global theme' }, { value: STOCK_THEME, label: 'Stock' }]
+        : [{ value: STOCK_THEME, label: 'Stock (leave unthemed)' }];
+
+    const groups = [{ label: '', options: first }];
     for (const family of FAMILIES) {
-        for (const theme of THEMES.filter(item => item.family === family.id)) {
-            options.push({ value: theme.slug, label: `${family.label}: ${theme.name}` });
-        }
+        groups.push({
+            label: family.label,
+            options: THEMES
+                .filter(theme => theme.family === family.id)
+                .map(theme => ({ value: theme.slug, label: theme.name })),
+        });
     }
-    for (const theme of Object.values(settings.customThemes)) {
-        options.push({ value: theme.slug, label: `Custom: ${theme.name ?? theme.slug}` });
-    }
-    return options;
+    groups.push({
+        label: 'Custom',
+        options: Object.values(settings.customThemes)
+            .map(theme => ({ value: theme.slug, label: theme.name ?? theme.slug })),
+    });
+    return groups;
 }
 
-function buildGallery(settings, refresh) {
-    const gallery = el('div', { class: 'rat-gallery', id: 'rat_gallery' });
-    const visible = familyFilter === 'all'
-        ? THEMES
-        : THEMES.filter(theme => theme.family === familyFilter);
+function buildPreview(settings) {
+    const wrapper = el('div', { id: 'rat_preview_wrap' });
+    const theme = getTheme(settings.theme, settings.customThemes);
 
-    for (const theme of visible) {
-        const active = settings.theme === theme.slug;
-        const card = el('div', { class: 'rat-card', 'data-active': String(active) });
-
-        card.append(el('div', { class: 'rat-card-head' }, [
-            el('span', { class: 'rat-card-name', text: theme.name }),
-            el('span', { class: 'rat-card-mode', text: theme.mode }),
-        ]));
-        if (theme.blurb) {
-            card.append(el('div', { class: 'rat-card-blurb', text: theme.blurb }));
-        }
-
-        const preview = el('div', { class: 'rat-preview' });
-        card.append(preview);
-        mountPreview(preview, previewArchetype, theme, settings.options);
-
-        const apply = el('div', { class: 'flex-container' }, [
-            el('div', {
-                class: 'menu_button menu_button_icon',
-                text: active ? 'Applied' : 'Apply to all',
-            }),
-        ]);
-        apply.firstChild.addEventListener('click', async () => {
-            updateSettings({ theme: theme.slug });
-            const result = await applyAll();
-            reportApply(result);
-            refresh();
-        });
-        card.append(apply);
-        gallery.append(card);
+    if (!theme) {
+        wrapper.append(el('div', {
+            class: 'rat-note',
+            text: 'Trackers are on the stock look. Pick a theme above to see it here.',
+        }));
+        return wrapper;
     }
 
-    if (!visible.length) {
-        gallery.append(el('div', { class: 'rat-note', text: 'No themes in this family.' }));
-    }
-    return gallery;
+    wrapper.append(el('div', { class: 'rat-preview-head' }, [
+        el('span', { class: 'rat-card-name', text: theme.name }),
+        el('span', { class: 'rat-card-mode', text: theme.mode }),
+    ]));
+
+    const preview = el('div', { class: 'rat-preview' });
+    wrapper.append(preview);
+    mountPreview(preview, previewArchetype, theme, settings.options);
+    return wrapper;
 }
 
 function reportApply(result) {
@@ -234,9 +244,9 @@ async function buildScopeTable(settings, refresh) {
         const reports = templateAgents.map(agent => inspectAgent(agent, settings));
         const worst = reports.find(report => report.status !== 'pristine') ?? reports[0];
 
-        const themeSelect = select(
+        const themeSelect = groupedSelect(
             `rat_scope_${templateId}`,
-            themeOptions(settings, { includeInherit: true }),
+            themeGroups(settings, { includeInherit: true }),
             settings.overrides[templateId] ?? '',
             async value => {
                 const overrides = { ...settings.overrides };
@@ -375,16 +385,6 @@ function buildToolbar(settings, refresh) {
         },
     )));
 
-    toolbar.append(optionRow('Family', select(
-        'rat_family',
-        [{ value: 'all', label: 'All families' }, ...FAMILIES.map(f => ({ value: f.id, label: f.label }))],
-        familyFilter,
-        value => {
-            familyFilter = value;
-            refresh();
-        },
-    )));
-
     const applyButton = el('div', { class: 'menu_button', text: 'Re-apply' });
     applyButton.addEventListener('click', async () => {
         reportApply(await applyAll());
@@ -464,19 +464,18 @@ async function renderContent(content) {
         }));
     }
 
-    content.append(el('h4', { text: 'Global theme' }));
-    content.append(select('rat_theme', themeOptions(settings), settings.theme, async value => {
+    content.append(el('h4', { text: 'Theme' }));
+    content.append(groupedSelect('rat_theme', themeGroups(settings), settings.theme, async value => {
         updateSettings({ theme: value });
         reportApply(await applyAll());
         refresh(content);
     }));
 
+    content.append(buildToolbar(settings, () => refresh(content)));
+    content.append(buildPreview(settings));
+
     content.append(el('h4', { text: 'Options' }));
     content.append(buildOptions(settings, () => refresh(content)));
-
-    content.append(el('h4', { text: 'Themes' }));
-    content.append(buildToolbar(settings, () => refresh(content)));
-    content.append(buildGallery(settings, () => refresh(content)));
 
     content.append(el('h4', { text: 'Per-tracker' }));
     content.append(await buildScopeTable(settings, () => refresh(content)));

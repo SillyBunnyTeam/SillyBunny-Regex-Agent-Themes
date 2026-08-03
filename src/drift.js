@@ -29,10 +29,13 @@ export const AUTO_APPLY = Object.freeze([STATUS.STOCK, STATUS.OUTDATED]);
  * @param {object|null} params.script The agent's current script, or null if absent.
  * @param {object} params.spec Its spec.
  * @param {string|null} params.expected What the current theme and options would produce.
+ * @param {string|null} [params.expectedFindRegex] For cleanup scripts, the pattern the
+ *   current theme would produce. Cleanup scripts carry no markup, so their `replaceString`
+ *   is always empty and comparing it would report every themed agent as unthemed.
  * @param {object} [params.ledgerEntry] What we recorded when we last wrote it.
  * @returns {string} A STATUS value.
  */
-export function classifyScript({ script, spec, expected, ledgerEntry }) {
+export function classifyScript({ script, spec, expected, expectedFindRegex, ledgerEntry }) {
     if (!script) {
         return STATUS.MISSING;
     }
@@ -43,6 +46,19 @@ export function classifyScript({ script, spec, expected, ledgerEntry }) {
     // this spec maps may have been renumbered upstream.
     if (stock && !spec.regenerateFindRegex && script.findRegex !== stock.findRegex) {
         return STATUS.UPSTREAM_CHANGED;
+    }
+
+    // A cleanup script's pattern matches our own generated markup, so the pattern is the
+    // only part of it that carries a theme. Only this extension ever writes it, so an
+    // unrecognised pattern means an older theme, not a hand edit.
+    if (spec.regenerateFindRegex) {
+        if (expectedFindRegex && script.findRegex === expectedFindRegex) {
+            return STATUS.PRISTINE;
+        }
+        if (stock && script.findRegex === stock.findRegex) {
+            return STATUS.STOCK;
+        }
+        return STATUS.OUTDATED;
     }
 
     const current = script.replaceString ?? '';

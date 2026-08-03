@@ -9,7 +9,6 @@ export const FANTASY_BOLD = [
         name: 'Grimoire',
         family: 'fantasy',
         mode: 'light',
-        blurb: 'Aged parchment, oxblood ink and gold-leaf rules.',
         surface: {
             headFrom: '#e8dcc0', headTo: '#d6c49c',
             bodyFrom: '#f2e9d2', bodyTo: '#e8dcc0',
@@ -40,7 +39,6 @@ export const FANTASY_BOLD = [
         name: 'Dungeon Slate',
         family: 'fantasy',
         mode: 'dark',
-        blurb: 'Chiselled stone with a torch-glow header.',
         surface: {
             headFrom: '#2a2724', headTo: 'rgba(216,122,44,0.24)',
             bodyFrom: '#211f1d', bodyTo: '#2a2724',
@@ -71,7 +69,6 @@ export const FANTASY_BOLD = [
         name: 'Elven Gilt',
         family: 'fantasy',
         mode: 'dark',
-        blurb: 'Forest green with tapered gold filigree dividers.',
         surface: {
             headFrom: '#0e2419', headTo: 'rgba(212,175,55,0.16)',
             bodyFrom: '#0b1d14', bodyTo: '#10281c',
@@ -99,7 +96,6 @@ export const FANTASY_BOLD = [
         name: 'Eldritch Deep',
         family: 'fantasy',
         mode: 'dark',
-        blurb: 'Abyssal teal to violet with irregular corners and an iridescent edge.',
         surface: {
             headFrom: '#07161c', headTo: 'rgba(124,58,237,0.28)',
             bodyFrom: '#05121a', bodyTo: '#0a1c26',
@@ -126,7 +122,6 @@ export const FANTASY_BOLD = [
         name: 'Steampunk Brass',
         family: 'fantasy',
         mode: 'dark',
-        blurb: 'Brass and copper over leather, rivets at every corner.',
         surface: {
             headFrom: '#3a2a18', headTo: 'rgba(196,148,74,0.30)',
             bodyFrom: '#2b1f14', bodyTo: '#3a2a18',
@@ -157,7 +152,6 @@ export const FANTASY_BOLD = [
         name: 'Celestial Chart',
         family: 'fantasy',
         mode: 'dark',
-        blurb: 'Star-map navy and gold with constellation-dot separators.',
         surface: {
             headFrom: '#0b1026', headTo: 'rgba(230,196,106,0.16)',
             bodyFrom: '#080d20', bodyTo: '#0d1430',
@@ -186,7 +180,6 @@ export const FANTASY_BOLD = [
         name: 'Neo-Brutalist',
         family: 'bold',
         mode: 'light',
-        blurb: 'Flat brights, 3px black borders, hard offset shadow. No gradients.',
         surface: {
             headFrom: '#ffe14d', headTo: '#ffe14d',
             bodyFrom: '#ffffff', bodyTo: '#ffffff',
@@ -214,7 +207,6 @@ export const FANTASY_BOLD = [
         name: 'Comic Panel',
         family: 'bold',
         mode: 'light',
-        blurb: 'Halftone dots, thick outlines, and a speech-bubble tail on chips.',
         surface: {
             headFrom: '#fff3c4', headTo: '#ffd93d',
             bodyFrom: '#ffffff', bodyTo: '#fffdf4',
@@ -243,7 +235,6 @@ export const FANTASY_BOLD = [
         name: 'Monochrome Slate',
         family: 'bold',
         mode: 'dark',
-        blurb: 'Zero hue. Weight and rules do all the work.',
         surface: {
             headFrom: '#232323', headTo: '#2e2e2e',
             bodyFrom: '#1c1c1c', bodyTo: '#232323',
@@ -270,7 +261,6 @@ export const FANTASY_BOLD = [
         name: 'Glass Frost',
         family: 'bold',
         mode: 'dark',
-        blurb: 'Translucent panes over a live blur, with a hairline rim.',
         surface: {
             headFrom: 'rgba(255,255,255,0.16)', headTo: 'rgba(255,255,255,0.06)',
             bodyFrom: 'rgba(255,255,255,0.10)', bodyTo: 'rgba(255,255,255,0.04)',
@@ -302,7 +292,6 @@ export const FANTASY_BOLD = [
         name: 'Ember Hearth',
         family: 'bold',
         mode: 'dark',
-        blurb: 'Warm charcoal with burnt orange and ochre. Nordic Frost, but warm.',
         surface: {
             headFrom: '#2a201c', headTo: 'rgba(217,119,54,0.24)',
             bodyFrom: '#241c19', bodyTo: '#2e2420',

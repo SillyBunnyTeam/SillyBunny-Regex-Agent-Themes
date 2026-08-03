@@ -9,7 +9,6 @@ export const RETRO_PRINT = [
         name: 'Vaporwave Sunset',
         family: 'retro',
         mode: 'dark',
-        blurb: 'Pink to teal gradient with a horizon grid fading into the body.',
         surface: {
             headFrom: '#2b1055', headTo: '#ff2e93',
             bodyFrom: '#20124d', bodyTo: '#3b1c6b',
@@ -37,7 +36,6 @@ export const RETRO_PRINT = [
         name: 'Synthwave Drive',
         family: 'retro',
         mode: 'dark',
-        blurb: 'Indigo to magenta with a chrome-gradient header and a horizon rule.',
         surface: {
             headFrom: '#1a1040', headTo: '#c2185b',
             bodyFrom: '#150c33', bodyTo: '#241350',
@@ -65,7 +63,6 @@ export const RETRO_PRINT = [
         name: 'Arcade Cabinet',
         family: 'retro',
         mode: 'dark',
-        blurb: 'CRT bezel highlight over saturated primaries.',
         surface: {
             headFrom: '#101010', headTo: 'rgba(255,215,0,0.18)',
             bodyFrom: '#0a0a0a', bodyTo: '#141414',
@@ -92,7 +89,6 @@ export const RETRO_PRINT = [
         name: 'Miami Deco',
         family: 'retro',
         mode: 'light',
-        blurb: 'Deco triple-rules in teal, coral and sand.',
         surface: {
             headFrom: '#f7f2e7', headTo: '#ffd9c9',
             bodyFrom: '#fffdf8', bodyTo: '#f9f4ea',
@@ -119,7 +115,6 @@ export const RETRO_PRINT = [
         name: 'Candy Gloss',
         family: 'retro',
         mode: 'light',
-        blurb: 'High-shine candy gradients with a glossy highlight bar.',
         surface: {
             headFrom: '#ff8fb1', headTo: '#ff5d8f',
             bodyFrom: '#ffffff', bodyTo: '#fff6f9',
@@ -145,7 +140,6 @@ export const RETRO_PRINT = [
         name: 'Paper Minimal',
         family: 'print',
         mode: 'light',
-        blurb: 'Off-white with grey hairlines. Nothing but weight and spacing.',
         surface: {
             headFrom: '#fbfbf9', headTo: '#f4f4f1',
             bodyFrom: '#ffffff', bodyTo: '#fdfdfc',
@@ -171,7 +165,6 @@ export const RETRO_PRINT = [
         name: 'Newsprint',
         family: 'print',
         mode: 'light',
-        blurb: 'Halftone cream with black rules and one red spot colour.',
         surface: {
             headFrom: '#f2ece1', headTo: '#e6ddcd',
             bodyFrom: '#f7f2e8', bodyTo: '#f2ece1',
@@ -200,7 +193,6 @@ export const RETRO_PRINT = [
         name: 'Ink & Vellum',
         family: 'print',
         mode: 'light',
-        blurb: 'Warm vellum and dense ink with double hairline rules.',
         surface: {
             headFrom: '#f6f0e2', headTo: '#ece3cf',
             bodyFrom: '#fbf7ec', bodyTo: '#f6f0e2',
@@ -228,7 +220,6 @@ export const RETRO_PRINT = [
         name: 'Editorial Hairline',
         family: 'print',
         mode: 'light',
-        blurb: 'No boxes. Just rules and spacing.',
         surface: {
             headFrom: '#ffffff', headTo: '#ffffff',
             bodyFrom: '#ffffff', bodyTo: '#ffffff',
@@ -257,7 +248,6 @@ export const RETRO_PRINT = [
         name: 'Blueprint',
         family: 'print',
         mode: 'dark',
-        blurb: 'Technical drawing: cyan on navy, dashed guides, drafting grid.',
         surface: {
             headFrom: '#0e1f33', headTo: '#12263f',
             bodyFrom: '#0b1a2b', bodyTo: '#0e1f33',
@@ -286,7 +276,6 @@ export const RETRO_PRINT = [
         name: 'Nordic Frost',
         family: 'print',
         mode: 'dark',
-        blurb: 'Low-contrast slate. The quietest theme in the pack.',
         surface: {
             headFrom: '#2e3440', headTo: '#3b4252',
             bodyFrom: '#2b3140', bodyTo: '#323947',
