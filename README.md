@@ -35,13 +35,15 @@ checking first if your extensions disappear after moving things around.
 
 ## Using it
 
-Pick a theme from the dropdown at the top, grouped by family. It applies everywhere immediately
-and the preview below shows what you just got.
+Pick a theme from the dropdown at the top, grouped by family. It applies everywhere immediately.
 
-The Preview dropdown switches which card the preview shows, so you can check how a theme handles
-NPC profiles or the chatroom before settling on it.
+Everything else sits in three collapsed sections so the panel stays short:
 
-The table at the bottom sets a theme per tracker. Leave a row blank to use the global theme.
+- **Preview** shows the current theme with sample data in it. Its own dropdown switches which card
+  you are looking at, so you can check how a theme handles NPC profiles or the chatroom. Picking a
+  theme opens this section for you.
+- **Options** is the settings below.
+- **Per-tracker** sets a theme for one tracker at a time. Leave a row blank to use the global theme.
 
 "Revert all" puts everything back to stock. Disabling the extension does not revert, because the
 themes get saved into your agent files.

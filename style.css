@@ -147,6 +147,25 @@
 
 /* ------------------------------------------------------------------ settings panel */
 
+/*
+ * Nested collapsible sections. SillyBunny's global .inline-drawer-toggle handler animates
+ * these, so they need no JS of their own. The deduping MutationObserver only inspects the
+ * host's direct children, so nesting drawers here is safe.
+ */
+#rat_drawer .rat-section {
+    border-top: 1px solid rgba(127, 127, 127, 0.22);
+    margin-top: 6px;
+}
+
+#rat_drawer .rat-section > .inline-drawer-header {
+    padding: 6px 0;
+    font-size: 0.95em;
+}
+
+#rat_drawer .rat-section > .inline-drawer-content {
+    padding-bottom: 8px;
+}
+
 #rat_drawer .rat-toolbar {
     display: flex;
     flex-wrap: wrap;

@@ -60,6 +60,7 @@ const STATUS_LABELS = Object.freeze({
 });
 
 let previewArchetype = ARCHETYPES.PANEL;
+const sectionOpen = { preview: false, options: false, scope: false };
 
 function el(tag, attrs = {}, children = []) {
     const node = document.createElement(tag);
@@ -120,6 +121,34 @@ function groupedSelect(id, groups, value, onChange) {
     node.value = value;
     node.addEventListener('change', () => onChange(node.value));
     return node;
+}
+
+function section(key, title) {
+    const open = sectionOpen[key];
+    const content = el('div', { class: 'inline-drawer-content' });
+    if (!open) {
+        content.style.display = 'none';
+    }
+
+    const icon = el('div', {
+        class: open
+            ? 'inline-drawer-icon fa-solid fa-circle-chevron-up up'
+            : 'inline-drawer-icon fa-solid fa-circle-chevron-down down',
+    });
+
+    const drawer = el('div', { class: 'inline-drawer rat-section' }, [
+        el('div', { class: 'inline-drawer-toggle inline-drawer-header' }, [
+            el('b', { text: title }),
+            icon,
+        ]),
+        content,
+    ]);
+
+    drawer.addEventListener('inline-drawer-toggle', () => {
+        sectionOpen[key] = !sectionOpen[key];
+    });
+
+    return { drawer, content };
 }
 
 function checkbox(id, checked, onChange) {
@@ -464,21 +493,26 @@ async function renderContent(content) {
         }));
     }
 
-    content.append(el('h4', { text: 'Theme' }));
     content.append(groupedSelect('rat_theme', themeGroups(settings), settings.theme, async value => {
         updateSettings({ theme: value });
+        // Open the preview on a theme change so the result is visible without a second click.
+        sectionOpen.preview = true;
         reportApply(await applyAll());
         refresh(content);
     }));
 
-    content.append(buildToolbar(settings, () => refresh(content)));
-    content.append(buildPreview(settings));
+    const preview = section('preview', 'Preview');
+    preview.content.append(buildToolbar(settings, () => refresh(content)));
+    preview.content.append(buildPreview(settings));
+    content.append(preview.drawer);
 
-    content.append(el('h4', { text: 'Options' }));
-    content.append(buildOptions(settings, () => refresh(content)));
+    const options = section('options', 'Options');
+    options.content.append(buildOptions(settings, () => refresh(content)));
+    content.append(options.drawer);
 
-    content.append(el('h4', { text: 'Per-tracker' }));
-    content.append(await buildScopeTable(settings, () => refresh(content)));
+    const scope = section('scope', 'Per-tracker');
+    scope.content.append(await buildScopeTable(settings, () => refresh(content)));
+    content.append(scope.drawer);
 }
 
 let refreshHandle = null;
