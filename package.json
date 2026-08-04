@@ -6,9 +6,10 @@
     "description": "Swappable HTML themes for SillyBunny's bundled In-Chat Agent trackers and companion panels.",
     "scripts": {
         "test": "npm run test:pure && npm run test:host",
-        "test:pure": "node --experimental-test-module-mocks --test test/apply-engine.test.js test/apply.test.js test/commands.test.js test/contrast.test.js test/custom-themes.test.js test/host.test.js test/invariants.test.js test/lifecycle.test.js test/release.test.js test/settings.test.js test/specs.test.js test/ui.test.js",
+        "test:pure": "node --experimental-test-module-mocks --test test/apply-engine.test.js test/apply.test.js test/commands.test.js test/contrast.test.js test/custom-themes.test.js test/gallery.test.js test/host.test.js test/invariants.test.js test/lifecycle.test.js test/release.test.js test/settings.test.js test/specs.test.js test/ui.test.js",
         "test:host": "RAT_REQUIRE_HOST=1 node --experimental-test-module-mocks --test test/contract.test.js test/integration.test.js test/interpolate.test.js",
-        "generate:stock": "node scripts/generate-stock.mjs"
+        "generate:stock": "node scripts/generate-stock.mjs",
+        "generate:gallery": "node scripts/generate-gallery.mjs"
     },
     "repository": {
         "type": "git",

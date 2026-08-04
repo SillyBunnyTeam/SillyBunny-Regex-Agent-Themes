@@ -29,7 +29,8 @@ export const PREVIEW_KEYS = Object.freeze({
     [ARCHETYPES.TRANSCRIPT]: 'chat-only',
 });
 
-function stockScriptsFor(templateId) {
+/** Reconstructs a live-shaped `regexScripts` array from the stock baseline. */
+export function stockScriptsFor(templateId) {
     return STOCK.filter(entry => entry.templateId === templateId).map(entry => ({
         id: entry.scriptId,
         scriptName: entry.scriptName,

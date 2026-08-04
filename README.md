@@ -69,18 +69,10 @@ failure, and continues a batch without claiming success for the failed agent.
 
 ## Themes
 
-| Family | Themes |
-| --- | --- |
-| Cute & Soft | Marshmallow, Strawberry Milk, Bubble Tea, Plushie Felt, Sticker Book, Sunny Bento, Midnight Kawaii |
-| Flowery & Botanical | Wildflower Press, Sakura Drift, Herbarium, Rose Gold Bloom, Cottagecore Linen, Pressed Lavender, Greenhouse Grid, Night Orchid |
-| Cyber & Tech | Neon Grid, Chrome HUD, Glitchwave, Circuitry, Datastream, Biometric Lab, Hazard Console |
-| Terminal & Retro Computing | Phosphor Green, Terminal Amber, Game Boy DMG, Teletext, Chrome 98, DOS Cobalt, Paper Tape, VFD Cyan |
-| Retro-Futurist & Neon | Vaporwave Sunset, Synthwave Drive, Arcade Cabinet, Miami Deco, Candy Gloss, Atomic Diner, Cassette Future, Raygun Poster |
-| Print & Editorial | Paper Minimal, Newsprint, Ink & Vellum, Editorial Hairline, Blueprint, Nordic Frost, Bauhaus Poster, Photocopy Zine |
-| Fantasy & Arcane | Grimoire, Dungeon Slate, Elven Gilt, Eldritch Deep, Steampunk Brass, Celestial Chart, Frost Rune, Sunlit Mosaic |
-| Bold & Material | Neo-Brutalist, Comic Panel, Monochrome Slate, Glass Frost, Ember Hearth, Riso Print, Soft Clay, Construction Paper |
-| Animated | Aurora Drift, Signal Pulse, Moonlit Garden, Firefly Glow, Ocean Breath, Prism Haze, Lantern Warmth, Plasma Ring, Comet Trail, Tidepool Shimmer, Candlelit Page, Storm Charge, Dawn Glow |
-| Adaptive | Adaptive Native, Adaptive Accent, Adaptive Ink |
+All 78 themes are pictured in [GALLERY.md](GALLERY.md), one screenshot each, showing the same scene
+tracker, NPC profile, and choice menu so they can be compared directly. They are grouped into ten
+families: Cute & Soft, Flowery & Botanical, Cyber & Tech, Terminal & Retro Computing, Retro-Futurist
+& Neon, Print & Editorial, Fantasy & Arcane, Bold & Material, Animated, and Adaptive.
 
 Adaptive themes use allowlisted SillyBunny theme variables. Generated text colors and local safety
 surfaces are derived to preserve readable contrast. Compact density reduces spacing without
@@ -162,6 +154,11 @@ RAT_ST_ROOT=/path/to/SillyBunny npm run test:host
 npm test
 npm run generate:stock -- /path/to/SillyBunny
 ```
+
+Regenerate the theme gallery with `npm run generate:gallery`. It needs headless Chrome plus `cwebp`
+and `magick`, and rewrites `GALLERY.md` and every image under `assets/themes`. Pass `--doc-only` to
+rebuild just the page, or `--only <slug>` for one theme. Fonts come from the machine that runs it, so
+a full regeneration belongs on one machine and a whole-set image diff is worth a second look.
 
 `npm run test:pure` needs no SillyBunny checkout. `npm run test:host` and `npm test` require one and
 fail if it is unavailable, so host coverage cannot be skipped in release checks. CI runs pure tests

@@ -1,0 +1,3 @@
+# Gallery screenshots. Marking them binary keeps git from attempting text diffs and from
+# touching their bytes on checkout.
+*.webp binary

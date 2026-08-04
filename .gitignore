@@ -3,3 +3,7 @@
 node_modules
 *.log
 .DS_Store
+
+# Gallery intermediates. Only the .webp files are committed; `--keep-png` writes the
+# uncompressed captures here for inspection.
+assets/themes/*.png
