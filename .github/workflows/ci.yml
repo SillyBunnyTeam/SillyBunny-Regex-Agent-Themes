@@ -30,8 +30,6 @@ jobs:
     name: SillyBunny host contract
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      RAT_ST_ROOT: ${{ runner.temp }}/SillyBunny
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,6 +37,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The `runner` context does not exist at job level, so the path is exported here from
+      # $RUNNER_TEMP instead. Keeping the clone out of the workspace stops it from showing up
+      # as untracked in the stock-baseline diff below.
+      - name: Locate the SillyBunny checkout
+        run: echo "RAT_ST_ROOT=$RUNNER_TEMP/SillyBunny" >> "$GITHUB_ENV"
       - name: Check out SillyBunny
         run: git clone --depth 1 https://github.com/SillyBunnyTeam/SillyBunny.git "$RAT_ST_ROOT"
       - run: npm run test:host
