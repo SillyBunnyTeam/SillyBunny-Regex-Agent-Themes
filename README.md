@@ -24,7 +24,7 @@ No server plugin or `config.yaml` change is required.
 Paste this URL into the SillyBunny extension installer:
 
 ```text
-https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes
+https://github.com/SillyBunnyTeam/SillyBunny-Regex-Agent-Themes
 ```
 
 Then open Extensions and expand **Regex Agent Themes**.

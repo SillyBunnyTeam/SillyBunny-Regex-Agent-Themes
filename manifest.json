@@ -12,7 +12,7 @@
     "js": "index.js",
     "css": "style.css",
     "license": "AGPL-3.0",
-    "homePage": "https://github.com/platberlitz/SillyBunny-Regex-Agent-Themes",
+    "homePage": "https://github.com/SillyBunnyTeam/SillyBunny-Regex-Agent-Themes",
     "loading_order": 120,
     "auto_update": true,
     "hooks": {
