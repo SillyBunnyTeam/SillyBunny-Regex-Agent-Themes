@@ -30,389 +30,389 @@ Apply one with `/rat-theme <slug>`, or pick it in **Browse themes**. Regenerate 
 
 ### Marshmallow
 
-`marshmallow` · Light
-
-![Marshmallow tracker panel, NPC profile and choice menu](assets/themes/marshmallow.webp)
+| `marshmallow` · Light |
+| --- |
+| <img src="assets/themes/marshmallow.webp" width="400" alt="Marshmallow tracker panel, NPC profile and choice menu"> |
 
 ### Strawberry Milk
 
-`strawberry-milk` · Light
-
-![Strawberry Milk tracker panel, NPC profile and choice menu](assets/themes/strawberry-milk.webp)
+| `strawberry-milk` · Light |
+| --- |
+| <img src="assets/themes/strawberry-milk.webp" width="400" alt="Strawberry Milk tracker panel, NPC profile and choice menu"> |
 
 ### Bubble Tea
 
-`bubble-tea` · Light
-
-![Bubble Tea tracker panel, NPC profile and choice menu](assets/themes/bubble-tea.webp)
+| `bubble-tea` · Light |
+| --- |
+| <img src="assets/themes/bubble-tea.webp" width="400" alt="Bubble Tea tracker panel, NPC profile and choice menu"> |
 
 ### Plushie Felt
 
-`plushie-felt` · Light
-
-![Plushie Felt tracker panel, NPC profile and choice menu](assets/themes/plushie-felt.webp)
+| `plushie-felt` · Light |
+| --- |
+| <img src="assets/themes/plushie-felt.webp" width="400" alt="Plushie Felt tracker panel, NPC profile and choice menu"> |
 
 ### Sticker Book
 
-`sticker-book` · Light · diecut frame
-
-![Sticker Book tracker panel, NPC profile and choice menu](assets/themes/sticker-book.webp)
+| `sticker-book` · Light · diecut frame |
+| --- |
+| <img src="assets/themes/sticker-book.webp" width="400" alt="Sticker Book tracker panel, NPC profile and choice menu"> |
 
 ### Sunny Bento
 
-`sunny-bento` · Light
-
-![Sunny Bento tracker panel, NPC profile and choice menu](assets/themes/sunny-bento.webp)
+| `sunny-bento` · Light |
+| --- |
+| <img src="assets/themes/sunny-bento.webp" width="400" alt="Sunny Bento tracker panel, NPC profile and choice menu"> |
 
 ### Midnight Kawaii
 
-`midnight-kawaii` · Dark
-
-![Midnight Kawaii tracker panel, NPC profile and choice menu](assets/themes/midnight-kawaii.webp)
+| `midnight-kawaii` · Dark |
+| --- |
+| <img src="assets/themes/midnight-kawaii.webp" width="400" alt="Midnight Kawaii tracker panel, NPC profile and choice menu"> |
 
 ## Flowery & Botanical
 
 ### Wildflower Press
 
-`wildflower-press` · Light
-
-![Wildflower Press tracker panel, NPC profile and choice menu](assets/themes/wildflower-press.webp)
+| `wildflower-press` · Light |
+| --- |
+| <img src="assets/themes/wildflower-press.webp" width="400" alt="Wildflower Press tracker panel, NPC profile and choice menu"> |
 
 ### Sakura Drift
 
-`sakura-drift` · Light
-
-![Sakura Drift tracker panel, NPC profile and choice menu](assets/themes/sakura-drift.webp)
+| `sakura-drift` · Light |
+| --- |
+| <img src="assets/themes/sakura-drift.webp" width="400" alt="Sakura Drift tracker panel, NPC profile and choice menu"> |
 
 ### Herbarium
 
-`herbarium` · Light
-
-![Herbarium tracker panel, NPC profile and choice menu](assets/themes/herbarium.webp)
+| `herbarium` · Light |
+| --- |
+| <img src="assets/themes/herbarium.webp" width="400" alt="Herbarium tracker panel, NPC profile and choice menu"> |
 
 ### Rose Gold Bloom
 
-`rose-gold-bloom` · Light
-
-![Rose Gold Bloom tracker panel, NPC profile and choice menu](assets/themes/rose-gold-bloom.webp)
+| `rose-gold-bloom` · Light |
+| --- |
+| <img src="assets/themes/rose-gold-bloom.webp" width="400" alt="Rose Gold Bloom tracker panel, NPC profile and choice menu"> |
 
 ### Cottagecore Linen
 
-`cottagecore-linen` · Light
-
-![Cottagecore Linen tracker panel, NPC profile and choice menu](assets/themes/cottagecore-linen.webp)
+| `cottagecore-linen` · Light |
+| --- |
+| <img src="assets/themes/cottagecore-linen.webp" width="400" alt="Cottagecore Linen tracker panel, NPC profile and choice menu"> |
 
 ### Pressed Lavender
 
-`pressed-lavender` · Light
-
-![Pressed Lavender tracker panel, NPC profile and choice menu](assets/themes/pressed-lavender.webp)
+| `pressed-lavender` · Light |
+| --- |
+| <img src="assets/themes/pressed-lavender.webp" width="400" alt="Pressed Lavender tracker panel, NPC profile and choice menu"> |
 
 ### Greenhouse Grid
 
-`greenhouse-grid` · Light · ticks frame
-
-![Greenhouse Grid tracker panel, NPC profile and choice menu](assets/themes/greenhouse-grid.webp)
+| `greenhouse-grid` · Light · ticks frame |
+| --- |
+| <img src="assets/themes/greenhouse-grid.webp" width="400" alt="Greenhouse Grid tracker panel, NPC profile and choice menu"> |
 
 ### Night Orchid
 
-`night-orchid` · Dark
-
-![Night Orchid tracker panel, NPC profile and choice menu](assets/themes/night-orchid.webp)
+| `night-orchid` · Dark |
+| --- |
+| <img src="assets/themes/night-orchid.webp" width="400" alt="Night Orchid tracker panel, NPC profile and choice menu"> |
 
 ## Cyber & Tech
 
 ### Neon Grid
 
-`neon-grid` · Dark · brackets frame · scan layer
-
-![Neon Grid tracker panel, NPC profile and choice menu](assets/themes/neon-grid.webp)
+| `neon-grid` · Dark · brackets frame · scan layer |
+| --- |
+| <img src="assets/themes/neon-grid.webp" width="400" alt="Neon Grid tracker panel, NPC profile and choice menu"> |
 
 ### Chrome HUD
 
-`chrome-hud` · Dark · ticks frame
-
-![Chrome HUD tracker panel, NPC profile and choice menu](assets/themes/chrome-hud.webp)
+| `chrome-hud` · Dark · ticks frame |
+| --- |
+| <img src="assets/themes/chrome-hud.webp" width="400" alt="Chrome HUD tracker panel, NPC profile and choice menu"> |
 
 ### Glitchwave
 
-`glitchwave` · Dark
-
-![Glitchwave tracker panel, NPC profile and choice menu](assets/themes/glitchwave.webp)
+| `glitchwave` · Dark |
+| --- |
+| <img src="assets/themes/glitchwave.webp" width="400" alt="Glitchwave tracker panel, NPC profile and choice menu"> |
 
 ### Circuitry
 
-`circuitry` · Dark
-
-![Circuitry tracker panel, NPC profile and choice menu](assets/themes/circuitry.webp)
+| `circuitry` · Dark |
+| --- |
+| <img src="assets/themes/circuitry.webp" width="400" alt="Circuitry tracker panel, NPC profile and choice menu"> |
 
 ### Datastream
 
-`datastream` · Dark
-
-![Datastream tracker panel, NPC profile and choice menu](assets/themes/datastream.webp)
+| `datastream` · Dark |
+| --- |
+| <img src="assets/themes/datastream.webp" width="400" alt="Datastream tracker panel, NPC profile and choice menu"> |
 
 ### Biometric Lab
 
-`biometric-lab` · Light · ticks frame
-
-![Biometric Lab tracker panel, NPC profile and choice menu](assets/themes/biometric-lab.webp)
+| `biometric-lab` · Light · ticks frame |
+| --- |
+| <img src="assets/themes/biometric-lab.webp" width="400" alt="Biometric Lab tracker panel, NPC profile and choice menu"> |
 
 ### Hazard Console
 
-`hazard-console` · Dark · rivets frame
-
-![Hazard Console tracker panel, NPC profile and choice menu](assets/themes/hazard-console.webp)
+| `hazard-console` · Dark · rivets frame |
+| --- |
+| <img src="assets/themes/hazard-console.webp" width="400" alt="Hazard Console tracker panel, NPC profile and choice menu"> |
 
 ## Terminal & Retro Computing
 
 ### Phosphor Green
 
-`phosphor-green` · Dark · scan layer
-
-![Phosphor Green tracker panel, NPC profile and choice menu](assets/themes/phosphor-green.webp)
+| `phosphor-green` · Dark · scan layer |
+| --- |
+| <img src="assets/themes/phosphor-green.webp" width="400" alt="Phosphor Green tracker panel, NPC profile and choice menu"> |
 
 ### Terminal Amber
 
-`terminal-amber` · Dark · scan layer
-
-![Terminal Amber tracker panel, NPC profile and choice menu](assets/themes/terminal-amber.webp)
+| `terminal-amber` · Dark · scan layer |
+| --- |
+| <img src="assets/themes/terminal-amber.webp" width="400" alt="Terminal Amber tracker panel, NPC profile and choice menu"> |
 
 ### Game Boy DMG
 
-`gameboy-dmg` · Dark
-
-![Game Boy DMG tracker panel, NPC profile and choice menu](assets/themes/gameboy-dmg.webp)
+| `gameboy-dmg` · Dark |
+| --- |
+| <img src="assets/themes/gameboy-dmg.webp" width="400" alt="Game Boy DMG tracker panel, NPC profile and choice menu"> |
 
 ### Teletext
 
-`teletext` · Dark
-
-![Teletext tracker panel, NPC profile and choice menu](assets/themes/teletext.webp)
+| `teletext` · Dark |
+| --- |
+| <img src="assets/themes/teletext.webp" width="400" alt="Teletext tracker panel, NPC profile and choice menu"> |
 
 ### Chrome 98
 
-`chrome-98` · Light · bevel frame
-
-![Chrome 98 tracker panel, NPC profile and choice menu](assets/themes/chrome-98.webp)
+| `chrome-98` · Light · bevel frame |
+| --- |
+| <img src="assets/themes/chrome-98.webp" width="400" alt="Chrome 98 tracker panel, NPC profile and choice menu"> |
 
 ### DOS Cobalt
 
-`dos-cobalt` · Dark
-
-![DOS Cobalt tracker panel, NPC profile and choice menu](assets/themes/dos-cobalt.webp)
+| `dos-cobalt` · Dark |
+| --- |
+| <img src="assets/themes/dos-cobalt.webp" width="400" alt="DOS Cobalt tracker panel, NPC profile and choice menu"> |
 
 ### Paper Tape
 
-`paper-tape` · Light · diecut frame
-
-![Paper Tape tracker panel, NPC profile and choice menu](assets/themes/paper-tape.webp)
+| `paper-tape` · Light · diecut frame |
+| --- |
+| <img src="assets/themes/paper-tape.webp" width="400" alt="Paper Tape tracker panel, NPC profile and choice menu"> |
 
 ### VFD Cyan
 
-`vfd-cyan` · Dark · scan layer
-
-![VFD Cyan tracker panel, NPC profile and choice menu](assets/themes/vfd-cyan.webp)
+| `vfd-cyan` · Dark · scan layer |
+| --- |
+| <img src="assets/themes/vfd-cyan.webp" width="400" alt="VFD Cyan tracker panel, NPC profile and choice menu"> |
 
 ## Retro-Futurist & Neon
 
 ### Vaporwave Sunset
 
-`vaporwave-sunset` · Dark
-
-![Vaporwave Sunset tracker panel, NPC profile and choice menu](assets/themes/vaporwave-sunset.webp)
+| `vaporwave-sunset` · Dark |
+| --- |
+| <img src="assets/themes/vaporwave-sunset.webp" width="400" alt="Vaporwave Sunset tracker panel, NPC profile and choice menu"> |
 
 ### Synthwave Drive
 
-`synthwave-drive` · Dark
-
-![Synthwave Drive tracker panel, NPC profile and choice menu](assets/themes/synthwave-drive.webp)
+| `synthwave-drive` · Dark |
+| --- |
+| <img src="assets/themes/synthwave-drive.webp" width="400" alt="Synthwave Drive tracker panel, NPC profile and choice menu"> |
 
 ### Arcade Cabinet
 
-`arcade-cabinet` · Dark
-
-![Arcade Cabinet tracker panel, NPC profile and choice menu](assets/themes/arcade-cabinet.webp)
+| `arcade-cabinet` · Dark |
+| --- |
+| <img src="assets/themes/arcade-cabinet.webp" width="400" alt="Arcade Cabinet tracker panel, NPC profile and choice menu"> |
 
 ### Miami Deco
 
-`miami-deco` · Light
-
-![Miami Deco tracker panel, NPC profile and choice menu](assets/themes/miami-deco.webp)
+| `miami-deco` · Light |
+| --- |
+| <img src="assets/themes/miami-deco.webp" width="400" alt="Miami Deco tracker panel, NPC profile and choice menu"> |
 
 ### Candy Gloss
 
-`candy-gloss` · Light
-
-![Candy Gloss tracker panel, NPC profile and choice menu](assets/themes/candy-gloss.webp)
+| `candy-gloss` · Light |
+| --- |
+| <img src="assets/themes/candy-gloss.webp" width="400" alt="Candy Gloss tracker panel, NPC profile and choice menu"> |
 
 ### Atomic Diner
 
-`atomic-diner` · Light
-
-![Atomic Diner tracker panel, NPC profile and choice menu](assets/themes/atomic-diner.webp)
+| `atomic-diner` · Light |
+| --- |
+| <img src="assets/themes/atomic-diner.webp" width="400" alt="Atomic Diner tracker panel, NPC profile and choice menu"> |
 
 ### Cassette Future
 
-`cassette-future` · Dark
-
-![Cassette Future tracker panel, NPC profile and choice menu](assets/themes/cassette-future.webp)
+| `cassette-future` · Dark |
+| --- |
+| <img src="assets/themes/cassette-future.webp" width="400" alt="Cassette Future tracker panel, NPC profile and choice menu"> |
 
 ### Raygun Poster
 
-`raygun-poster` · Light · brackets frame
-
-![Raygun Poster tracker panel, NPC profile and choice menu](assets/themes/raygun-poster.webp)
+| `raygun-poster` · Light · brackets frame |
+| --- |
+| <img src="assets/themes/raygun-poster.webp" width="400" alt="Raygun Poster tracker panel, NPC profile and choice menu"> |
 
 ## Print & Editorial
 
 ### Paper Minimal
 
-`paper-minimal` · Light
-
-![Paper Minimal tracker panel, NPC profile and choice menu](assets/themes/paper-minimal.webp)
+| `paper-minimal` · Light |
+| --- |
+| <img src="assets/themes/paper-minimal.webp" width="400" alt="Paper Minimal tracker panel, NPC profile and choice menu"> |
 
 ### Newsprint
 
-`newsprint` · Light · halftone frame
-
-![Newsprint tracker panel, NPC profile and choice menu](assets/themes/newsprint.webp)
+| `newsprint` · Light · halftone frame |
+| --- |
+| <img src="assets/themes/newsprint.webp" width="400" alt="Newsprint tracker panel, NPC profile and choice menu"> |
 
 ### Ink & Vellum
 
-`ink-vellum` · Light
-
-![Ink & Vellum tracker panel, NPC profile and choice menu](assets/themes/ink-vellum.webp)
+| `ink-vellum` · Light |
+| --- |
+| <img src="assets/themes/ink-vellum.webp" width="400" alt="Ink & Vellum tracker panel, NPC profile and choice menu"> |
 
 ### Editorial Hairline
 
-`editorial-hairline` · Light
-
-![Editorial Hairline tracker panel, NPC profile and choice menu](assets/themes/editorial-hairline.webp)
+| `editorial-hairline` · Light |
+| --- |
+| <img src="assets/themes/editorial-hairline.webp" width="400" alt="Editorial Hairline tracker panel, NPC profile and choice menu"> |
 
 ### Blueprint
 
-`blueprint` · Dark · ticks frame
-
-![Blueprint tracker panel, NPC profile and choice menu](assets/themes/blueprint.webp)
+| `blueprint` · Dark · ticks frame |
+| --- |
+| <img src="assets/themes/blueprint.webp" width="400" alt="Blueprint tracker panel, NPC profile and choice menu"> |
 
 ### Nordic Frost
 
-`nordic-frost` · Dark
-
-![Nordic Frost tracker panel, NPC profile and choice menu](assets/themes/nordic-frost.webp)
+| `nordic-frost` · Dark |
+| --- |
+| <img src="assets/themes/nordic-frost.webp" width="400" alt="Nordic Frost tracker panel, NPC profile and choice menu"> |
 
 ### Bauhaus Poster
 
-`bauhaus-poster` · Light · ticks frame
-
-![Bauhaus Poster tracker panel, NPC profile and choice menu](assets/themes/bauhaus-poster.webp)
+| `bauhaus-poster` · Light · ticks frame |
+| --- |
+| <img src="assets/themes/bauhaus-poster.webp" width="400" alt="Bauhaus Poster tracker panel, NPC profile and choice menu"> |
 
 ### Photocopy Zine
 
-`photocopy-zine` · Light · halftone frame
-
-![Photocopy Zine tracker panel, NPC profile and choice menu](assets/themes/photocopy-zine.webp)
+| `photocopy-zine` · Light · halftone frame |
+| --- |
+| <img src="assets/themes/photocopy-zine.webp" width="400" alt="Photocopy Zine tracker panel, NPC profile and choice menu"> |
 
 ## Fantasy & Arcane
 
 ### Grimoire
 
-`grimoire` · Light
-
-![Grimoire tracker panel, NPC profile and choice menu](assets/themes/grimoire.webp)
+| `grimoire` · Light |
+| --- |
+| <img src="assets/themes/grimoire.webp" width="400" alt="Grimoire tracker panel, NPC profile and choice menu"> |
 
 ### Dungeon Slate
 
-`dungeon-slate` · Dark
-
-![Dungeon Slate tracker panel, NPC profile and choice menu](assets/themes/dungeon-slate.webp)
+| `dungeon-slate` · Dark |
+| --- |
+| <img src="assets/themes/dungeon-slate.webp" width="400" alt="Dungeon Slate tracker panel, NPC profile and choice menu"> |
 
 ### Elven Gilt
 
-`elven-gilt` · Dark
-
-![Elven Gilt tracker panel, NPC profile and choice menu](assets/themes/elven-gilt.webp)
+| `elven-gilt` · Dark |
+| --- |
+| <img src="assets/themes/elven-gilt.webp" width="400" alt="Elven Gilt tracker panel, NPC profile and choice menu"> |
 
 ### Eldritch Deep
 
-`eldritch-deep` · Dark
-
-![Eldritch Deep tracker panel, NPC profile and choice menu](assets/themes/eldritch-deep.webp)
+| `eldritch-deep` · Dark |
+| --- |
+| <img src="assets/themes/eldritch-deep.webp" width="400" alt="Eldritch Deep tracker panel, NPC profile and choice menu"> |
 
 ### Steampunk Brass
 
-`steampunk-brass` · Dark · rivets frame
-
-![Steampunk Brass tracker panel, NPC profile and choice menu](assets/themes/steampunk-brass.webp)
+| `steampunk-brass` · Dark · rivets frame |
+| --- |
+| <img src="assets/themes/steampunk-brass.webp" width="400" alt="Steampunk Brass tracker panel, NPC profile and choice menu"> |
 
 ### Celestial Chart
 
-`celestial-chart` · Dark
-
-![Celestial Chart tracker panel, NPC profile and choice menu](assets/themes/celestial-chart.webp)
+| `celestial-chart` · Dark |
+| --- |
+| <img src="assets/themes/celestial-chart.webp" width="400" alt="Celestial Chart tracker panel, NPC profile and choice menu"> |
 
 ### Frost Rune
 
-`frost-rune` · Dark · brackets frame
-
-![Frost Rune tracker panel, NPC profile and choice menu](assets/themes/frost-rune.webp)
+| `frost-rune` · Dark · brackets frame |
+| --- |
+| <img src="assets/themes/frost-rune.webp" width="400" alt="Frost Rune tracker panel, NPC profile and choice menu"> |
 
 ### Sunlit Mosaic
 
-`sunlit-mosaic` · Light · diecut frame
-
-![Sunlit Mosaic tracker panel, NPC profile and choice menu](assets/themes/sunlit-mosaic.webp)
+| `sunlit-mosaic` · Light · diecut frame |
+| --- |
+| <img src="assets/themes/sunlit-mosaic.webp" width="400" alt="Sunlit Mosaic tracker panel, NPC profile and choice menu"> |
 
 ## Bold & Material
 
 ### Neo-Brutalist
 
-`neo-brutalist` · Light
-
-![Neo-Brutalist tracker panel, NPC profile and choice menu](assets/themes/neo-brutalist.webp)
+| `neo-brutalist` · Light |
+| --- |
+| <img src="assets/themes/neo-brutalist.webp" width="400" alt="Neo-Brutalist tracker panel, NPC profile and choice menu"> |
 
 ### Comic Panel
 
-`comic-panel` · Light · halftone frame
-
-![Comic Panel tracker panel, NPC profile and choice menu](assets/themes/comic-panel.webp)
+| `comic-panel` · Light · halftone frame |
+| --- |
+| <img src="assets/themes/comic-panel.webp" width="400" alt="Comic Panel tracker panel, NPC profile and choice menu"> |
 
 ### Monochrome Slate
 
-`monochrome-slate` · Dark
-
-![Monochrome Slate tracker panel, NPC profile and choice menu](assets/themes/monochrome-slate.webp)
+| `monochrome-slate` · Dark |
+| --- |
+| <img src="assets/themes/monochrome-slate.webp" width="400" alt="Monochrome Slate tracker panel, NPC profile and choice menu"> |
 
 ### Glass Frost
 
-`glass-frost` · Dark
-
-![Glass Frost tracker panel, NPC profile and choice menu](assets/themes/glass-frost.webp)
+| `glass-frost` · Dark |
+| --- |
+| <img src="assets/themes/glass-frost.webp" width="400" alt="Glass Frost tracker panel, NPC profile and choice menu"> |
 
 ### Ember Hearth
 
-`ember-hearth` · Dark
-
-![Ember Hearth tracker panel, NPC profile and choice menu](assets/themes/ember-hearth.webp)
+| `ember-hearth` · Dark |
+| --- |
+| <img src="assets/themes/ember-hearth.webp" width="400" alt="Ember Hearth tracker panel, NPC profile and choice menu"> |
 
 ### Riso Print
 
-`riso-print` · Light · halftone frame
-
-![Riso Print tracker panel, NPC profile and choice menu](assets/themes/riso-print.webp)
+| `riso-print` · Light · halftone frame |
+| --- |
+| <img src="assets/themes/riso-print.webp" width="400" alt="Riso Print tracker panel, NPC profile and choice menu"> |
 
 ### Soft Clay
 
-`soft-clay` · Light
-
-![Soft Clay tracker panel, NPC profile and choice menu](assets/themes/soft-clay.webp)
+| `soft-clay` · Light |
+| --- |
+| <img src="assets/themes/soft-clay.webp" width="400" alt="Soft Clay tracker panel, NPC profile and choice menu"> |
 
 ### Construction Paper
 
-`construction-paper` · Dark · diecut frame
-
-![Construction Paper tracker panel, NPC profile and choice menu](assets/themes/construction-paper.webp)
+| `construction-paper` · Dark · diecut frame |
+| --- |
+| <img src="assets/themes/construction-paper.webp" width="400" alt="Construction Paper tracker panel, NPC profile and choice menu"> |
 
 ## Animated
 
@@ -421,81 +421,81 @@ the operating system asks for reduced motion. Nothing else moves.
 
 ### Aurora Drift
 
-`aurora-drift` · Dark · Animated
-
-![Aurora Drift tracker panel, NPC profile and choice menu](assets/themes/aurora-drift.webp)
+| `aurora-drift` · Dark · Animated |
+| --- |
+| <img src="assets/themes/aurora-drift.webp" width="400" alt="Aurora Drift tracker panel, NPC profile and choice menu"> |
 
 ### Signal Pulse
 
-`signal-pulse` · Dark · Animated · brackets frame · scan layer
-
-![Signal Pulse tracker panel, NPC profile and choice menu](assets/themes/signal-pulse.webp)
+| `signal-pulse` · Dark · Animated · brackets frame · scan layer |
+| --- |
+| <img src="assets/themes/signal-pulse.webp" width="400" alt="Signal Pulse tracker panel, NPC profile and choice menu"> |
 
 ### Moonlit Garden
 
-`moonlit-garden` · Dark · Animated
-
-![Moonlit Garden tracker panel, NPC profile and choice menu](assets/themes/moonlit-garden.webp)
+| `moonlit-garden` · Dark · Animated |
+| --- |
+| <img src="assets/themes/moonlit-garden.webp" width="400" alt="Moonlit Garden tracker panel, NPC profile and choice menu"> |
 
 ### Firefly Glow
 
-`firefly-glow` · Dark · Animated
-
-![Firefly Glow tracker panel, NPC profile and choice menu](assets/themes/firefly-glow.webp)
+| `firefly-glow` · Dark · Animated |
+| --- |
+| <img src="assets/themes/firefly-glow.webp" width="400" alt="Firefly Glow tracker panel, NPC profile and choice menu"> |
 
 ### Ocean Breath
 
-`ocean-breath` · Dark · Animated
-
-![Ocean Breath tracker panel, NPC profile and choice menu](assets/themes/ocean-breath.webp)
+| `ocean-breath` · Dark · Animated |
+| --- |
+| <img src="assets/themes/ocean-breath.webp" width="400" alt="Ocean Breath tracker panel, NPC profile and choice menu"> |
 
 ### Prism Haze
 
-`prism-haze` · Light · Animated
-
-![Prism Haze tracker panel, NPC profile and choice menu](assets/themes/prism-haze.webp)
+| `prism-haze` · Light · Animated |
+| --- |
+| <img src="assets/themes/prism-haze.webp" width="400" alt="Prism Haze tracker panel, NPC profile and choice menu"> |
 
 ### Lantern Warmth
 
-`lantern-warmth` · Light · Animated
-
-![Lantern Warmth tracker panel, NPC profile and choice menu](assets/themes/lantern-warmth.webp)
+| `lantern-warmth` · Light · Animated |
+| --- |
+| <img src="assets/themes/lantern-warmth.webp" width="400" alt="Lantern Warmth tracker panel, NPC profile and choice menu"> |
 
 ### Plasma Ring
 
-`plasma-ring` · Dark · Animated
-
-![Plasma Ring tracker panel, NPC profile and choice menu](assets/themes/plasma-ring.webp)
+| `plasma-ring` · Dark · Animated |
+| --- |
+| <img src="assets/themes/plasma-ring.webp" width="400" alt="Plasma Ring tracker panel, NPC profile and choice menu"> |
 
 ### Comet Trail
 
-`comet-trail` · Dark · Animated
-
-![Comet Trail tracker panel, NPC profile and choice menu](assets/themes/comet-trail.webp)
+| `comet-trail` · Dark · Animated |
+| --- |
+| <img src="assets/themes/comet-trail.webp" width="400" alt="Comet Trail tracker panel, NPC profile and choice menu"> |
 
 ### Tidepool Shimmer
 
-`tidepool-shimmer` · Light · Animated
-
-![Tidepool Shimmer tracker panel, NPC profile and choice menu](assets/themes/tidepool-shimmer.webp)
+| `tidepool-shimmer` · Light · Animated |
+| --- |
+| <img src="assets/themes/tidepool-shimmer.webp" width="400" alt="Tidepool Shimmer tracker panel, NPC profile and choice menu"> |
 
 ### Candlelit Page
 
-`candlelit-page` · Light · Animated
-
-![Candlelit Page tracker panel, NPC profile and choice menu](assets/themes/candlelit-page.webp)
+| `candlelit-page` · Light · Animated |
+| --- |
+| <img src="assets/themes/candlelit-page.webp" width="400" alt="Candlelit Page tracker panel, NPC profile and choice menu"> |
 
 ### Storm Charge
 
-`storm-charge` · Dark · Animated
-
-![Storm Charge tracker panel, NPC profile and choice menu](assets/themes/storm-charge.webp)
+| `storm-charge` · Dark · Animated |
+| --- |
+| <img src="assets/themes/storm-charge.webp" width="400" alt="Storm Charge tracker panel, NPC profile and choice menu"> |
 
 ### Dawn Glow
 
-`dawn-glow` · Light · Animated
-
-![Dawn Glow tracker panel, NPC profile and choice menu](assets/themes/dawn-glow.webp)
+| `dawn-glow` · Light · Animated |
+| --- |
+| <img src="assets/themes/dawn-glow.webp" width="400" alt="Dawn Glow tracker panel, NPC profile and choice menu"> |
 
 ## Adaptive
 
@@ -509,7 +509,7 @@ know in advance, so the card stays dark even on a light host theme.
 
 | On a light SillyBunny theme (Nord Light) | On a dark one (Dracula) |
 | --- | --- |
-| ![Adaptive Native on a light theme](assets/themes/adaptive-native-light.webp) | ![Adaptive Native on a dark theme](assets/themes/adaptive-native-dark.webp) |
+| <img src="assets/themes/adaptive-native-light.webp" width="400" alt="Adaptive Native on a light theme"> | <img src="assets/themes/adaptive-native-dark.webp" width="400" alt="Adaptive Native on a dark theme"> |
 
 ### Adaptive Accent
 
@@ -517,7 +517,7 @@ know in advance, so the card stays dark even on a light host theme.
 
 | On a light SillyBunny theme (Nord Light) | On a dark one (Dracula) |
 | --- | --- |
-| ![Adaptive Accent on a light theme](assets/themes/adaptive-accent-light.webp) | ![Adaptive Accent on a dark theme](assets/themes/adaptive-accent-dark.webp) |
+| <img src="assets/themes/adaptive-accent-light.webp" width="400" alt="Adaptive Accent on a light theme"> | <img src="assets/themes/adaptive-accent-dark.webp" width="400" alt="Adaptive Accent on a dark theme"> |
 
 ### Adaptive Ink
 
@@ -525,4 +525,4 @@ know in advance, so the card stays dark even on a light host theme.
 
 | On a light SillyBunny theme (Nord Light) | On a dark one (Dracula) |
 | --- | --- |
-| ![Adaptive Ink on a light theme](assets/themes/adaptive-ink-light.webp) | ![Adaptive Ink on a dark theme](assets/themes/adaptive-ink-dark.webp) |
+| <img src="assets/themes/adaptive-ink-light.webp" width="400" alt="Adaptive Ink on a light theme"> | <img src="assets/themes/adaptive-ink-dark.webp" width="400" alt="Adaptive Ink on a dark theme"> |

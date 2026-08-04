@@ -307,6 +307,18 @@ function traits(theme) {
  * becomes `cute--soft` — two hyphens, from the spaces either side of the removed `&`.
  * Collapsing to one hyphen produces a link that silently goes nowhere.
  */
+/**
+ * Displayed width, in CSS pixels. The captures are roughly twice this, so they stay sharp on
+ * a high-density screen while the page reads as a set of cards rather than a wall of
+ * full-bleed images. Markdown cannot size an image, so this has to be an <img> tag.
+ */
+const DISPLAY_WIDTH = 400;
+
+function shot(theme, variant, alt) {
+    const stem = variant ? `${theme.slug}-${variant}` : theme.slug;
+    return `<img src="assets/themes/${stem}.webp" width="${DISPLAY_WIDTH}" alt="${alt}">`;
+}
+
 function anchor(label) {
     return label.trim().toLowerCase()
         .replace(/[!"#$%&'()*+,./:;<=>?@[\]^`{|}~\\]/g, '')
@@ -343,17 +355,26 @@ export function galleryMarkdown() {
             lines.push(...FAMILY_NOTES[family.id], '');
         }
         for (const theme of themes) {
-            lines.push(`### ${theme.name}`, '', traits(theme), '');
+            lines.push(`### ${theme.name}`, '');
             if (theme.mode === 'adaptive') {
                 lines.push(
+                    traits(theme),
+                    '',
                     `| On a light SillyBunny theme (${BACKDROPS.light.label}) | On a dark one (${BACKDROPS.dark.label}) |`,
                     '| --- | --- |',
-                    `| ![${theme.name} on a light theme](assets/themes/${theme.slug}-light.webp)`
-                    + ` | ![${theme.name} on a dark theme](assets/themes/${theme.slug}-dark.webp) |`,
+                    `| ${shot(theme, 'light', `${theme.name} on a light theme`)}`
+                    + ` | ${shot(theme, 'dark', `${theme.name} on a dark theme`)} |`,
                     '',
                 );
             } else {
-                lines.push(`![${theme.name} tracker panel, NPC profile and choice menu](assets/themes/${theme.slug}.webp)`, '');
+                // A single-column table gives the shot the same framed cell the adaptive pair
+                // gets, with the trait line as its caption.
+                lines.push(
+                    `| ${traits(theme)} |`,
+                    '| --- |',
+                    `| ${shot(theme, null, `${theme.name} tracker panel, NPC profile and choice menu`)} |`,
+                    '',
+                );
             }
         }
     }

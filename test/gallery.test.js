@@ -60,7 +60,7 @@ test('family sections are linked by anchors GitHub will actually resolve', () =>
 
 test('every referenced image exists and every committed image is referenced', () => {
     const referenced = new Set(
-        [...gallery.matchAll(/\(assets\/themes\/([^)]+)\)/gu)].map(match => match[1]),
+        [...gallery.matchAll(/src="assets\/themes\/([^"]+)"/gu)].map(match => match[1]),
     );
     assert.equal(referenced.size, EXPECTED_IMAGES);
 
