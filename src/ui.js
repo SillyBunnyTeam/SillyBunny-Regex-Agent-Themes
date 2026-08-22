@@ -321,7 +321,7 @@ export function drawerIconClass(open) {
     const direction = open
         ? 'fa-circle-chevron-up up'
         : 'fa-circle-chevron-down down';
-    return `inline-drawer-icon not_focusable fa-solid ${direction}`;
+    return `inline-drawer-icon fa-solid ${direction}`;
 }
 
 function observeDrawerState(drawer, toggle, content, onChange = () => {}) {
@@ -329,7 +329,6 @@ function observeDrawerState(drawer, toggle, content, onChange = () => {}) {
     let previousOpen = null;
     const sync = () => {
         const open = icon?.classList.contains('up') ?? false;
-        toggle.setAttribute('aria-expanded', String(open));
         content.setAttribute('aria-hidden', String(!open));
         if (open !== previousOpen) {
             previousOpen = open;
@@ -357,19 +356,18 @@ function disconnectDrawerStateObservers() {
     drawerStateObservers.clear();
 }
 
-function makeDrawerToggle(id, contentId, title, level, open) {
-    const icon = el('span', {
-        class: drawerIconClass(open),
-        'aria-hidden': 'true',
-    });
-    return el('button', {
+function makeDrawerToggle(id, title, level, open) {
+    // No aria-hidden: with a <div> header the host's a11y pass makes this
+    // chevron the keyboard control, so hiding it would hide the only control.
+    const icon = el('span', { class: drawerIconClass(open) });
+    // Plain <div> with a <b> title, exactly like every host drawer header: a
+    // <button> would need a font/colour reset that outranks theme rules on
+    // .inline-drawer-header, and the host makes the chevron the keyboard target.
+    return el('div', {
         id,
-        type: 'button',
         class: 'inline-drawer-toggle inline-drawer-header rat-drawer-toggle',
-        'aria-expanded': String(open),
-        'aria-controls': contentId,
     }, [
-        el('span', { role: 'heading', 'aria-level': String(level), text: title }),
+        el('b', { role: 'heading', 'aria-level': String(level), text: title }),
         icon,
     ]);
 }
@@ -383,7 +381,7 @@ function makeSection(key, title) {
         'aria-hidden': String(!open),
     });
     content.style.display = open ? 'block' : 'none';
-    const toggle = makeDrawerToggle(`rat_toggle_${key}`, contentId, title, 3, open);
+    const toggle = makeDrawerToggle(`rat_toggle_${key}`, title, 3, open);
     const drawer = el('section', {
         class: 'inline-drawer rat-section',
         'data-rat-section': key,
@@ -1462,7 +1460,7 @@ function createView(host) {
         'aria-hidden': 'true',
     });
     content.style.display = 'none';
-    const rootToggle = makeDrawerToggle('rat_drawer_toggle', contentId, 'Regex Agent Themes', 2, false);
+    const rootToggle = makeDrawerToggle('rat_drawer_toggle', 'Regex Agent Themes', 2, false);
     const sections = {
         overview: makeSection('overview', 'Overview'),
         browse: makeSection('browse', 'Browse themes'),

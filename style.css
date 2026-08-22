@@ -330,15 +330,6 @@
     container-type: inline-size;
 }
 
-#rat_drawer .rat-drawer-toggle {
-    width: 100%;
-    border: 0;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-}
-
-#rat_drawer .rat-drawer-toggle:focus-visible,
 #rat_drawer .menu_button:focus-visible,
 #rat_drawer select:focus-visible,
 #rat_drawer input:focus-visible,

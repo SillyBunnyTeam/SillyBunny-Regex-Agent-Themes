@@ -9,11 +9,11 @@ import {
     summarizeTemplateReports,
 } from '../src/ui.js';
 
-test('drawer icons opt out of host keyboard interaction', () => {
+test('drawer icons stay keyboard interactable like every host drawer', () => {
     for (const open of [false, true]) {
         const classes = drawerIconClass(open).split(/\s+/);
         assert.ok(classes.includes('inline-drawer-icon'));
-        assert.ok(classes.includes('not_focusable'));
+        assert.ok(!classes.includes('not_focusable'));
     }
 });
 
