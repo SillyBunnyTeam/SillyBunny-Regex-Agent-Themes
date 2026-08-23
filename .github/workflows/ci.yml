@@ -18,8 +18,8 @@ jobs:
       matrix:
         node: [22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -31,8 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -43,7 +43,7 @@ jobs:
       - name: Locate the SillyBunny checkout
         run: echo "RAT_ST_ROOT=$RUNNER_TEMP/SillyBunny" >> "$GITHUB_ENV"
       - name: Check out SillyBunny
-        run: git clone --depth 1 https://github.com/SillyBunnyTeam/SillyBunny.git "$RAT_ST_ROOT"
+        run: git clone --depth 1 --branch staging https://github.com/SillyBunnyTeam/SillyBunny.git "$RAT_ST_ROOT"
       - run: npm run test:host
       - name: Verify generated stock baseline
         run: npm run generate:stock -- "$RAT_ST_ROOT" && git diff --exit-code -- src/stock.js

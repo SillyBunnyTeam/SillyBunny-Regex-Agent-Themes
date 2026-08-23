@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { mock, test } from 'node:test';
 
+const mockExports = Number.parseInt(process.versions.node, 10) >= 24 ? 'exports' : 'namedExports';
+
 test('deactivation cancels pending boot work and tears down commands and listeners', async () => {
     const calls = {
         mount: 0,
@@ -33,7 +35,7 @@ test('deactivation cancels pending boot work and tears down commands and listene
 
     const url = relative => new URL(relative, import.meta.url).href;
     mock.module(url('../src/ui.js'), {
-        exports: {
+        [mockExports]: {
             mountSettings: () => {
                 calls.mount++;
                 return () => { calls.refresh++; };
@@ -42,19 +44,19 @@ test('deactivation cancels pending boot work and tears down commands and listene
         },
     });
     mock.module(url('../src/commands.js'), {
-        exports: {
+        [mockExports]: {
             registerCommands: () => { calls.register++; },
             unregisterCommands: () => { calls.unregister++; },
         },
     });
     mock.module(url('../src/settings.js'), {
-        exports: {
+        [mockExports]: {
             getSettings: () => ({}),
             pruneLedger: () => { calls.prune++; },
         },
     });
     mock.module(url('../src/apply.js'), {
-        exports: {
+        [mockExports]: {
             reconcile: async () => {
                 calls.reconcile++;
                 return { ok: true, repaired: 0, reverted: 0, needsAttention: [], failed: [] };
@@ -62,7 +64,7 @@ test('deactivation cancels pending boot work and tears down commands and listene
         },
     });
     mock.module(url('../src/host.js'), {
-        exports: {
+        [mockExports]: {
             getContext: () => context,
             waitForAgents: () => waiting,
         },

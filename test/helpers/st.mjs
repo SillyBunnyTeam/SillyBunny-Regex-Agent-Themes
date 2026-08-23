@@ -11,6 +11,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+const mockExports = Number.parseInt(process.versions.node, 10) >= 24 ? 'exports' : 'namedExports';
 const CANDIDATES = [
     process.env.RAT_ST_ROOT,
     '/home/platinum/SillyBunny',
@@ -58,7 +59,7 @@ export async function loadRegexEngine(mock) {
 
     let counter = 0;
     mock.module(pathToFileURL(join(root, 'public/scripts/utils.js')).href, {
-        exports: {
+        [mockExports]: {
             regexFromString,
             uuidv4: () => `test-uuid-${++counter}`,
         },
